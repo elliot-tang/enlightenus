@@ -1,20 +1,54 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import LoginScreen from './screens/login';
+import RegisterScreen from './screens/register';
+import HomeScreen from './screens/home';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+export type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export type HomeStackParamList = {
+  Home: undefined;
+}
+
+const AuthStackNav = createNativeStackNavigator<AuthStackParamList>();
+const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
+
+const AuthStack = () => (
+  <AuthStackNav.Navigator 
+  screenOptions={{
+    headerShown: false,
+  }}> 
+    <AuthStackNav.Screen name='Login' component={LoginScreen} />
+    <AuthStackNav.Screen name='Register' component={RegisterScreen} />
+  </AuthStackNav.Navigator>
+)
+
+const HomeStack = () => (
+  <HomeStackNav.Navigator
+  screenOptions={{
+    headerShown: false,
+  }}> 
+    <HomeStackNav.Screen name='Home' component={HomeScreen} />
+  </HomeStackNav.Navigator>
+)
+
+const AuthNavigator = () => {
+  const loggedIn = useAuth();
+  const user = loggedIn.user;
+  return user ? <HomeStack /> : <AuthStack />;
+}
+
+const App = () => (
+  <AuthProvider>
+    <NavigationContainer>
+      <AuthNavigator />
+    </NavigationContainer>
+  </AuthProvider>
+)
+
+export default App;
