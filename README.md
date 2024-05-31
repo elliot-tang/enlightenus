@@ -1,7 +1,7 @@
 # enlighteNUS
 An integrated mobile quiz application which comprises quizzes on NUS modules as well as general knowledge topics as well as a forum feature to facilitate discussions on quiz questions and related topics.
 
-Project for NUS Orbital
+Project for NUS Orbital\
 Level of Achievement: Apollo 11
 
 ## Problem Statement
