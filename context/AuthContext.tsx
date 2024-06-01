@@ -69,7 +69,6 @@ export const AuthProvider = ({ children } : Props) => {
   const register = async (email : string, username : string, password : string) => {
     try {
       const backendAPI : string = `${process.env.EXPO_PUBLIC_BACKEND_API}/register`;
-      console.log(`${process.env.EXPO_PUBLIC_BACKEND_API}/register`);
       await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/register`, { email, username, password });
       console.log('User registered!');
       alert('Registration success!');

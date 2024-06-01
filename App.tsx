@@ -1,9 +1,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from './screens/login';
-import RegisterScreen from './screens/register';
-import HomeScreen from './screens/home';
+import LoginScreen from './screens/auth/login';
+import RegisterScreen from './screens/auth/register';
+import HomeTabs from './screens/home_tabs/home_navigator';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 export type AuthStackParamList = {
@@ -12,7 +12,7 @@ export type AuthStackParamList = {
 }
 
 export type HomeStackParamList = {
-  Home: undefined;
+  HomeTabs: undefined;
 }
 
 const AuthStackNav = createNativeStackNavigator<AuthStackParamList>();
@@ -33,7 +33,7 @@ const HomeStack = () => (
   screenOptions={{
     headerShown: false,
   }}> 
-    <HomeStackNav.Screen name='Home' component={HomeScreen} />
+    <HomeStackNav.Screen name='HomeTabs' component={HomeTabs} options={{headerShown: false}}/>
   </HomeStackNav.Navigator>
 )
 
