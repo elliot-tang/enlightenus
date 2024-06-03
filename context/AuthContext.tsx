@@ -56,7 +56,7 @@ export const AuthProvider = ({ children } : Props) => {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage: string = error.response?.data.message;
-        alert(`Error: ${errorMessage}`);
+        alert(`Axios Error: ${errorMessage}`);
         console.error('Axios error:', error.message);
         console.error('Error response:', error.response?.data);
       } else {
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children } : Props) => {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage: string = error.response?.data.message;
-        alert(`Error: ${errorMessage}`);
+        alert(`Axios Error: ${errorMessage}`);
         console.error('Axios error:', error.message);
         console.error('Error response:', error.response?.data);
       } else {

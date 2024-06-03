@@ -39,3 +39,6 @@ yarn-error.*
 
 # deprecated work
 RubbishFiles
+
+# eas config
+eas.json

@@ -7,12 +7,13 @@ const app = express();
 require('dotenv').config()
 
 // allows http requests from frontend
-const corsOptions = {
-  origin: process.env.FRONTEND_API,
-  methods: 'GET,HEAD,POST,PUT,DELETE',
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: process.env.FRONTEND_API,
+//   methods: 'GET,HEAD,POST,PUT,DELETE',
+//   credentials: true,
+// };
+// app.use(cors(corsOptions));
+app.use(cors());
 
 // defines routes for auth
 app.use(express.json());

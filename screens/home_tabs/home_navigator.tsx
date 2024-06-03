@@ -20,7 +20,6 @@ export type HomeTabParamList = {
 const HomeTabNav = createBottomTabNavigator<HomeTabParamList>();
 
 const HomeTabs : React.FC<Props> = () => (
-  // TODO: Remove header for Tab
   <HomeTabNav.Navigator>
     <HomeTabNav.Screen 
       name="Home" 

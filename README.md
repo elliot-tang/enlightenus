@@ -52,9 +52,9 @@ Proof of Concept:
 - Quiz Interface (In Progress, Not Yet Integrated)
    - Created home screen navigation skeleton
    - Created screens for two types of quizzes, scroll view and questions 1 by 1.
-- Deployment of Application (Partially Completed)
+- Deployment of Application (Completed)
    - Backend deployed on AWS EC2 instance
-   - Frontend not deployed
+   - Android APK generated
 
 ### Milestone 2
 Implementation of Core Features:
@@ -71,8 +71,6 @@ Implementation of Extension Features:
 - Integration with ChatGPT
 Continued Integration Testing and Bug Fixing
 
-## Project Log
-
 ## Tech Stack
 ### Frameworks
 1. React Native and Expo Go (Frontend)
@@ -80,7 +78,7 @@ Continued Integration Testing and Bug Fixing
 3. Node.js and Express.js (Backend)
 4. MongoDB and MongoDB Atlas (Database)
 5. AWS EC2 (Backend Hosting)
-6. Vercel (projected) (Frontend Deployment)
+6. EAS Build (Frontend Deployment)
 
 ### Others
 1. TypeScript and JavaScript (Frontend and Backend Code)
