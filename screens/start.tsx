@@ -1,13 +1,10 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '../App';
 import { returnUser } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
+import { HomeScreenProps } from "../App"
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
-
-const HomeScreen: React.FC<Props> = () => {
+function StartScreen({ navigation }: HomeScreenProps) {
   const user : string = returnUser();
   const { logout } = useAuth();
 
@@ -18,10 +15,12 @@ const HomeScreen: React.FC<Props> = () => {
   return (
   <View style={styles.container}>
     <Text style = {styles.headerText}>
-      Welcome, {user}!
+      Welcome back, {user}! What would you like to do today?
     </Text>
     
     <View style={styles.buttonContainer}>
+      <Button title="Create New" onPress={() => navigation.navigate('Create')} />
+      <Button title="Play Quiz" onPress={() => navigation.navigate('Play')} />
       <Button title="Logout" color='#6cac48' onPress={handleLogout} />
     </View>
   </View>
@@ -43,4 +42,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default StartScreen;
