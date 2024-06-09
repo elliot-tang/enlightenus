@@ -155,7 +155,7 @@ export function quizScroll(questions : Array<QnProps>) {
     return (<ScrollView>
       <FlatList
         ItemSeparatorComponent={
-          (({highlighted}) => (
+          (() => (
             <View
               style={{marginTop: 16}}
             />
