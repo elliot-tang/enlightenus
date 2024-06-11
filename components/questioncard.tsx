@@ -14,6 +14,8 @@ type QnProps = {
 
 export type QnPropsDisplay = QnProps & { editQn: () => void , deleteQn:() =>void};
 
+export type QnPropsWithReport = QnProps & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , correct: boolean, saved: boolean};
+
 export const QuestionCard = (question: QnPropsDisplay) => {
 
   const shorten = question.corrans.slice(0,3)
@@ -37,6 +39,28 @@ export const QuestionCard = (question: QnPropsDisplay) => {
     </View>
   );
 };
+
+export function TallyCard(question: QnPropsWithReport){
+  const shorten = question.corrans.slice(0,3)
+  const renderCorrectAnswers = () => {
+    return shorten.map((answer) => (
+      <Text key={answer} style={styles.correctAnswer}>
+        {answer}
+      </Text>
+    ));
+  };
+  return(
+    <View style={{gap: 10, borderRadius: 10, backgroundColor:'#cdefff', borderColor: (question.correct? "green":"red"), borderWidth: 3}}>
+      <Text style={styles.questionStatement}>{question.mcq? "MCQ":"Open"}: {question.quizstmt}</Text>
+      {renderCorrectAnswers()}
+      {(question.corrans.length > 3) && <Text style={styles.correctAnswer}>(And {question.corrans.length-3} others) </Text>}
+      <View style={styles.editIconContainer}>
+        <Button title="Report" onPress={question.reportQn} /> {/* a list of reports generated to the database*/}
+        {question.saved? <Button color = "red" title="Remove" onPress={question.unsaveQn} />:<Button title="Save" onPress={question.saveQn} />} {/*prob have to unpack the questions from quiz and pass the id individually, not looking fun*/}
+      </View>
+    </View>
+  )
+}
 
 const styles = StyleSheet.create({
   cardContainer: {

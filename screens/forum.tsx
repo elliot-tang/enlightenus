@@ -118,14 +118,16 @@ function CreatePost({navigation}: ForumScreenProps){
   const [postTopic,setTopic] = useState("General")
   return(
     <View style = {{padding: 10}}>
-      <Text>What topic do you want to discuss?
-      </Text>
-      <CustomPicker
-        options={options}
-        selectedValue={postTopic}
-        onValueChange={setTopic}
-        label="Select an option:"
-      />
+      <View style = {{flex:1}}>
+        <Text>What topic do you want to discuss?
+        </Text>
+        <CustomPicker
+          options={options}
+          selectedValue={postTopic}
+          onValueChange={setTopic}
+          label="Select an option:"
+        />
+      </View>
       <TextInput style={styles.input}
         placeholder="Give your post a title"
         value={title}

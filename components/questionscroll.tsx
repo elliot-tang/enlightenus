@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView} from 'react-native';
+import { TallyCard } from './questioncard';
 
 
 export type QnProps = {
@@ -83,8 +84,7 @@ export function QnScroll(props: QnPropsFuncs) {
       
       const renderOps = ({item}: {item: string}) => {
         const backgroundColor = (item === ansState ? '#6e3b6e' : '#f9c2ff');
-        const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; i just copy this bit
-        from the react native tutorial lol */
+        const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; */
 
         return (
           <Item
@@ -116,7 +116,7 @@ export function AnsScroll(props:QnPropsVerify) {
     return (
       <View>
         <Text style = {{color : 'green'}}>
-      "{props.ans}" is the correct answer!
+      "{props.ans}" is a correct answer!
     </Text>
     <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
@@ -141,6 +141,9 @@ export function quizScroll(questions : Array<QnProps>) {
   const totalQn = questions.length;
   const [subState,setSub] = useState(false);
   const [qAnswers, setqAns] = useState(Array(totalQn));
+  const [save,setSave] = useState(Array<string>);
+  const [report,setReport] = useState(Array<string>);
+  const [reportstring,setReportstring] = useState("");
   /*function callBack*/
   function updateAns(qst : QnProps){
     return function(answer:string) {
@@ -183,38 +186,74 @@ export function quizScroll(questions : Array<QnProps>) {
     )
   }
   else {
-    var score = 0; 
+    var score = 0;
+    const tally = Array(questions.length).fill(false); 
     for (var i =0; i < questions.length; i++) {
       if ((questions[i].mcq == true && (questions[i].corrans[0] == qAnswers[i])) || 
       (questions[i].mcq == false && questions[i].corrans.includes(qAnswers[i]))) {
-        score +=1
+        score +=1;
+        tally[i] = true;
+        };
       }
-    }
+
+    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i]])
+    
     /*here we display the score, and tally up which qn is correct or wrong*/
     return (
-      <ScrollView>
-        <Text> Your score is {score}/{totalQn}</Text>
-        <FlatList
-        ItemSeparatorComponent={
-          (({highlighted}) => (
+      <View style = {{flex: 1}}>
+        <View style ={{flex: 2}}>
+          <Text>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
+          <TextInput 
+          multiline={true}
+          value={reportstring}
+          placeholder="If you had reported a question, please type the details here"
+                  onChangeText={setReportstring}/>
+        </View>
+        
+        <ScrollView style={{ flex: 11, gap :10 }}>
+          <FlatList
+            ItemSeparatorComponent={
+          (() => (
             <View
               style={{marginTop: 16}}
             />
           ))
         }
-        data={questions}
-        renderItem={({item}) => <AnsScroll
-        id={item.id}
-        mcq={item.mcq} 
-        maxAttempt={item.maxAttempt}
-        quizstmt={item.quizstmt} 
-        corrans = {item.corrans}
-        wrongs={item.wrongs} 
-        noOption={item.noOption}
-        explainText={item.explainText}
-        ans = {qAnswers[questions.indexOf(item)]} />}
-        />
-      </ScrollView>
+            data={toShow}
+            keyExtractor={item => item[0].id} 
+            renderItem={({item}) => 
+            <View>
+              <AnsScroll 
+              {...item[0]}
+              ans = {qAnswers[questions.indexOf(item[0])]}/>
+              <TallyCard
+            {...item[0]}
+            saved = {save.includes(item[0].id)}
+            correct={item[1]}
+            reportQn={()=>{
+              var temp = Array.from(report);
+              temp.push(item[0].id);
+              setReport(temp)
+            }}
+            saveQn={()=>{
+              var temp = Array.from(save);
+              temp.push(item[0].id);
+              setSave(temp)
+            }}
+            unsaveQn={()=>{
+              var temp = save.filter(ele => ele != item[0].id)
+              setSave(temp)
+            }}
+            />
+            </View>
+            
+            } 
+          />
+        </ScrollView>
+        <View style={{flex:1}}>
+          <Button title="Return to Home" />
+        </View>
+      </View>
     )
   }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, Image } from 'react-native';
 import { returnUser } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
 import { HomeScreenProps } from "../App"
@@ -14,6 +14,8 @@ function StartScreen({ navigation }: HomeScreenProps) {
   
   return (
   <View style={styles.container}>
+    <Image style={{ height: 123,
+    width: 396,}} source={require("../../assets/banner.png")}></Image>
     <Text style = {styles.headerText}>
       Welcome back, {user}! What would you like to do today?
     </Text>
