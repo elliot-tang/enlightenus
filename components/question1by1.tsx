@@ -1,5 +1,6 @@
 import React, { useState,} from 'react';
-import {Button, Text, TextInput, View, FlatList, TouchableOpacity} from 'react-native';
+import {Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, Alert} from 'react-native';
+import { TallyCard } from './questioncard';
 
 export type QnProps = {
   id: string
@@ -135,8 +136,7 @@ export function Qn1b1(props: QnPropsFunc) {
     
     const renderOps = ({item}: {item: string}) => {
       const backgroundColor = (item === ansState ? '#6e3b6e' : '#f9c2ff');
-      const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; i just copy this bit
-      from the react native tutorial lol */
+      const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; */
 
       return (
         <Item
@@ -197,10 +197,22 @@ export function Qn1b1(props: QnPropsFunc) {
 export const quiz1b1 = (questions: Array<QnProps>) => {
   const [pageNo, setPage] = useState(0);
   const [point, setPoint] = useState(0);
+  const [tally,setTally] = useState(Array(questions.length).fill(false));
+  const [save,setSave] = useState(Array<string>);
+  const [report,setReport] = useState(Array<string>);
+  const [reportstring,setReportstring] = useState("");
 
   // function callbacks
   const nextPage = () => setPage(pageNo + 1);
-  const addPoint = () => setPoint(point + 1);
+  const addPoint = (qnNumber:number) => { 
+    function addTally(){
+      setPoint(point + 1);
+      var temp = Array.from(tally);
+      temp[qnNumber] = true; 
+      setTally(temp);}
+    return addTally
+  };
+  {/*note: it adds the page first then runs the assignment, so this is correct; offset by -1 is wrong */}
 
   const renderQuestion = (question: QnProps) => (
     <View key={question.id}>
@@ -208,14 +220,62 @@ export const quiz1b1 = (questions: Array<QnProps>) => {
       <Qn1b1
         {...question} // Spread props from question object
         nextPage={nextPage}
-        addPoint={addPoint}
+        addPoint={addPoint(pageNo)}
       />
     </View>
   );
 
   if (pageNo === questions.length) {
-    return <Text>Your score is {point}/{questions.length}</Text>;
-  } else {
-    return renderQuestion(questions[pageNo]);
-  }
+    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i]])
+    return (
+      <View style = {{flex: 1}}>
+        <View style ={{flex: 2}}>
+          <Text>Your score is {point}/{questions.length}. Listed below is a breakdown.</Text>
+          <TextInput 
+          multiline={true}
+          value={reportstring}
+          placeholder="If you had reported a question, please type the details here"
+                  onChangeText={setReportstring}/>
+        </View>
+        
+        <ScrollView style={{ flex: 11, gap :10 }}>
+          <FlatList
+            ItemSeparatorComponent={
+          (() => (
+            <View
+              style={{marginTop: 16}}
+            />
+          ))
+        }
+            data={toShow}
+            keyExtractor={item => item[0].id} 
+            renderItem={({item}) => <TallyCard
+            {...item[0]}
+            saved = {save.includes(item[0].id)}
+            correct={item[1]}
+            reportQn={()=>{
+              var temp = Array.from(report);
+              temp.push(item[0].id);
+              setReport(temp)
+            }}
+            saveQn={()=>{
+              var temp = Array.from(save);
+              temp.push(item[0].id);
+              setSave(temp)
+            }}
+            unsaveQn={()=>{
+              var temp = save.filter(ele => ele != item[0].id)
+              setSave(temp)
+            }}
+            />} 
+          />
+        </ScrollView>
+        <View style={{flex:1}}>
+          <Button title="Return to Home" />
+        </View>
+      </View>
+    );
+  } 
+  else{
+    return renderQuestion(questions[pageNo]);}
 };
