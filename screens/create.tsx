@@ -17,7 +17,7 @@ const deleteQuestion = (questionProps: Array<QnProps>, questionId :string) => {
   return questionProps.filter((question) => question.id !== questionId);
 };
 
-const CreateScreen= ({navigation} : HomeScreenProps ) => {
+const CreateScreen = ({navigation} : HomeScreenProps ) => {
   const passedunfinished = React.useContext(UnfinishedQuizCreationData)
   const [isEnabled, setIsEnabled] = useState(false);
   const [renderstate,setRender] =useState(0);
@@ -304,6 +304,5 @@ const CreateScreen= ({navigation} : HomeScreenProps ) => {
     )
   }
 }
-
 
 export default CreateScreen
