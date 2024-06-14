@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { createContext } from "react";
 import {
   Button,
@@ -17,6 +17,8 @@ import { useState } from 'react';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LineChart } from 'react-native-chart-kit';
 import { HomeScreenProps, styles } from '@app/App';
+import { returnUser } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 // Attribution for icons:
 // - Math: https://www.flaticon.com/free-icons/math
@@ -26,7 +28,7 @@ import { HomeScreenProps, styles } from '@app/App';
 
 const { width, height } = Dimensions.get("window");
 
-const user_id = "Demo User"; // To retrieve from database instead
+// const user_id = "Demo User"; // To retrieve from database instead
 
 const chartConfig = {
   backgroundGradientFrom: "#B3E5FF",
@@ -40,6 +42,13 @@ const chartConfig = {
 };
 
 function StartScreen({ navigation }: HomeScreenProps) {
+  const user : string = returnUser();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  }
+
   const [topic, setSel] = useState("");
 
   const toShowdata =
@@ -72,13 +81,13 @@ function StartScreen({ navigation }: HomeScreenProps) {
         }}
       >
         <Text style={{ textAlign: 'center', fontSize: 24 }}>
-          Welcome back {user_id}!
+          Welcome back {user}!
         </Text>
-        <Button title="Logout" color="black" />
+        <Button title="Logout" color="black" onPress={handleLogout}/>
       </View>
       <Image
         style={{ height: 0.15 * height, width: width }}
-        source={require("/banner.png")}
+        source={require("../assets/banner.png")}
       />
       <View style={{ height: 0.05 * height, flexDirection: "row" }}>
         <Text style={{ fontSize: 30, textAlign: "left" }}>
@@ -88,31 +97,36 @@ function StartScreen({ navigation }: HomeScreenProps) {
       <View style={{ flexDirection: "row", width: 0.73 * width, height: 0.15 * height }}>
         <ScrollView horizontal={true}>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Uncategorised")}>
-            <Image source={require("./traffic-signal.png")} style={styles.image} />
+            {/* <Image source={require("./traffic-signal.png")} style={styles.image} /> */}
+            <Image source={require("../assets/logo.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>All</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("NUS Modules")}>
-            <Image source={require("./nuslogo.png")} style={styles.image} />
+            {/* <Image source={require("./nuslogo.png")} style={styles.image} /> */}
+            <Image source={require("../assets/logo.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>NUS Modules</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Coding")}>
-            <Image source={require("./browser.png")} style={styles.image} />
+            {/* <Image source={require("./browser.png")} style={styles.image} /> */}
+            <Image source={require("../assets/logo.png")} style={styles.image} />
             <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Coding</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("Math")}>
-          <Image source={require("./math.png")} style={styles.image} />
+          {/* <Image source={require("./math.png")} style={styles.image} /> */}
+          <Image source={require("../assets/logo.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Math</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("General Knowledge")}>
-          <Image source={require("./open-book.png")} style={styles.image} />
+          {/* <Image source={require("./open-book.png")} style={styles.image} /> */}
+          <Image source={require("../assets/logo.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>General Knowledge</Text>
           </View>
