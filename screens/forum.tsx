@@ -82,7 +82,7 @@ function Individual({route,navigation}: IndividualProps){
     </View>
     <View>
       <View>
-      <TextInput style={styles.input}
+      <TextInput style={[styles.input,{width:"80%"}]}
         placeholder="What do you have to say?"
         multiline={true}
         value={replyText}

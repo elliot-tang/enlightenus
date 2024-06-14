@@ -165,10 +165,39 @@ export const styles = StyleSheet.create({
   },
 
   pickerStyle: {
-    height: 50, // Adjust height for desired size
-    fontSize: 15, // Adjust fontSize for desired boldness
-    fontWeight: 'bold', // Set font weight to bold
+    height: 50, 
+    fontSize: 15, 
+    fontWeight: 'bold', 
   },
+
+  imagecontainer: {
+    width: 100, 
+    height: 100, 
+    borderRadius: 15,
+    borderWidth: 3,
+    borderColor: '#cdeeff', 
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain', 
+  },
+  textContainer: {
+    position: 'absolute',
+    bottom: 0, 
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+    padding: 5,
+  },
+  icon: {
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 15,
+    borderWidth: 3,
+    borderColor: 'black'
+  }
 })
 
 export default App;
