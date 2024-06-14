@@ -15,21 +15,21 @@ router.post('/register', async (req, res) => {
     // check all fields filled in
     if (!email || !username || !password) {
       console.log('Failed login: incomplete fields');
-      return res.status(403).json({ message: 'All fields required' });
+      return res.status(400).json({ message: 'All fields required' });
     }
 
     // email already taken by other user
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
       console.log(`${ username } failed registration: Email already registered`);
-      return res.status(400).json({ message: 'Email already registered' });
+      return res.status(409).json({ message: 'Email already registered' });
     }
     
     // user already exists in db
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       console.log(`${ username } failed registration: User already registered`);
-      return res.status(400).json({ message: 'User already registered' });
+      return res.status(409).json({ message: 'User already registered' });
     }
     
     // encrypt password
@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
     // check all fields filled in
     if (!username || !password) {
       console.log('Failed login: incomplete fields');
-      return res.status(403).json({ message: 'All fields required' });
+      return res.status(400).json({ message: 'All fields required' });
     }
 
     const user = await User.findOne({ username });
@@ -64,7 +64,7 @@ router.post('/login', async (req, res) => {
     // user doesn't exist in db
     if (!user) {
       console.log(`${ username } failed login: User not found`);
-      return res.status(401).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // wrong password
