@@ -1,29 +1,25 @@
 import * as React from 'react';
-import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
 import { useState } from 'react';
-import { HomeScreenProps, styles, UnfinishedQuizCreationData } from '../App';
+import { StackNavigationParamList, styles, UnfinishedQuizCreationData } from '../App';
 import { QnProps } from '../components/question1by1';
 import { QuestionCard } from '../components/questioncard';
-import CustomPicker from '../components/mypicker';
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-const options = [
-  { value: 'General', label: 'General' },
-  { value: 'Programming', label: 'Programming' },
-  { value: 'Math', label: 'Math' },
-]
+type CreateProps = NativeStackScreenProps<StackNavigationParamList,"Create">
 
 const deleteQuestion = (questionProps: Array<QnProps>, questionId :string) => {
   // Filter the questionProps array to exclude the question with the matching id
   return questionProps.filter((question) => question.id !== questionId);
 };
 
-const CreateScreen = ({navigation} : HomeScreenProps ) => {
+const Create= ({route,navigation} : CreateProps) => {
   const passedunfinished = React.useContext(UnfinishedQuizCreationData)
+  const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised"||route.params.topic ===""))? "Uncategorised": route.params.topic;
   const [isEnabled, setIsEnabled] = useState(false);
   const [renderstate,setRender] =useState(0);
   const [questions,setQuestions] = useState(passedunfinished.data); 
   const [quiztitle,setTitle] = useState("");
-  const [quiztopic,setTopic] = useState("General");
 
   //pingpong bad design
 
@@ -38,7 +34,7 @@ const CreateScreen = ({navigation} : HomeScreenProps ) => {
   if (renderstate ==0) {
     return (
       <ScrollView>
-        <Text style={styles.header}>Create New Quiz</Text>
+        <Text style={styles.header}>Create New Quiz ({topic})</Text>
 
         <View style={styles.buttonContainer}>
           <Button color='#6cac48' title="Add question from scratch" onPress={()=> setRender(1)}/>
@@ -49,14 +45,7 @@ const CreateScreen = ({navigation} : HomeScreenProps ) => {
               data={questions}
               keyExtractor={item => item.id} 
               renderItem={({item}) => <QuestionCard
-            id={item.id}
-            mcq={item.mcq} 
-            maxAttempt={item.maxAttempt}
-            quizstmt={item.quizstmt} 
-            corrans = {item.corrans}
-            wrongs={item.wrongs} 
-            noOption={item.noOption}
-            explainText={item.explainText}
+            {...item}
             editQn={()=>{
               setMcq(item.mcq);
               setMax(item.maxAttempt);
@@ -206,9 +195,9 @@ const CreateScreen = ({navigation} : HomeScreenProps ) => {
                     if ((!wrongs) && (mcq == true)) {
                       alert("MCQs should have at least 1 wrong option")
                     }
-                    setRender(0);
+                    setRender(0); {/* this id thing i hope the mongobongo can generate it uniquely */}
                     const temp = {
-                      id: Math.random().toString(),
+                      id: Math.random().toString(), 
                       mcq: mcq,
                       maxAttempt: maxAttempt,
                       quizstmt: quizstmt,
@@ -278,7 +267,7 @@ const CreateScreen = ({navigation} : HomeScreenProps ) => {
                   (Yes)
                 </Text>}
             </View>
-            <Text> Give your quiz a title
+            <Text> Give your ({topic}) quiz a title
             </Text>
             <TextInput
               style={styles.input}
@@ -286,16 +275,9 @@ const CreateScreen = ({navigation} : HomeScreenProps ) => {
               value={quiztitle}
               onChangeText={(text) => setTitle(text)}
             />
-            
-            <CustomPicker
-              options={options}
-              selectedValue={quiztopic}
-              onValueChange={setTopic}
-              label="Select an option:"
-            />
         </View>
         
-        <View style={styles.bottombuttonContainer}>
+        <View>
           <Button title="Back" onPress={()=>setRender(0)}/>
           <Button title="Publish Quiz" onPress={()=> {navigation.goBack(); passedunfinished.setData([])}}/>
         </View>
@@ -305,4 +287,5 @@ const CreateScreen = ({navigation} : HomeScreenProps ) => {
   }
 }
 
-export default CreateScreen
+
+export default Create

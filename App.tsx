@@ -41,7 +41,7 @@ type BottomTabNavigationParamList = {
   History: undefined
 };
 
-type StackNavigationParamList = {
+export type StackNavigationParamList = {
   Home: undefined;
   Create: undefined;
   Play: undefined;
