@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Switch, Text , StyleSheet, Image, SafeAreaView } from 'react-native';
+import { View, TextInput, Button, Switch, Text, StyleSheet, Image, SafeAreaView } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../App';
-import { useAuth } from '../../context/AuthContext';
+import { AuthStackParamList } from '@app/App';
+import { useAuth } from '@app/context/AuthContext';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -19,7 +19,7 @@ const LoginScreen : React.FC<Props> = ({ navigation }: Props) => {
   return (
     <SafeAreaView style={styles.container}>
       
-      <Image style={styles.banner} source={require("../../assets/banner.png")}></Image>
+      <Image style={styles.banner} source={require("@app/assets/banner.png")}></Image>
       
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Welcome back!</Text>

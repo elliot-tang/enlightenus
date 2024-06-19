@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text , StyleSheet, SafeAreaView, Image } from 'react-native';
+import { View, TextInput, Button, Text , StyleSheet, SafeAreaView, Image, Switch } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../App';
-import { useAuth } from '../../context/AuthContext';
+import { AuthStackParamList } from '@app/App';
+import { useAuth } from '@app/context/AuthContext';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
@@ -11,19 +11,23 @@ const RegisterScreen : React.FC<Props> = ({ navigation } : Props) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
   const { register } = useAuth();
 
   const handleRegister = () => {
     if (password != confirmPassword) {
       alert("Passwords don't match!");
+      setPassword('');
+      setConfirmPassword('');
+    } else {
+      register(email, username, password, keepSignedIn);
     }
-    register(email, username, password);
   };
   
   return (
     <SafeAreaView style={styles.container}>
       
-      <Image style={styles.banner} source={require("../../assets/banner.png")}></Image>
+      <Image style={styles.banner} source={require("@app/assets/banner.png")}></Image>
       
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Create your account!</Text>
@@ -52,6 +56,11 @@ const RegisterScreen : React.FC<Props> = ({ navigation } : Props) => {
           value={confirmPassword} 
           onChangeText={setConfirmPassword} 
           secureTextEntry />
+      </View>
+
+      <View style={styles.keepSignedInContainer}>
+        <Switch value={keepSignedIn} onValueChange={setKeepSignedIn} />
+        <Text>Keep me signed in</Text>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -110,6 +119,11 @@ const styles = StyleSheet.create({
 
   buttonContainer: {
     paddingTop: 20,
+  },
+
+  keepSignedInContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   redirectContainer: {

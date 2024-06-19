@@ -17,7 +17,7 @@ export type ForumProps = {
   replies: Array<ReplyProps>
 }
 
-export type ForumPropsDisplay = ForumProps & { goToInd: () => void};
+export type ForumPropsDisplay = ForumProps & { goToInd: () => void };
 
 export const ForumCard = (fprops: ForumPropsDisplay) =>{
   return(<TouchableOpacity style = {styles.touchable} onPress={fprops.goToInd}>

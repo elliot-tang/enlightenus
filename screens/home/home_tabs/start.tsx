@@ -1,24 +1,11 @@
-import React from 'react';
-import { createContext } from "react";
-import {
-  Button,
-  Text,
-  View,
-  Image,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Button, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LineChart } from 'react-native-chart-kit';
 import { HomeScreenProps, styles } from '@app/App';
-import { returnUser } from '../context/AuthContext';
-import { useAuth } from '../context/AuthContext';
+import { returnUser, useAuth } from '@app/context/AuthContext';
+import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { HomeTabParamList } from './home_navigator';
 
 // Attribution for icons:
 // - Math: https://www.flaticon.com/free-icons/math
@@ -26,22 +13,9 @@ import { useAuth } from '../context/AuthContext';
 // - Coding: https://www.flaticon.com/free-icons/html
 // - All/No Category: https://www.flaticon.com/free-icons/forbidden
 
-const { width, height } = Dimensions.get("window");
+type Props = BottomTabScreenProps<HomeTabParamList, 'Home'>;
 
-// const user_id = "Demo User"; // To retrieve from database instead
-
-const chartConfig = {
-  backgroundGradientFrom: "#B3E5FF",
-  backgroundGradientFromOpacity: 0,
-  backgroundGradientTo: "#FFFFFF",
-  backgroundGradientToOpacity: 10,
-  color: (opacity = 1) => `rgba(0,0,0, ${opacity})`,
-  strokeWidth: 2, // optional
-  barPercentage: 0.5,
-  useShadowColorFromDataset: false, // optional
-};
-
-function StartScreen({ navigation }: HomeScreenProps) {
+const StartScreen = ({ navigation }: HomeScreenProps) => {
   const user : string = returnUser();
   const { logout } = useAuth();
 
@@ -87,7 +61,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
       </View>
       <Image
         style={{ height: 0.15 * height, width: width }}
-        source={require("../assets/banner.png")}
+        source={require("@app/assets/banner.png")}
       />
       <View style={{ height: 0.05 * height, flexDirection: "row" }}>
         <Text style={{ fontSize: 30, textAlign: "left" }}>
@@ -98,35 +72,35 @@ function StartScreen({ navigation }: HomeScreenProps) {
         <ScrollView horizontal={true}>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Uncategorised")}>
             {/* <Image source={require("./traffic-signal.png")} style={styles.image} /> */}
-            <Image source={require("../assets/logo.png")} style={styles.image} />
+            <Image source={require("@app/assets/logo.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>All</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("NUS Modules")}>
             {/* <Image source={require("./nuslogo.png")} style={styles.image} /> */}
-            <Image source={require("../assets/logo.png")} style={styles.image} />
+            <Image source={require("@app/assets/logo.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>NUS Modules</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Coding")}>
             {/* <Image source={require("./browser.png")} style={styles.image} /> */}
-            <Image source={require("../assets/logo.png")} style={styles.image} />
+            <Image source={require("@app/assets/logo.png")} style={styles.image} />
             <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Coding</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("Math")}>
           {/* <Image source={require("./math.png")} style={styles.image} /> */}
-          <Image source={require("../assets/logo.png")} style={styles.image} />
+          <Image source={require("@app/assets/logo.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Math</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("General Knowledge")}>
           {/* <Image source={require("./open-book.png")} style={styles.image} /> */}
-          <Image source={require("../assets/logo.png")} style={styles.image} />
+          <Image source={require("@app/assets/logo.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>General Knowledge</Text>
           </View>
@@ -166,6 +140,19 @@ function StartScreen({ navigation }: HomeScreenProps) {
 );
 }
 
+const { width, height } = Dimensions.get("window");
+
+const chartConfig = {
+  backgroundGradientFrom: "#B3E5FF",
+  backgroundGradientFromOpacity: 0,
+  backgroundGradientTo: "#FFFFFF",
+  backgroundGradientToOpacity: 10,
+  color: (opacity = 1) => `rgba(0,0,0, ${opacity})`,
+  strokeWidth: 2, // optional
+  barPercentage: 0.5,
+  useShadowColorFromDataset: false, // optional
+};
+
 const testData = [
   { quizid: "sfnjsnfs", percent: 0.8, topic: "NUS Modules" },
   { quizid: "fnk", percent: 0.95, topic: "NUS Modules" },
@@ -177,5 +164,6 @@ const testData = [
   { quizid: "doug", percent: 0.32, topic: "General Knowledge" },
   { quizid: "fjsfsl", percent: 0.89, topic: "General Knowledge" },
 ]; /* To retrieve from database instead */
+
 
 export default StartScreen;

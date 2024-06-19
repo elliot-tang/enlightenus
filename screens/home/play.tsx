@@ -1,5 +1,5 @@
 import {View,Text, Button} from "react-native"
-import {styles, HomeScreenProps} from "../App"
+import {styles, HomeScreenProps} from "../../App"
 
 export default function Play({ navigation }: HomeScreenProps) {
     return (

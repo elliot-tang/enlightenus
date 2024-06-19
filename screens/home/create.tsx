@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard} from 'react-native';
 import { useState } from 'react';
-import { HomeScreenProps, styles, UnfinishedQuizCreationData } from '../App';
-import { QnProps } from '../components/question1by1';
-import { QuestionCard } from '../components/questioncard';
-import CustomPicker from '../components/mypicker';
+import { HomeScreenProps, styles, UnfinishedQuizCreationData } from '../../App';
+import { QnProps } from '../../components/question1by1';
+import { QuestionCard } from '../../components/questioncard';
+import CustomPicker from '../../components/mypicker';
 
 const options = [
   { value: 'General', label: 'General' },
@@ -177,7 +177,7 @@ const CreateScreen = ({navigation} : HomeScreenProps ) => {
       <Button title="Save Question" onPress={() => {
         if (!quizstmt){
           alert("What is the question?!")
-        }
+        } 
         else{
           if (maxAttempt == 0){
             alert("Max. Attempts must at least be 1")

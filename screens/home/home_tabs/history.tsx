@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { LineChart, PieChart } from 'react-native-chart-kit'
+import { LineChart, PieChart } from 'react-native-chart-kit';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput } from 'react-native';
 import { Dimensions } from "react-native";
 import { useState } from 'react';
-import CustomPicker from '../components/mypicker';
+import CustomPicker from '../../../components/mypicker';
 const screenWidth = Dimensions.get("window").width;
 
 export default function PlayHist() {

@@ -2,10 +2,10 @@ import * as React from 'react';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ForumCard } from '../components/forumpostcard';
-import { styles } from '../App';
+import { ForumCard } from '@app/components/forumpostcard';
+import { styles } from '@app/App';
 import { useState } from 'react';
-import CustomPicker from '../components/mypicker';
+import CustomPicker from '@app/components/mypicker';
 
 const options = [
   { value: 'General', label: 'General' },
