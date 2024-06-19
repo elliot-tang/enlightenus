@@ -15,6 +15,8 @@ import PlayScreen from './screens/play';
 import {QnProps} from './components/question1by1';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StyleSheet } from 'react-native';
+import { QuizProps } from './components/quizcardonsearch';
+import QuizScreen from './screens/quizscreen';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -43,12 +45,13 @@ type BottomTabNavigationParamList = {
 
 export type StackNavigationParamList = {
   Home: undefined;
-  Create: undefined;
-  Play: undefined;
+  Create: {topic:string}|undefined;
+  Play: {topic:string}|undefined;
+  DisplayPlay: {quizprops:QuizProps}|undefined
 }
 
-const Tab = createBottomTabNavigator<BottomTabNavigationParamList>(); /*I will keep the tab within this file, */
-/*i think it better to keep the home screen naviagtion together with the rest, its not technically a screen anyway*/
+const Tab = createBottomTabNavigator<BottomTabNavigationParamList>(); 
+
 export const Stack = createNativeStackNavigator<StackNavigationParamList>();
 
 const AuthStackNav = createNativeStackNavigator<AuthStackParamList>();
@@ -80,6 +83,7 @@ const HomeStack = () => (
     <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
     <Stack.Screen name="Create" component={CreateScreen} options={{ headerLeft: ()=> null}}/>
     <Stack.Screen name="Play" component={PlayScreen} />
+    <Stack.Screen name="DisplayPlay" component={QuizScreen} />
   </Stack.Navigator>
 )
 

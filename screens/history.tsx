@@ -60,8 +60,8 @@ function MainHistory({navigation}:HistoryScreenProps) {
 }
 
 function Individual({route,navigation}: IndividualProps){
-  const toShowProps = (route.params === undefined)? {id:"",title:"", topic:"", questions: [], tally: []}: route.params.indivProps
-  const toShow = Array.from({ length: toShowProps.questions.length}, (_, i) => [toShowProps.questions[i], toShowProps.tally[i]])
+  const toShowProps = (route.params === undefined)? {id:"",title:"", topic:"", questions: [], tally: [], userAnswers:[]}: route.params.indivProps
+  const toShow = Array.from({ length: toShowProps.questions.length}, (_, i) => [toShowProps.questions[i], toShowProps.tally[i], toShowProps.userAnswers[i]])
   return (
     <View style={{flex:1, paddingTop:20}}>
       <Text style={{fontSize:18, fontWeight:"bold"}}>{toShowProps.topic} : {toShowProps.title}</Text>
@@ -81,6 +81,7 @@ function Individual({route,navigation}: IndividualProps){
             {...item[0]}
             saved = {true}
             correct={item[1]}
+            userAns={item[2]}
             reportQn={1}
             saveQn={1}
             unsaveQn={1}
@@ -102,9 +103,9 @@ const options = [
 ]
 
 const testData = [
-  {id: "hsbfhbfj", title: "myquiz", topic: "Coding", questions: [{id: "jddjs", mcq: false, maxAttempt: 1, quizstmt: "questio hcshcjkn", corrans: ["dhsbdh","dhsdh"], wrongs:[], noOption:2, explainText:"hdbsh"},{id: "jddjs2", mcq: false, maxAttempt: 1, quizstmt: "questio hcshcjkn", corrans: ["dhsbdh","dhsdh"], wrongs:[], noOption:2, explainText:"hdbsh"}], tally: [false,true], hasSaved: true},
-  {id: "hsbfbfj", title: "myquiz2", topic: "Math", questions: [], tally: [], hasSaved: true}, 
-  {id: "hsdjiofj", title: "myquiz3", topic: "Coding", questions: [], tally: [], hasSaved: false}
+  {id: "hsbfhbfj", userAnswers: ["njsck","dhsdh"], title: "myquiz", topic: "Coding", questions: [{id: "jddjs", mcq: false, maxAttempt: 1, quizstmt: "questio hcshcjkn", corrans: ["dhsbdh","dhsdh"], wrongs:[], noOption:2, explainText:"hdbsh"},{id: "jddjs2", mcq: false, maxAttempt: 1, quizstmt: "questio hcshcjkn", corrans: ["dhsbdh","dhsdh"], wrongs:[], noOption:2, explainText:"hdbsh"}], tally: [false,true], hasSaved: true},
+  {id: "hsbfbfj", userAnswers: [], title: "myquiz2", topic: "Math", questions: [], tally: [], hasSaved: true}, 
+  {id: "hsdjiofj", userAnswers: [], title: "myquiz3", topic: "Coding", questions: [], tally: [], hasSaved: false}
 ]
 
 

@@ -135,15 +135,15 @@ function StartScreen({ navigation }: HomeScreenProps) {
     <View style={{ height: 0.03 * height }} />
   </View>
   <View style={{ height: 0.14 * height, flexDirection: "row", gap: 10 }}>
-    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Play")}>
+    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Play", {topic: topic})}>
       <MaterialIcons name="search" size={74} color="black" />
       <Text> Play </Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create")}>
+    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create", {topic: topic})}>
       <MaterialIcons name="add" size={74} color="black" />
       <Text> Add </Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create")}>
+    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create", {topic: topic})}>
       <MaterialIcons name="delete" size={74} color="black" />
       <Text> Delete </Text>
     </TouchableOpacity>

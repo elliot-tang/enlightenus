@@ -9,7 +9,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type ForumStackNavigationParamList = {
   main: undefined,
-  individual: {postid: string}|undefined,
+  individual: {postid: string}|undefined, // alternative: you may want to pass the whole post props over to the next screen.... (see in history)
   create: undefined,
   report: {reportid: string,contenttype: string}|undefined
 }

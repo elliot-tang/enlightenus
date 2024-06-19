@@ -1,14 +1,19 @@
 import {View,Text, Button, TouchableOpacity, TextInput} from "react-native"
-import {styles, HomeScreenProps} from "../App"
+import {styles, HomeScreenProps, StackNavigationParamList} from "../App"
 import { useState } from "react"
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-export default function PlayScreen({ navigation }: HomeScreenProps) {
+type PlayProps = NativeStackScreenProps<StackNavigationParamList,"Play">
+
+export default function PlayScreen({ route, navigation }: PlayProps) {
+  const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised"||route.params.topic ===""))? "Uncategorised": route.params.topic;
   const [searchFrom, setSearchFrom] = useState("All");
-  const [searchText, setSearchText] = useState("")
+  const [searchText, setSearchText] = useState("");
+  const toShow = testData //make it a function of the search from and search text, determines which database to pull from
     return (
       <View style={{gap:15}}>
-        <Text style={{ fontSize: 24}}> Search questions from? </Text> 
+        <Text style={{ fontSize: 24}}>Search quizzes in {topic} from? </Text> 
   <View style={{ flexDirection: "row" ,flex:1}}>
     <TouchableOpacity
       onPress={() => setSearchFrom("Saved")}
@@ -51,3 +56,80 @@ export default function PlayScreen({ navigation }: HomeScreenProps) {
   </View>
     )};
 
+const testQn = [{
+  id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+  mcq: false,
+  quizstmt : "2+2 = ?",
+  corrans: ["4"],
+  wrongs: [],
+  noOption: 0,
+  maxAttempt: 2,
+  explainText: "Open ended questions are supported with an explanation"
+},
+{
+  id: 'someotherrandomstring',
+  mcq: false,
+  quizstmt : "Solve for x: (x-1)(x-2) = 0",
+  corrans: ["1","1.0","2","2.0"],
+  wrongs: [],
+  noOption: 0,
+  maxAttempt: 3,
+  explainText: "Open ended questions allow multiple answers"
+},
+{
+  id: 'indisndsk',
+  mcq: true,
+  quizstmt : "Press true for correct answer",
+  corrans: ["True"],
+  wrongs: ["False"],
+  noOption: 2,
+  maxAttempt: 1,
+  explainText: "We support multiple choice questions"
+},
+{
+  id: '283ehuwduweduwh9f',
+  mcq: true,
+  quizstmt : "What is the fundamental group of the Klien bottle?",
+  corrans: ["<a,b | a^2b^-2 = e>"],
+  wrongs: ["Z", "Z x Z", "<a,b,c,d | aba^-1b^-1cdc^-1d^-1 = e>", "F(2)", "F(4)"],
+  noOption: 4,
+  maxAttempt: 2,
+  explainText: "Users can also set the number of options, and the options will be randomised"
+},
+{
+  id: 'indisndjiooisk',
+  mcq: true,
+  quizstmt : "Press true",
+  corrans: ["False"],
+  wrongs: ["True"],
+  noOption: 2,
+  maxAttempt: 2,
+  explainText: "Users can also customise the number of attempts"
+},
+{
+  id: '283euweduwh9f',
+  mcq: false,
+  quizstmt : "Here's a hard question: What is the name of this app?",
+  corrans: ["enlighteNUS"],
+  wrongs: [],
+  noOption: 0,
+  maxAttempt: 4,
+  explainText: "More features to be implemented"
+},]
+
+const testData = [{
+  id:"scroll",
+  title:"scrolling",
+  topic: "intro",
+  questions: testQn,
+  oneByOne: false,
+  authorid: "the creator"
+} ,
+{
+  id:"1by1",
+  title:"nonscroll",
+  topic: "intro",
+  questions: testQn,
+  oneByOne: false,
+  authorid: "the creator"
+} ]

@@ -8,6 +8,7 @@ export type HistoryProps = {
   topic: string
   questions: Array<QnProps>
   tally: Array<boolean>
+  userAnswers: Array<string>
   hasSaved: boolean
 } 
 
