@@ -1,57 +1,40 @@
 import * as React from 'react';
 import { LineChart, PieChart } from 'react-native-chart-kit'
-import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput } from 'react-native';
+import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView } from 'react-native';
+import { styles } from '../App';
 import { Dimensions } from "react-native";
 import { useState } from 'react';
 import CustomPicker from '../components/mypicker';
-const screenWidth = Dimensions.get("window").width;
+import HistoryCard, { HistoryProps } from '../components/historycard';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { TallyCard } from '../components/questioncard';
+
+const {height,width} = Dimensions.get("window");
+
+type HistoryStackNavigationParamList = {
+  main: undefined,
+  individual: {indivProps: HistoryProps}|undefined,
+}
+
+const Stack = createNativeStackNavigator<HistoryStackNavigationParamList>();
+
+interface HistoryScreenProps extends NativeStackScreenProps<HistoryStackNavigationParamList>{}
+
+type IndividualProps = NativeStackScreenProps<HistoryStackNavigationParamList,"individual">
+
 
 export default function PlayHist() {
-  const [topic,setTopic] = useState("General");
+  return (
+    <Stack.Navigator initialRouteName="main">
+      <Stack.Screen name="main" component={MainHistory} options={{ headerShown: false }}/>
+      <Stack.Screen name="individual" component={Individual} />
+    </Stack.Navigator>
+  );
+}
 
-  const toShowdata = topic==="General"? testData: testData.filter(ele=>ele.topic ===topic)
-  const data = {
-  labels: Array(toShowdata.length).fill(""),
-  datasets: [
-    {
-      data: toShowdata.map(ele=>ele.percent),
-      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
-      strokeWidth: 2 // optional
-    }
-  ],
-  legend: [topic]
-};
-  const data2 = [
-
-  {
-    name: "Programming",
-    population: testData.filter(ele => ele.topic==="Programming").length,
-    color: "green",
-    legendFontColor: "#7F7F7F",
-    legendFontSize: 15
-  },
-  {
-    name: "Math",
-    population: testData.filter(ele => ele.topic==="Math").length,
-    color: "red",
-    legendFontColor: "#7F7F7F",
-    legendFontSize: 15
-  },
-  {
-    name: "Physics",
-    population: testData.filter(ele => ele.topic==="Physics").length,
-    color: "blue",
-    legendFontColor: "#7F7F7F",
-    legendFontSize: 15
-  },
-  {
-    name: "Uncategorised",
-    population: testData.filter(ele => ele.topic==="General").length,
-    color: "black",
-    legendFontColor: "#7F7F7F",
-    legendFontSize: 15
-  }
-];
+function MainHistory({navigation}:HistoryScreenProps) {
+  const [topic,setTopic] = useState("Uncategorised");
+  const toShowData = (topic==="Uncategorised" || topic ==="")? testData: testData.filter(ele=>ele.topic === topic);
   return (
     <View style={{padding: 20, flex:1}}>
     <View style ={{zIndex:1}}>
@@ -59,83 +42,69 @@ export default function PlayHist() {
         options={options}
         selectedValue={topic}
         onValueChange={setTopic}
-        label="View stats by topic:"
+        label="View past quizzes by topic:"
       />
     </View>
-      <LineChart
-        data={data}
-        width={screenWidth}
-        height={180}
-        chartConfig={chartConfig}
+    <ScrollView style={{ flex: 1, }}>
+      <FlatList
+        data={toShowData}
+        keyExtractor={item => item.id} 
+        renderItem={({item}) => <HistoryCard
+        {...item}
+        goToInd = {()=>navigation.navigate("individual", {indivProps: item})}/>} 
+        ItemSeparatorComponent={()=><View style={{ height: 10 }} />}
       />
-      <PieChart
-        data={data2}
-        width={screenWidth}
-        height={180}
-        chartConfig={chartConfig}
-        accessor={"population"}
-        backgroundColor={"transparent"}
-        paddingLeft={"15"}
-      />
+    </ScrollView>
     </View>
   )
 }
 
-const chartConfig = {
-  backgroundGradientFrom: "#1E2923",
-  backgroundGradientFromOpacity: 0,
-  backgroundGradientTo: "#08130D",
-  backgroundGradientToOpacity: 0,
-  color: (opacity = 1) => `rgba(0, 0, 16, ${opacity})`,
-  strokeWidth: 2, // optional, default 3
-  barPercentage: 0.5,
-  useShadowColorFromDataset: false, // optional
-};
+function Individual({route,navigation}: IndividualProps){
+  const toShowProps = (route.params === undefined)? {id:"",title:"", topic:"", questions: [], tally: []}: route.params.indivProps
+  const toShow = Array.from({ length: toShowProps.questions.length}, (_, i) => [toShowProps.questions[i], toShowProps.tally[i]])
+  return (
+    <View style={{flex:1}}>
+      <Text style={{fontSize:18, fontWeight:"bold"}}>{toShowProps.topic} : {toShowProps.title}</Text>
+      <View style={{height: 0.05*height, flexDirection: "row"}}/>
+      <ScrollView style={{ flex: 11, gap :10 }}>
+          <FlatList
+            ItemSeparatorComponent={
+          (() => (
+            <View
+              style={{marginTop: 16}}
+            />
+          ))
+        }
+            data={toShow}
+            keyExtractor={item => item[0].id} 
+            renderItem={({item}) => <TallyCard
+            {...item[0]}
+            saved = {true}
+            correct={item[1]}
+            reportQn={1}
+            saveQn={1}
+            unsaveQn={1}
+            />} 
+          />
+        </ScrollView>
+      <Button title="Go Back" onPress={()=>navigation.goBack()}/>
+    </View>
+    
+  )
+  
+}
 
 const options = [
-  { value: 'General', label: 'General' },
-  { value: 'Programming', label: 'Programming' },
+  { value: 'Uncategorised', label: 'Uncategorised' },
+  { value: 'Coding', label: 'Coding' },
   { value: 'Math', label: 'Math' },
-  { value: 'Physics', label: 'Physics' },
+  { value: 'NUS Modules', label: 'NUS Modules' },
 ]
 
-/*get from database instead */
 const testData = [
-  {quizid: "sfnjsnfs",
-  percent: 0.8,
-  topic: "Physics"
-  },
-  {quizid: "fnk",
-  percent: 0.95,
-  topic: "Physics"
-  },
-  {quizid: "notmsynfjsk",
-  percent: 0.5,
-  topic: "Math"
-  },
-  {quizid: "mmmdjq",
-  percent: 0.8,
-  topic: "Math"
-  },
-  {quizid: "sfsfsfsf",
-  percent: 0.7,
-  topic: "Programming"
-  },
-  {quizid: "snkoss",
-  percent: 0.76,
-  topic: "Programming"
-  },
-  {quizid: "etiewof",
-  percent: 0.81,
-  topic: "Programming"
-  },
-  {quizid: "doug",
-  percent: 0.32,
-  topic: "General"
-  },
-  {quizid: "fjsfsl",
-  percent: 0.89,
-  topic: "General"
-  },
+  {id: "hsbfhbfj", title: "myquiz", topic: "Coding", questions: [{id: "jddjs", mcq: false, maxAttempt: 1, quizstmt: "questio hcshcjkn", corrans: ["dhsbdh","dhsdh"], wrongs:[], noOption:2, explainText:"hdbsh"},{id: "jddjs2", mcq: false, maxAttempt: 1, quizstmt: "questio hcshcjkn", corrans: ["dhsbdh","dhsdh"], wrongs:[], noOption:2, explainText:"hdbsh"}], tally: [false,true], hasSaved: true},
+  {id: "hsbfbfj", title: "myquiz2", topic: "Math", questions: [], tally: [], hasSaved: true}, 
+  {id: "hsdjiofj", title: "myquiz3", topic: "Coding", questions: [], tally: [], hasSaved: false}
 ]
+
 

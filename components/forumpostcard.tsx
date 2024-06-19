@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 
 export type ReplyProps = {
   id: string,
   author: string,
-  body: string
+  body: string,
 }
 
 export type ForumProps = {
@@ -12,9 +11,9 @@ export type ForumProps = {
   title: string,
   topic: string,
   body: string,
-  votes: number,
   author: string,
-  replies: Array<ReplyProps>
+  replies: Array<ReplyProps> //to change to array of reply strings
+  attached: Array<{id:string, single: boolean}>
 }
 
 export type ForumPropsDisplay = ForumProps & { goToInd: () => void};
@@ -25,6 +24,7 @@ export const ForumCard = (fprops: ForumPropsDisplay) =>{
     <Text numberOfLines={4} ellipsizeMode="tail">
       {fprops.body}
     </Text>
+    {fprops.attached.length !=0 && <Text style={{ fontWeight: '100', fontSize: 11 }}>Has Attachments </Text>}
   </TouchableOpacity>)
 }
 
