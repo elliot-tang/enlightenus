@@ -15,7 +15,7 @@ export type QnProps = {
 
 /*TO DO: alerts when empty enters*/
 
-export type QnPropsFunc = QnProps & {nextPage: () => void , addPoint: () => void}
+export type QnPropsFunc = QnProps & {nextPage: () => void , addPoint: () => void, toAppendAnswer: (text: string) => void}
 
 export function Qn1b1(props: QnPropsFunc) {
   const [attemptState,setAtt] = useState(0);
@@ -72,7 +72,7 @@ export function Qn1b1(props: QnPropsFunc) {
                   <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
                   <Button title = "Next Question" 
-                  onPress={()=>props.nextPage()}/>
+                  onPress={()=>{props.nextPage();props.toAppendAnswer(ansState)}}/>
                 </View>}
               </View>
           );
@@ -85,7 +85,7 @@ export function Qn1b1(props: QnPropsFunc) {
               <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
               <Button title = "Next Question"
-              onPress={()=>{props.nextPage(); props.addPoint()}} />
+              onPress={()=>{props.nextPage(); props.toAppendAnswer(ansState); props.addPoint()}} />
             </View>
         )
       }
@@ -175,7 +175,7 @@ export function Qn1b1(props: QnPropsFunc) {
              <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
             <Button title = "Next Question" 
-            onPress={()=>props.nextPage()}/>
+            onPress={()=>{props.nextPage(); props.toAppendAnswer(ansState)}}/>
           </View>}
 
         </View>
@@ -187,7 +187,7 @@ export function Qn1b1(props: QnPropsFunc) {
             <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
             <Button title = "Next Question" 
-            onPress={()=>{props.nextPage(); props.addPoint()}}/>  
+            onPress={()=>{props.nextPage(); props.toAppendAnswer(ansState); props.addPoint()}}/>  
           </View>)
     }
 
@@ -198,6 +198,7 @@ export const quiz1b1 = (questions: Array<QnProps>) => {
   const [pageNo, setPage] = useState(0);
   const [point, setPoint] = useState(0);
   const [tally,setTally] = useState(Array(questions.length).fill(false));
+  const [qAnswers, setqAns] = useState<string[]>([]);
   const [save,setSave] = useState(Array<string>);
   const [report,setReport] = useState(Array<string>);
   const [reportstring,setReportstring] = useState("");
@@ -212,6 +213,11 @@ export const quiz1b1 = (questions: Array<QnProps>) => {
       setTally(temp);}
     return addTally
   };
+  function appendAnswer(answer:string){
+    var temp = Array.from(qAnswers)
+    temp.push(answer)
+    setqAns(temp)
+  }
   {/*note: it adds the page first then runs the assignment, so this is correct; offset by -1 is wrong */}
 
   const renderQuestion = (question: QnProps) => (
@@ -221,12 +227,13 @@ export const quiz1b1 = (questions: Array<QnProps>) => {
         {...question} // Spread props from question object
         nextPage={nextPage}
         addPoint={addPoint(pageNo)}
+        toAppendAnswer={appendAnswer}
       />
     </View>
   );
 
   if (pageNo === questions.length) {
-    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i]])
+    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i], qAnswers[i]])
     return (
       <View style = {{flex: 1}}>
         <View style ={{flex: 2}}>
@@ -253,6 +260,7 @@ export const quiz1b1 = (questions: Array<QnProps>) => {
             {...item[0]}
             saved = {save.includes(item[0].id)}
             correct={item[1]}
+            userAns={item[2]}
             reportQn={()=>{
               var temp = Array.from(report);
               temp.push(item[0].id);

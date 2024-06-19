@@ -14,7 +14,7 @@ type QnProps = {
 
 export type QnPropsDisplay = QnProps & { editQn: () => void , deleteQn:() =>void};
 
-export type QnPropsWithReport = QnProps & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , correct: boolean, saved: boolean};
+export type QnPropsWithReport = QnProps & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , userAns: string, correct: boolean, saved: boolean};
 
 export const QuestionCard = (question: QnPropsDisplay) => {
 
@@ -52,12 +52,13 @@ export function TallyCard(question: QnPropsWithReport) {
   };
 
   return (
-    <View style={{ gap: 10, borderRadius: 10, backgroundColor: '#cdefff', borderColor: question.correct ? 'green' : 'red', borderWidth: 3 }}>
+    <View style={{ gap: 10, borderRadius: 10, backgroundColor: '#cdefff', borderWidth: 3 }}>
       <Text style={styles.questionStatement}>
         {question.mcq ? 'MCQ' : 'Open'}: {question.quizstmt}
       </Text>
       {renderCorrectAnswers()}
       {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
+      <Text style={{color: question.correct ? 'green' : 'red',}}>Your answer: {question.userAns}</Text>
       <View style={styles.editIconContainer}>
         <Button title="Report" onPress={question.reportQn} />
         {question.saved ? (

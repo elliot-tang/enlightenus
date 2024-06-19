@@ -38,7 +38,7 @@ function MainForum({navigation}: ForumScreenProps){
 
   const data = testData; //from database instead
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 , paddingTop:20}}>
       <Button title = "Create New Forum Discussion!" onPress={()=>navigation.navigate("create")}/>
       <View style={{ height: 25 }} />
       <ScrollView style={{ flex: 1 }}>
@@ -70,7 +70,7 @@ function Individual({route,navigation}: IndividualProps){
   return (
     <SafeAreaView>
     <View style={{ 
-      backgroundColor: 'cdefff', borderColor: 'black', borderWidth: 2.5, borderRadius: 10 }}>
+      backgroundColor: 'cdefff', borderColor: 'black', borderWidth: 2.5, borderRadius: 10, paddingTop:20 }}>
       <Text style={{ fontWeight: 'bold', fontSize: 17 }}>
       {toDisplay.author}: {toDisplay.title}
       </Text>
@@ -149,7 +149,7 @@ function Report({route,navigation}: ReportProps){
   
   const [reportText, setReport] = useState('');
   return(
-    <View style={{gap:5}}>
+    <View style={{gap:5, paddingTop:20}}>
       <Text style={{textAlign: "left"}}>Report a {temptype} </Text>
       <TextInput
         style={styles.input}

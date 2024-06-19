@@ -196,7 +196,7 @@ export function quizScroll(questions : Array<QnProps>) {
         };
       }
 
-    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i]])
+    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i], qAnswers[i]])
     
     /*here we display the score, and tally up which qn is correct or wrong*/
     return (
@@ -230,6 +230,7 @@ export function quizScroll(questions : Array<QnProps>) {
             {...item[0]}
             saved = {save.includes(item[0].id)}
             correct={item[1]}
+            userAns={item[2]}
             reportQn={()=>{
               var temp = Array.from(report);
               temp.push(item[0].id);

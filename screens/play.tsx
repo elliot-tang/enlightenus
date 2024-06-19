@@ -3,9 +3,6 @@ import {styles, HomeScreenProps} from "../App"
 import { useState } from "react"
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-
-function playScreenCard(){} 
-
 export default function PlayScreen({ navigation }: HomeScreenProps) {
   const [searchFrom, setSearchFrom] = useState("All");
   const [searchText, setSearchText] = useState("")

@@ -36,7 +36,7 @@ function MainHistory({navigation}:HistoryScreenProps) {
   const [topic,setTopic] = useState("Uncategorised");
   const toShowData = (topic==="Uncategorised" || topic ==="")? testData: testData.filter(ele=>ele.topic === topic);
   return (
-    <View style={{padding: 20, flex:1}}>
+    <View style={{flex:1, paddingTop:20}}>
     <View style ={{zIndex:1}}>
       <CustomPicker
         options={options}
@@ -63,7 +63,7 @@ function Individual({route,navigation}: IndividualProps){
   const toShowProps = (route.params === undefined)? {id:"",title:"", topic:"", questions: [], tally: []}: route.params.indivProps
   const toShow = Array.from({ length: toShowProps.questions.length}, (_, i) => [toShowProps.questions[i], toShowProps.tally[i]])
   return (
-    <View style={{flex:1}}>
+    <View style={{flex:1, paddingTop:20}}>
       <Text style={{fontSize:18, fontWeight:"bold"}}>{toShowProps.topic} : {toShowProps.title}</Text>
       <View style={{height: 0.05*height, flexDirection: "row"}}/>
       <ScrollView style={{ flex: 11, gap :10 }}>

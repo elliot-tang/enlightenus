@@ -9,6 +9,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type CreateProps = NativeStackScreenProps<StackNavigationParamList,"Create">
 
+//
+
 // the search feature fetches an array of datatype jasons
 
 //note the id created here is a local id, it SHOULD NOT be passed into mongobongo in page 4
