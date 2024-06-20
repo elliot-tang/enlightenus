@@ -16,7 +16,7 @@ import {QnProps} from './components/question1by1';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StyleSheet } from 'react-native';
 import { QuizProps } from './components/quizcardonsearch';
-import QuizScreen from './screens/quizscreen';
+import QuizScreen, { OneScreen, ScrollScreen } from './screens/quizscreen';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -47,7 +47,9 @@ export type StackNavigationParamList = {
   Home: undefined;
   Create: {topic:string}|undefined;
   Play: {topic:string}|undefined;
-  DisplayPlay: {quizprops:QuizProps}|undefined
+  DisplayPlay: {qzprop:QuizProps};
+  ScrollScreen: {qzprop:QuizProps};
+  OneScreen: {qzprop:QuizProps};
 }
 
 const Tab = createBottomTabNavigator<BottomTabNavigationParamList>(); 
@@ -84,6 +86,8 @@ const HomeStack = () => (
     <Stack.Screen name="Create" component={CreateScreen} options={{ headerLeft: ()=> null}}/>
     <Stack.Screen name="Play" component={PlayScreen} />
     <Stack.Screen name="DisplayPlay" component={QuizScreen} />
+    <Stack.Screen name="ScrollScreen" component={ScrollScreen} />
+    <Stack.Screen name="OneScreen" component={OneScreen} />
   </Stack.Navigator>
 )
 

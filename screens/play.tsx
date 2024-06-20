@@ -1,8 +1,9 @@
-import {View,Text, Button, TouchableOpacity, TextInput} from "react-native"
+import {View,Text, Button, TouchableOpacity, TextInput, FlatList} from "react-native"
 import {styles, HomeScreenProps, StackNavigationParamList} from "../App"
 import { useState } from "react"
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import QuizCard from "@app/components/quizcardonsearch";
 
 type PlayProps = NativeStackScreenProps<StackNavigationParamList,"Play">
 
@@ -12,12 +13,18 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
   const [searchText, setSearchText] = useState("");
   const toShow = testData //make it a function of the search from and search text, determines which database to pull from
     return (
-      <View style={{gap:15}}>
-        <Text style={{ fontSize: 24}}>Search quizzes in {topic} from? </Text> 
-  <View style={{ flexDirection: "row" ,flex:1}}>
+      <View style={{ gap: 15 }}>
+  <Text style={{ fontSize: 22 }}>Search quizzes in {topic} from? </Text>
+  <View style={{ flexDirection: "row" }}> 
     <TouchableOpacity
       onPress={() => setSearchFrom("Saved")}
-      style={{ flex:1, backgroundColor: searchFrom === "Saved" ? '#6e3b6e' : '#f9c2ff' , height:50, justifyContent: 'center', alignItems: 'center' }}
+      style={{
+        flex: 1,
+        backgroundColor: searchFrom === "Saved" ? '#6e3b6e' : '#f9c2ff',
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
     >
       <Text style={{ fontSize: 24, color: searchFrom === "Saved" ? 'white' : 'black', textAlign: 'center' }}>
         Saved Only
@@ -25,7 +32,13 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => setSearchFrom("All")}
-      style={{flex:1, backgroundColor: searchFrom === "All" ? '#6e3b6e' : '#f9c2ff',height:50 , justifyContent: 'center', alignItems: 'center'}}
+      style={{
+        flex: 1,
+        backgroundColor: searchFrom === "All" ? '#6e3b6e' : '#f9c2ff',
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
     >
       <Text style={{ fontSize: 24, color: searchFrom === "All" ? 'white' : 'black', textAlign: 'center' }}>
         All
@@ -33,15 +46,22 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => setSearchFrom("Mine")}
-      style={{flex:1, backgroundColor: searchFrom === "Mine" ? '#6e3b6e' : '#f9c2ff',height:50 , justifyContent: 'center', alignItems: 'center'}}
+      style={{
+        flex: 1, 
+        backgroundColor: searchFrom === "Mine" ? '#6e3b6e' : '#f9c2ff',
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
     >
       <Text style={{ fontSize: 24, color: searchFrom === "Mine" ? 'white' : 'black', textAlign: 'center' }}>
         My Quizzes
       </Text>
     </TouchableOpacity>
   </View>
+  <View style={{ gap: 25 }} />
   {searchFrom === "Mine" && <Text>*Note: You can only playtest your own quizzes and the scores will not be reflected in the leaderboards</Text>}
-  <View style={{flexDirection:"row",backgroundColor:'white', flex:1}}>
+ <View style={{flexDirection:"row",backgroundColor:'white'}}>
       <TextInput
         style={{flex:10}}
         placeholder="Search..."
@@ -52,6 +72,18 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
         <MaterialIcons name="search" size={24} color="gray" />
       </TouchableOpacity>
     </View>
+    <FlatList
+              data={toShow}
+              keyExtractor={item => item.id} 
+              renderItem={({item}) => <QuizCard 
+              {...item}
+              onPress={()=>navigation.navigate("DisplayPlay", {qzprop: item})}
+              />}
+              ItemSeparatorComponent={(() => (
+          <View
+            style={{height: 10}}
+          />
+        ))}/>
         <Button title="Go back" onPress={()=>navigation.goBack()}/>
   </View>
     )};
@@ -130,6 +162,6 @@ const testData = [{
   title:"nonscroll",
   topic: "intro",
   questions: testQn,
-  oneByOne: false,
+  oneByOne: true,
   authorid: "the creator"
 } ]
