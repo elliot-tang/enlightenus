@@ -144,12 +144,12 @@ const Create= ({route,navigation} : CreateProps) => {
       />
 
       {/* Input for Wrong Answers */}
-      <TextInput
+      {mcq && <TextInput
         style={styles.input}
         placeholder="Wrong Answers (comma-separated)"
         value={wrongs}
         onChangeText={(text) => setWrongs(text)}
-      />
+      />}
 
       {/* Dropdown for Number of Options */}
       {mcq && <View>
