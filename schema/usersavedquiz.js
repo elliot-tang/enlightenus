@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const User = require("./user");
+const { MCQ, OEQ } = require("./question");
 
 const userSavedQuizSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

@@ -7,6 +7,7 @@ const QuizSchema = new mongoose.Schema({
     questionId: { type: mongoose.Schema.Types.ObjectId, refPath: 'questions.questionType', required: true },
     questionType: { type: String, required: true, enum: ['MCQ', 'OEQ'], },
     questionAttempts: { type: Number, required: true, default: 1, },
+    noOptions: { type: Number, required: true, },
   }],
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', },
   rating: { type: Number, required: true, default: 0 },
@@ -15,6 +16,13 @@ const QuizSchema = new mongoose.Schema({
   isVerified: { type: Boolean, required: true, default: false },
   dateCreated: { type: Date, default: Date.now, immutable: true, },
 });
+
+// Ensures questions have unique questionIds
+QuizSchema.path('questions').validate(function (questions) {
+  const questionIds = questions.map(q => q.questionId.toString());
+  const uniqueQuestionIds = new Set(questionIds);
+  return questionIds.length === uniqueQuestionIds.size;
+}, 'Quiz cannot contain the same question multiple times.');
 
 const Quiz = mongoose.model('Quiz', QuizSchema);
 module.exports = Quiz;

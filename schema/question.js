@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// As of now, allows for multiple correct answers
+// Allows for multiple correct answers
 const AnswerSchema = new mongoose.Schema({
   answer: { type: String, required: true },
   isCorrect: { type: Boolean, required: true, default: false },
@@ -33,7 +33,7 @@ const MCQSchema = new mongoose.Schema({
       // checks that at least one correct answer exists
       {
         validator: function(v) {
-          return v.some(option => option.isCorrect == true);
+          return v.some(option => option.isCorrect === true);
         },
         message: 'There must be at least one correct answer!',
       },
@@ -41,6 +41,7 @@ const MCQSchema = new mongoose.Schema({
   },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', },
   explainText: { type: String, },
+  dateCreated: { type: Date, default: Date.now, immutable: true, },
 });
 
 // Allows for multiple correct answers
@@ -58,7 +59,48 @@ const OEQSchema = new mongoose.Schema({
   },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', },
   explainText: { type: String, },
+  dateCreated: { type: Date, default: Date.now, immutable: true, },
 })
+
+// Middleware to add dateCreated field to docs which are missing it whenever doc is fetched
+const addDateCreatedIfMissingFindOne = async function(doc, next) {
+  const now = new Date();
+
+  if (doc && !doc.dateCreated) {
+    console.log(`Adding dateCreated to document with id: ${doc._id}`);
+    doc.dateCreated = now;
+    await doc.save().then(doc => console.log(`Document with id: ${doc._id} saved with dateCreated: ${doc.dateCreated}`))
+                    .catch(error => console.log(error));
+  }
+  next();
+};
+MCQSchema.post('findOne', addDateCreatedIfMissingFindOne);
+OEQSchema.post('findOne', addDateCreatedIfMissingFindOne);
+
+const addDateCreatedIfMissing = async function(docs, next) {
+  const now = new Date();
+  const updates = [];
+
+  docs.forEach(doc => {
+    if (!doc.dateCreated) {
+      console.log(`Adding dateCreated to document with id: ${doc._id}`);
+      doc.dateCreated = now;
+      updates.push(doc.save().then(doc => {
+        console.log(`Document with id: ${doc._id} saved with dateCreated: ${doc.dateCreated}`);
+        return doc;
+      }).catch(error => console.error(error)));
+    }
+  });
+
+  if (updates.length > 0) {
+    await Promise.all(updates);
+  };
+
+  next();
+};
+
+MCQSchema.post('find', addDateCreatedIfMissing);
+OEQSchema.post('find', addDateCreatedIfMissing);
 
 const MCQ = mongoose.model('MCQ', MCQSchema);
 const OEQ = mongoose.model('OEQ', OEQSchema);

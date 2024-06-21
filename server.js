@@ -19,6 +19,7 @@ app.use(cors());
 // defines routes for auth
 app.use(express.json());
 app.use('/', AuthRouter);
+app.use('/', QuizRouter);
 app.use('/auth', AuthRouter);
 app.use('/quiz', QuizRouter);
 
