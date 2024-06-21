@@ -28,12 +28,17 @@ export interface HomeScreenProps extends NativeStackScreenProps<StackNavigationP
 interface UnfinwithCall {
   data: Array<QnProps>
   setData: (newd: Array<QnProps>)=>void
+  save: Array<String>
+  setSaved: (newd: Array<String>)=>void
 }
 
 export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
   data: [],
   setData: (newData) => {},
+  save: [],
+  setSaved: (newSaved) => {},
 });
+
 
 // Optional type definition for bottom tab navigator params
 type BottomTabNavigationParamList = {
@@ -98,12 +103,16 @@ const AuthNavigator = () => {
 }
 
 function App() {
-const [unfin,setUnfin] = useState(Array<QnProps>);
+  const [unfin,setUnfin] = useState(Array<QnProps>);
   function childTrafficking(newData: Array<QnProps>) {
     setUnfin(newData);}
+  const [unfin2,setUnfin2] = useState(Array<String>);
+  function childTrafficking2(newData: Array<String>) {
+    setUnfin2(newData);
+  }
   return(
   <AuthProvider>
-    <UnfinishedQuizCreationData.Provider value = {{data:unfin,setData:childTrafficking}}>
+    <UnfinishedQuizCreationData.Provider value = {{data:unfin,setData:childTrafficking, save: unfin2, setSaved:childTrafficking2}}>
       <NavigationContainer>
         <AuthNavigator />
       </NavigationContainer>

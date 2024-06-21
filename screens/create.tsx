@@ -31,7 +31,7 @@ const Create= ({route,navigation} : CreateProps) => {
   const [quiztitle,setTitle] = useState("");
   const [saveorall, setSaveorall] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [newQnsLocalID, setNew] = useState(Array<String>)
+  const [newQnsLocalID, setNew] = useState(passedunfinished.save);
 
   //pingpong bad design
 
@@ -75,7 +75,10 @@ const Create= ({route,navigation} : CreateProps) => {
               setQuestions(temp);
               const tempnew = newQnsLocalID.filter((localid)=> localid !== item.id);
               setNew(tempnew);
-            }}  />} 
+            }}
+            notpushed = {newQnsLocalID.includes(item.id)}
+            pushQn = {()=> {const tempnew = newQnsLocalID.filter((localid)=> localid !== item.id); setNew(tempnew); alert("Pushing logic here")}}
+            />} 
             />
           ): <Text style ={{textAlign : "center"}}> No questions add yet.....</Text>
           }
@@ -84,7 +87,8 @@ const Create= ({route,navigation} : CreateProps) => {
           <Button title="Finalise new quiz" onPress={()=> setRender(4)} disabled = {questions.length==0}/>
           <Button title="Save and Go Back Home" onPress={() => {
             navigation.goBack();
-            passedunfinished.setData(questions)
+            passedunfinished.setData(questions);
+            passedunfinished.setSaved(newQnsLocalID)
           }} />
         </View>
         
@@ -226,7 +230,7 @@ const Create= ({route,navigation} : CreateProps) => {
                     }
                     var getquestions = questions;
                     getquestions.push(temp);
-                    var getnew = newQnsLocalID;
+                    var getnew = Array.from(newQnsLocalID);
                     getnew.push(temp.id);
                     setNew(getnew);
                     setQuestions(getquestions);
@@ -331,7 +335,7 @@ const Create= ({route,navigation} : CreateProps) => {
         
         <View>
           <Button title="Back" onPress={()=>setRender(0)}/>
-          <Button title="Publish Quiz" onPress={()=> {navigation.goBack(); passedunfinished.setData([])}}/>
+          <Button title="Publish Quiz" onPress={()=> {alert("here should be the final pushing");navigation.goBack(); passedunfinished.setData([]); passedunfinished.setSaved([])}}/>
         </View>
         
       </SafeAreaView>
