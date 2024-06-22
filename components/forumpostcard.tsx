@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 
 export type ReplyProps = {
