@@ -10,7 +10,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 type CreateProps = NativeStackScreenProps<StackNavigationParamList,"Create">
 
 interface FetchedQuestion{
-  _id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {option: string, isCorrect?:boolean}[];
+  _id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {answer: string, isCorrect?:boolean}[];
   }
 //
 
@@ -34,6 +34,7 @@ const Create= ({route,navigation} : CreateProps) => {
   const [searchText, setSearchText] = useState("");
   const [newQnsLocalID, setNew] = useState(passedunfinished.save);
   const [selectionRender, setSelection] = useState<FetchedQuestion[]>([]);
+  const [allQnsMongoID, setAll] = useState(passedunfinished.mongo);
 
   //pingpong bad design
 
@@ -311,14 +312,14 @@ const Create= ({route,navigation} : CreateProps) => {
               while (questions.map((ele)=>ele.id).includes(localid)) {
                 localid = Math.random().toString();
               };
-              const corrects = (item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect).map((ele)=>ele.option): []);
+              const corrects = (item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect).map((ele)=>ele.answer): []);
               const temp = {
                 id: localid, 
                 mcq: item.questionType==="MCQ",
                 maxAttempt: 1,
                 quizstmt: item.questionBody,
                 corrans: item.questionType==="MCQ"? corrects:item.correctOptions, 
-                wrongs: item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect===undefined).map((ele)=>ele.option):[], 
+                wrongs: item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect===undefined).map((ele)=>ele.answer):[], 
                 noOption: 10,
                 explainText: item.explainText
               };
@@ -403,7 +404,7 @@ const dummydata = [
     _id: "jfnsjfnsjee",
     questionBody: "some mcq rubbish",
     __v: 0 ,
-    options: [{option: "true", isCorrect: true},{option:"false"}],
+    options: [{answer: "true", isCorrect: true},{answer:"false"}],
     author: "creator",
     explainText: "im not typing that shit again",
     dateCreated: Date(),

@@ -30,6 +30,8 @@ interface UnfinwithCall {
   setData: (newd: Array<QnProps>)=>void
   save: Array<String>
   setSaved: (newd: Array<String>)=>void
+  mongo: Array<String>
+  setMongo: (newd: Array<String>)=>void
 }
 
 export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
@@ -37,6 +39,8 @@ export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
   setData: (newData) => {},
   save: [],
   setSaved: (newSaved) => {},
+  mongo:[],
+  setMongo: (newSaved) => {},
 });
 
 
@@ -110,9 +114,13 @@ function App() {
   function childTrafficking2(newData: Array<String>) {
     setUnfin2(newData);
   }
+  const [unfin3,setUnfin3] = useState(Array<String>);
+  function childTrafficking3(newData: Array<String>) {
+    setUnfin3(newData);
+  }
   return(
   <AuthProvider>
-    <UnfinishedQuizCreationData.Provider value = {{data:unfin,setData:childTrafficking, save: unfin2, setSaved:childTrafficking2}}>
+    <UnfinishedQuizCreationData.Provider value = {{data:unfin,setData:childTrafficking, save: unfin2, setSaved:childTrafficking2, mongo: unfin3, setMongo:childTrafficking3}}>
       <NavigationContainer>
         <AuthNavigator />
       </NavigationContainer>
