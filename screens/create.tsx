@@ -9,9 +9,10 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type CreateProps = NativeStackScreenProps<StackNavigationParamList,"Create">
 
+interface FetchedQuestion{
+  _id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {option: string, isCorrect?:boolean}[];
+  }
 //
-
-// the search feature fetches an array of datatype jasons
 
 //note the id created here is a local id, it SHOULD NOT be passed into mongobongo in page 4
 
@@ -32,6 +33,7 @@ const Create= ({route,navigation} : CreateProps) => {
   const [saveorall, setSaveorall] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [newQnsLocalID, setNew] = useState(passedunfinished.save);
+  const [selectionRender, setSelection] = useState<FetchedQuestion[]>([]);
 
   //pingpong bad design
 
@@ -228,7 +230,7 @@ const Create= ({route,navigation} : CreateProps) => {
                       noOption: noOption,
                       explainText: explainText
                     }
-                    var getquestions = questions;
+                    var getquestions = Array.from(questions);
                     getquestions.push(temp);
                     var getnew = Array.from(newQnsLocalID);
                     getnew.push(temp.id);
@@ -265,9 +267,9 @@ const Create= ({route,navigation} : CreateProps) => {
   /*questions retrieved from database wouldnt have a new flag, so append to questions but not to newLocalID*/
   if (renderstate == 3) {
     return(
-        <View style={{gap:15}}>
+        <View style={{gap:15, flex:1}}>
         <Text style={{ fontSize: 24}}> Search questions from? </Text> 
-  <View style={{ flexDirection: "row" ,flex:1}}>
+  <View style={{ flexDirection: "row" }}>
     <TouchableOpacity
       onPress={() => setSaveorall(true)}
       style={{ flex:1, backgroundColor: saveorall === true ? '#6e3b6e' : '#f9c2ff' , height:50, justifyContent: 'center', alignItems: 'center' }}
@@ -285,18 +287,60 @@ const Create= ({route,navigation} : CreateProps) => {
       </Text>
     </TouchableOpacity>
   </View>
-  <View style={{flexDirection:"row",backgroundColor:'white', flex:1}}>
+  <View style={{flexDirection:"row",backgroundColor:'white'}}>
       <TextInput
-        style={{flex:10}}
+        style={{flex:5}}
         placeholder="Search..."
         onChangeText={setSearchText}
         value={searchText}
       />
-      <TouchableOpacity style={{justifyContent:"center", flex:1}} onPress={() => alert("it should fetch all the questions from server containing search term")}>
+      <TouchableOpacity style={{justifyContent:"center", flex:1}} onPress={() => {setSelection(dummydata)}}>
         <MaterialIcons name="search" size={24} color="gray" />
       </TouchableOpacity>
     </View>
+      <ScrollView style={{ flex: 10 }}>
+      <FlatList
+        data={selectionRender}
+        keyExtractor={item => item._id} 
+        renderItem={({item}) => 
+          <TouchableOpacity style = {{backgroundColor: '#cdefff',
+            padding: 15,
+            borderRadius: 10,}} onPress={()=>
+            {
+              var localid = Math.random().toString();
+              while (questions.map((ele)=>ele.id).includes(localid)) {
+                localid = Math.random().toString();
+              };
+              const corrects = (item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect).map((ele)=>ele.option): []);
+              const temp = {
+                id: localid, 
+                mcq: item.questionType==="MCQ",
+                maxAttempt: 1,
+                quizstmt: item.questionBody,
+                corrans: item.questionType==="MCQ"? corrects:item.correctOptions, 
+                wrongs: item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect===undefined).map((ele)=>ele.option):[], 
+                noOption: 10,
+                explainText: item.explainText
+              };
+              var getquestions = Array.from(questions);
+              getquestions.push(temp);
+              setQuestions(getquestions);
+              setRender(0);
+              return;
+              
+            }
+            }>
+            <Text>{item.questionType}: {item.questionBody} by {item.author}</Text>
+          </TouchableOpacity> } 
+        ItemSeparatorComponent={(() => (
+          <View
+            style={{height: 10}}
+          />
+        ))}
+      />
+    </ScrollView>
         <Button title="Go back" onPress={()=>setRender(0)}/>
+        <View style={{height: 20}}/>
       </View>
       )
     }
@@ -335,7 +379,7 @@ const Create= ({route,navigation} : CreateProps) => {
         
         <View>
           <Button title="Back" onPress={()=>setRender(0)}/>
-          <Button title="Publish Quiz" onPress={()=> {alert("here should be the final pushing");navigation.goBack(); passedunfinished.setData([]); passedunfinished.setSaved([])}}/>
+          <Button title="Publish Quiz" onPress={()=> {alert("here should be the final pushing, first the questions to get their id, then feed those ids into the quiz and push the quiz");navigation.goBack(); passedunfinished.setData([]); passedunfinished.setSaved([])}}/>
         </View>
         
       </SafeAreaView>
@@ -343,5 +387,28 @@ const Create= ({route,navigation} : CreateProps) => {
   }
 }
 
+
+const dummydata = [
+  {
+    _id:"jfnsjfnsj",
+    questionBody: "some oeq rubbish",
+    __v: 0 ,
+    correctOptions: ["here","there","everywhere"],
+    author: "creator",
+    explainText: "this is a quarter note, the quarter note blah blab",
+    dateCreated: Date(),
+    questionType: 'OEQ'
+  },
+  {
+    _id: "jfnsjfnsjee",
+    questionBody: "some mcq rubbish",
+    __v: 0 ,
+    options: [{option: "true", isCorrect: true},{option:"false"}],
+    author: "creator",
+    explainText: "im not typing that shit again",
+    dateCreated: Date(),
+    questionType: 'MCQ'
+  },
+]
 
 export default Create
