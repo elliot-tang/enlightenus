@@ -17,8 +17,8 @@ import { useState } from 'react';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LineChart } from 'react-native-chart-kit';
 import { HomeScreenProps, styles } from '@app/App';
-import { returnUser } from '../context/AuthContext';
-import { useAuth } from '../context/AuthContext';
+import { returnUser } from '@app/context/AuthContext';
+import { useAuth } from '@app/context/AuthContext';
 
 // Attribution for icons:
 // - Math: https://www.flaticon.com/free-icons/math
@@ -87,7 +87,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
       </View>
       <Image
         style={{ height: 0.15 * height, width: width }}
-        source={require("../assets/banner.png")}
+        source={require("@app/assets/banner.png")}
       />
       <View style={{ height: 0.05 * height, flexDirection: "row" }}>
         <Text style={{ fontSize: 30, textAlign: "left" }}>
@@ -98,35 +98,35 @@ function StartScreen({ navigation }: HomeScreenProps) {
         <ScrollView horizontal={true}>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Uncategorised")}>
             {/* <Image source={require("./traffic-signal.png")} style={styles.image} /> */}
-            <Image source={require("../assets/logo.png")} style={styles.image} />
+            <Image source={require("@app/assets/traffic-signal.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>All</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("NUS Modules")}>
             {/* <Image source={require("./nuslogo.png")} style={styles.image} /> */}
-            <Image source={require("../assets/logo.png")} style={styles.image} />
+            <Image source={require("@app/assets/nuslogo.jpeg")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>NUS Modules</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Coding")}>
             {/* <Image source={require("./browser.png")} style={styles.image} /> */}
-            <Image source={require("../assets/logo.png")} style={styles.image} />
+            <Image source={require("@app/assets/browser.png")} style={styles.image} />
             <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Coding</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("Math")}>
           {/* <Image source={require("./math.png")} style={styles.image} /> */}
-          <Image source={require("../assets/logo.png")} style={styles.image} />
+          <Image source={require("@app/assets/math.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Math</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("General Knowledge")}>
           {/* <Image source={require("./open-book.png")} style={styles.image} /> */}
-          <Image source={require("../assets/logo.png")} style={styles.image} />
+          <Image source={require("@app/assets/open-book.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>General Knowledge</Text>
           </View>

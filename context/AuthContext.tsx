@@ -7,7 +7,7 @@ interface AuthContextData {
   user: string | undefined;
   loading: boolean | undefined;
   login: (username: string, password: string, keepSignedIn: boolean) => Promise<void>;
-  register: (email: string, username: string, password: string) => Promise<void>;
+  register: (email: string, username: string, password: string, keepSignedIn: boolean) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -44,8 +44,8 @@ export const AuthProvider = ({ children } : Props) => {
 
   const login = async (username : string, password : string, keepSignedIn : boolean) => {
     try {
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/login`, { username, password });
-      const { token, user } = response.data;
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/auth/login`, { username, password });
+      const { token, user, message } = response.data;
       setToken(token);
       setUser(user);
       if (keepSignedIn) {
@@ -66,13 +66,19 @@ export const AuthProvider = ({ children } : Props) => {
     }
   }
 
-  const register = async (email : string, username : string, password : string) => {
+  const register = async (email : string, username : string, password : string, keepSignedIn : boolean) => {
     try {
-      const backendAPI : string = `${process.env.EXPO_PUBLIC_BACKEND_API}/register`;
-      await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/register`, { email, username, password });
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/auth/register`, { email, username, password });
+      const { token, user, message } = response.data;
       console.log('User registered!');
       alert('Registration success!');
-      // TODO: Redirect
+      setToken(token);
+      setUser(user);
+      if (keepSignedIn) {
+        await AsyncStorage.setItem('user', user);
+        await AsyncStorage.setItem('token', token);
+        await AsyncStorage.setItem('keepSignedIn', String(keepSignedIn));
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage: string = error.response?.data.message;

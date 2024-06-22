@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard, Platform, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
-import { StackNavigationParamList, styles, UnfinishedQuizCreationData } from '../App';
-import { QnProps } from '../components/question1by1';
-import { QuestionCard } from '../components/questioncard';
+import { HomeStackParamList, styles, UnfinishedQuizCreationData } from '@app/App';
+import { QnProps } from '@app/components/question1by1';
+import { QuestionCard } from '@app/components/questioncard';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-type CreateProps = NativeStackScreenProps<StackNavigationParamList,"Create">
+type CreateProps = NativeStackScreenProps<HomeStackParamList,"Create">
 
 interface FetchedQuestion{
   _id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {answer: string, isCorrect?:boolean}[];
@@ -24,7 +24,7 @@ const deleteQuestion = (questionProps: Array<QnProps>, questionId :string) => {
 };
 
 const Create= ({route,navigation} : CreateProps) => {
-  const passedunfinished = React.useContext(UnfinishedQuizCreationData)
+  const passedunfinished = React.useContext(UnfinishedQuizCreationData);
   const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised"||route.params.topic ===""))? "Uncategorised": route.params.topic;
   const [is1b1Enabled, setIs1b1Enabled] = useState(false);
   const [renderstate,setRender] =useState(0);

@@ -238,11 +238,11 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void) => {
     const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i], qAnswers[i]])
     return (
       <View style = {{flex: 1}}>
-        <View style ={{flex: 1}}>
+        <View style = {{paddingBottom:20}}>
           <Text style={{fontSize:18}}>Your score is {point}/{questions.length}. Listed below is a breakdown.</Text>
         </View>
         
-        <ScrollView style={{ flex: 11, gap :10 }}>
+        <ScrollView style={{ gap :10 }}>
           <FlatList
             ItemSeparatorComponent={
           (() => (
@@ -275,7 +275,7 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void) => {
             />} 
           />
         </ScrollView>
-        <View style={{flex:1}}>
+        <View style={{paddingBottom:20,paddingTop:20}}>
           <Button title="Return to Home" onPress={exitScreen}/>
         </View>
       </View>

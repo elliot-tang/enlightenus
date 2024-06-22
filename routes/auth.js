@@ -7,9 +7,9 @@ const router = express.Router();
 require('dotenv').config()
 
 // registration
-router.post('/register', async (req, res) => {
+router.post('/auth/register', async (req, res) => {
   try {
-    const { email, username, password} = req.body;
+    const { email, username, password } = req.body;
     console.log(`Attempting registration: username: ${username}`);
 
     // check all fields filled in
@@ -39,8 +39,13 @@ router.post('/register', async (req, res) => {
     // create and save new user into db
     const user = new User({ email, username, password: hashedPassword });
     await user.save();
+    
+    // generate and return jwt
+    const secretKey = process.env.JWT_SECRET_KEY;
+    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: '7' });
+
     console.log(`${ username } registered successfully`);
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ token: token, user: username, message: 'User registered successfully' });
   } catch (error) {
     console.log(`Failed registration: ${error.message}`);
     res.status(500).json({ message: 'Error registering user', error });
@@ -48,7 +53,7 @@ router.post('/register', async (req, res) => {
 });
 
 // login
-router.post('/login', async (req, res) => {
+router.post('/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     console.log(`Attempting login: username: ${username}`);
@@ -77,7 +82,7 @@ router.post('/login', async (req, res) => {
     // generate and return jwt
     const secretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: '7' });
-    res.status(200).json({ token: token, user: username});
+    res.status(200).json({ token: token, user: username, message: 'User logged in successfully' });
     console.log(`${ username } logged in successfully`);
   } catch (error) {
     console.log(`Failed login: ${error.message}`);
@@ -89,11 +94,11 @@ router.get('/', (req, res) => {
   res.send('Hello World!')
 });
 
-router.get('/register', (req, res) => {
+router.get('/auth/register', (req, res) => {
   res.send('Hello Register!')
 });
 
-router.get('/login', (req, res) => {
+router.get('/auth/login', (req, res) => {
   res.send('Hello Login!')
 });
 

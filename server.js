@@ -1,7 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const router = require("./routes/auth");
+const AuthRouter = require("./routes/auth");
+const QuizRouter = require("./routes/quiz");
 
 const app = express();
 require('dotenv').config()
@@ -17,9 +18,10 @@ app.use(cors());
 
 // defines routes for auth
 app.use(express.json());
-app.use('/', router);
-app.use('/register', router);
-app.use('/login', router);
+app.use('/', AuthRouter);
+app.use('/', QuizRouter);
+app.use('/auth', AuthRouter);
+app.use('/quiz', QuizRouter);
 
 // starts server and connects to database
 if (process.env.MONGO_URL) {

@@ -209,7 +209,7 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
     /*here we display the score, and tally up which qn is correct or wrong*/
     return (
       <View style = {{flex: 1}}>
-        <View style ={{flex: 1}}>
+        <View style ={{paddingBottom:20}}>
           <Text style={{fontSize:18}}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
         </View>
         
@@ -254,7 +254,7 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
             } 
           />
         </ScrollView>
-        <View style={{flex:1}}>
+        <View style={{paddingBottom:20, paddingTop:20}}>
           <Button title="Return to Home" onPress={exitScreen}/>
         </View>
       </View>
