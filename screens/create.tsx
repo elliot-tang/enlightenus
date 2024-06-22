@@ -1,12 +1,22 @@
 import * as React from 'react';
-import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard, Platform, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { StackNavigationParamList, styles, UnfinishedQuizCreationData } from '../App';
 import { QnProps } from '../components/question1by1';
 import { QuestionCard } from '../components/questioncard';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type CreateProps = NativeStackScreenProps<StackNavigationParamList,"Create">
+
+interface FetchedQuestion{
+  _id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {answer: string, isCorrect?:boolean}[];
+  }
+//
+
+//note the id created here is a local id, it SHOULD NOT be passed into mongobongo in page 4
+
+//the newqnlocal determines which of the created questions need to be pushed to database, which are pre-fetched so no need to push. it stores the corresponding local id.
 
 const deleteQuestion = (questionProps: Array<QnProps>, questionId :string) => {
   // Filter the questionProps array to exclude the question with the matching id
@@ -16,10 +26,15 @@ const deleteQuestion = (questionProps: Array<QnProps>, questionId :string) => {
 const Create= ({route,navigation} : CreateProps) => {
   const passedunfinished = React.useContext(UnfinishedQuizCreationData)
   const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised"||route.params.topic ===""))? "Uncategorised": route.params.topic;
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [is1b1Enabled, setIs1b1Enabled] = useState(false);
   const [renderstate,setRender] =useState(0);
   const [questions,setQuestions] = useState(passedunfinished.data); 
   const [quiztitle,setTitle] = useState("");
+  const [saveorall, setSaveorall] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [newQnsLocalID, setNew] = useState(passedunfinished.save);
+  const [selectionRender, setSelection] = useState<FetchedQuestion[]>([]);
+  const [allQnsMongoID, setAll] = useState(passedunfinished.mongo);
 
   //pingpong bad design
 
@@ -61,7 +76,12 @@ const Create= ({route,navigation} : CreateProps) => {
             deleteQn={()=> {
               const temp = deleteQuestion(questions, item.id);
               setQuestions(temp);
-            }}  />} 
+              const tempnew = newQnsLocalID.filter((localid)=> localid !== item.id);
+              setNew(tempnew);
+            }}
+            notpushed = {newQnsLocalID.includes(item.id)}
+            pushQn = {()=> {const tempnew = newQnsLocalID.filter((localid)=> localid !== item.id); setNew(tempnew); alert("Pushing logic here")}}
+            />} 
             />
           ): <Text style ={{textAlign : "center"}}> No questions add yet.....</Text>
           }
@@ -70,13 +90,14 @@ const Create= ({route,navigation} : CreateProps) => {
           <Button title="Finalise new quiz" onPress={()=> setRender(4)} disabled = {questions.length==0}/>
           <Button title="Save and Go Back Home" onPress={() => {
             navigation.goBack();
-            passedunfinished.setData(questions)
+            passedunfinished.setData(questions);
+            passedunfinished.setSaved(newQnsLocalID)
           }} />
         </View>
         
       </ScrollView>)}
 
-{/* to edit a question, we will create a new question id, this might cause problem later*/}  
+{/* edit or save question triggers a "new" flag*/}  
 
   if (renderstate == 1 || renderstate == 1.5) {
 
@@ -130,12 +151,12 @@ const Create= ({route,navigation} : CreateProps) => {
       />
 
       {/* Input for Wrong Answers */}
-      <TextInput
+      {mcq && <TextInput
         style={styles.input}
         placeholder="Wrong Answers (comma-separated)"
         value={wrongs}
         onChangeText={(text) => setWrongs(text)}
-      />
+      />}
 
       {/* Dropdown for Number of Options */}
       {mcq && <View>
@@ -187,7 +208,7 @@ const Create= ({route,navigation} : CreateProps) => {
                 }
 
                 else{
-                  if (corrans.split(",").filter(value => wrongs.split(",").includes(value)).length >0){
+                  if (corrans.split(",").map((ele)=>ele.trim()).filter(value => wrongs.split(",").map((ele)=>ele.trim()).includes(value)).length >0){
                     alert("Wrong answer and Correct Answer cannot be the same")
                   }
                   
@@ -195,19 +216,26 @@ const Create= ({route,navigation} : CreateProps) => {
                     if ((!wrongs) && (mcq == true)) {
                       alert("MCQs should have at least 1 wrong option")
                     }
-                    setRender(0); {/* this id thing i hope the mongobongo can generate it uniquely */}
+                    setRender(0); 
+                    var localid = Math.random().toString();
+                    while (questions.map((ele)=>ele.id).includes(localid)) {
+                      localid = Math.random().toString();
+                    }
                     const temp = {
-                      id: Math.random().toString(), 
+                      id: localid, 
                       mcq: mcq,
                       maxAttempt: maxAttempt,
                       quizstmt: quizstmt,
-                      corrans: corrans.split(","), 
-                      wrongs: wrongs.split(","), 
+                      corrans: corrans.split(",").map((ele)=>ele.trim()), 
+                      wrongs: wrongs.split(",").map((ele)=>ele.trim()), 
                       noOption: noOption,
                       explainText: explainText
                     }
-                    var getquestions = questions;
+                    var getquestions = Array.from(questions);
                     getquestions.push(temp);
+                    var getnew = Array.from(newQnsLocalID);
+                    getnew.push(temp.id);
+                    setNew(getnew);
                     setQuestions(getquestions);
                     setMcq(false);
                     setMax(1);
@@ -236,11 +264,84 @@ const Create= ({route,navigation} : CreateProps) => {
       )
     }
 
+
+  /*questions retrieved from database wouldnt have a new flag, so append to questions but not to newLocalID*/
   if (renderstate == 3) {
     return(
-      <View>
-        <Text>Database screen goes here </Text>
+        <View style={{gap:15, flex:1}}>
+        <Text style={{ fontSize: 24}}> Search questions from? </Text> 
+  <View style={{ flexDirection: "row" }}>
+    <TouchableOpacity
+      onPress={() => setSaveorall(true)}
+      style={{ flex:1, backgroundColor: saveorall === true ? '#6e3b6e' : '#f9c2ff' , height:50, justifyContent: 'center', alignItems: 'center' }}
+    >
+      <Text style={{ fontSize: 24, color: saveorall === true ? 'white' : 'black', textAlign: 'center' }}>
+        Saved Only
+      </Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={() => setSaveorall(false)}
+      style={{flex:1, backgroundColor: saveorall === false ? '#6e3b6e' : '#f9c2ff',height:50 , justifyContent: 'center', alignItems: 'center'}}
+    >
+      <Text style={{ fontSize: 24, color: saveorall === false ? 'white' : 'black', textAlign: 'center' }}>
+        All
+      </Text>
+    </TouchableOpacity>
+  </View>
+  <View style={{flexDirection:"row",backgroundColor:'white'}}>
+      <TextInput
+        style={{flex:5}}
+        placeholder="Search..."
+        onChangeText={setSearchText}
+        value={searchText}
+      />
+      <TouchableOpacity style={{justifyContent:"center", flex:1}} onPress={() => {setSelection(dummydata)}}>
+        <MaterialIcons name="search" size={24} color="gray" />
+      </TouchableOpacity>
+    </View>
+      <ScrollView style={{ flex: 10 }}>
+      <FlatList
+        data={selectionRender}
+        keyExtractor={item => item._id} 
+        renderItem={({item}) => 
+          <TouchableOpacity style = {{backgroundColor: '#cdefff',
+            padding: 15,
+            borderRadius: 10,}} onPress={()=>
+            {
+              var localid = Math.random().toString();
+              while (questions.map((ele)=>ele.id).includes(localid)) {
+                localid = Math.random().toString();
+              };
+              const corrects = (item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect).map((ele)=>ele.answer): []);
+              const temp = {
+                id: localid, 
+                mcq: item.questionType==="MCQ",
+                maxAttempt: 1,
+                quizstmt: item.questionBody,
+                corrans: item.questionType==="MCQ"? corrects:item.correctOptions, 
+                wrongs: item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect===undefined).map((ele)=>ele.answer):[], 
+                noOption: 10,
+                explainText: item.explainText
+              };
+              var getquestions = Array.from(questions);
+              getquestions.push(temp);
+              setQuestions(getquestions);
+              setRender(0);
+              return;
+              
+            }
+            }>
+            <Text>{item.questionType}: {item.questionBody} by {item.author}</Text>
+          </TouchableOpacity> } 
+        ItemSeparatorComponent={(() => (
+          <View
+            style={{height: 10}}
+          />
+        ))}
+      />
+    </ScrollView>
         <Button title="Go back" onPress={()=>setRender(0)}/>
+        <View style={{height: 20}}/>
       </View>
       )
     }
@@ -258,12 +359,12 @@ const Create= ({route,navigation} : CreateProps) => {
                 </Text>
                 <Switch
                   trackColor={{false: '#767577', true: '#81b0ff'}}
-                  thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+                  thumbColor={is1b1Enabled ? '#f5dd4b' : '#f4f3f4'}
                   ios_backgroundColor="#3e3e3e"
-                  onValueChange={() => setIsEnabled(previousState => !previousState)}
-                  value={isEnabled}
+                  onValueChange={() => setIs1b1Enabled(previousState => !previousState)}
+                  value={is1b1Enabled}
                 />
-                {isEnabled && <Text>
+                {is1b1Enabled && <Text>
                   (Yes)
                 </Text>}
             </View>
@@ -279,7 +380,7 @@ const Create= ({route,navigation} : CreateProps) => {
         
         <View>
           <Button title="Back" onPress={()=>setRender(0)}/>
-          <Button title="Publish Quiz" onPress={()=> {navigation.goBack(); passedunfinished.setData([])}}/>
+          <Button title="Publish Quiz" onPress={()=> {alert("here should be the final pushing, first the questions to get their id, then feed those ids into the quiz and push the quiz");navigation.goBack(); passedunfinished.setData([]); passedunfinished.setSaved([])}}/>
         </View>
         
       </SafeAreaView>
@@ -287,5 +388,28 @@ const Create= ({route,navigation} : CreateProps) => {
   }
 }
 
+
+const dummydata = [
+  {
+    _id:"jfnsjfnsj",
+    questionBody: "some oeq rubbish",
+    __v: 0 ,
+    correctOptions: ["here","there","everywhere"],
+    author: "creator",
+    explainText: "this is a quarter note, the quarter note blah blab",
+    dateCreated: Date(),
+    questionType: 'OEQ'
+  },
+  {
+    _id: "jfnsjfnsjee",
+    questionBody: "some mcq rubbish",
+    __v: 0 ,
+    options: [{answer: "true", isCorrect: true},{answer:"false"}],
+    author: "creator",
+    explainText: "im not typing that shit again",
+    dateCreated: Date(),
+    questionType: 'MCQ'
+  },
+]
 
 export default Create

@@ -15,6 +15,8 @@ import PlayScreen from './screens/play';
 import {QnProps} from './components/question1by1';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StyleSheet } from 'react-native';
+import { QuizProps } from './components/quizcardonsearch';
+import QuizScreen, { OneScreen, ScrollScreen } from './screens/quizscreen';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -26,12 +28,21 @@ export interface HomeScreenProps extends NativeStackScreenProps<StackNavigationP
 interface UnfinwithCall {
   data: Array<QnProps>
   setData: (newd: Array<QnProps>)=>void
+  save: Array<String>
+  setSaved: (newd: Array<String>)=>void
+  mongo: Array<String>
+  setMongo: (newd: Array<String>)=>void
 }
 
 export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
   data: [],
   setData: (newData) => {},
+  save: [],
+  setSaved: (newSaved) => {},
+  mongo:[],
+  setMongo: (newSaved) => {},
 });
+
 
 // Optional type definition for bottom tab navigator params
 type BottomTabNavigationParamList = {
@@ -43,12 +54,15 @@ type BottomTabNavigationParamList = {
 
 export type StackNavigationParamList = {
   Home: undefined;
-  Create: undefined;
-  Play: undefined;
+  Create: {topic:string}|undefined;
+  Play: {topic:string}|undefined;
+  DisplayPlay: {qzprop:QuizProps};
+  ScrollScreen: {qzprop:QuizProps};
+  OneScreen: {qzprop:QuizProps};
 }
 
-const Tab = createBottomTabNavigator<BottomTabNavigationParamList>(); /*I will keep the tab within this file, */
-/*i think it better to keep the home screen naviagtion together with the rest, its not technically a screen anyway*/
+const Tab = createBottomTabNavigator<BottomTabNavigationParamList>(); 
+
 export const Stack = createNativeStackNavigator<StackNavigationParamList>();
 
 const AuthStackNav = createNativeStackNavigator<AuthStackParamList>();
@@ -80,6 +94,9 @@ const HomeStack = () => (
     <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
     <Stack.Screen name="Create" component={CreateScreen} options={{ headerLeft: ()=> null}}/>
     <Stack.Screen name="Play" component={PlayScreen} />
+    <Stack.Screen name="DisplayPlay" component={QuizScreen} />
+    <Stack.Screen name="ScrollScreen" component={ScrollScreen} />
+    <Stack.Screen name="OneScreen" component={OneScreen} />
   </Stack.Navigator>
 )
 
@@ -90,12 +107,20 @@ const AuthNavigator = () => {
 }
 
 function App() {
-const [unfin,setUnfin] = useState(Array<QnProps>);
+  const [unfin,setUnfin] = useState(Array<QnProps>);
   function childTrafficking(newData: Array<QnProps>) {
     setUnfin(newData);}
+  const [unfin2,setUnfin2] = useState(Array<String>);
+  function childTrafficking2(newData: Array<String>) {
+    setUnfin2(newData);
+  }
+  const [unfin3,setUnfin3] = useState(Array<String>);
+  function childTrafficking3(newData: Array<String>) {
+    setUnfin3(newData);
+  }
   return(
   <AuthProvider>
-    <UnfinishedQuizCreationData.Provider value = {{data:unfin,setData:childTrafficking}}>
+    <UnfinishedQuizCreationData.Provider value = {{data:unfin,setData:childTrafficking, save: unfin2, setSaved:childTrafficking2, mongo: unfin3, setMongo:childTrafficking3}}>
       <NavigationContainer>
         <AuthNavigator />
       </NavigationContainer>
