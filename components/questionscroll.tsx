@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView} from 'react-native';
 import { TallyCard } from './questioncard';
+import { styles } from '@app/App';
 
 
 export type QnProps = {
@@ -137,13 +138,18 @@ export function AnsScroll(props:QnPropsVerify) {
 
 /*above defines a modified version of question component, below initialises a quiz component based on QnProps data */
 
-export function quizScroll(questions : Array<QnProps>) {
+
+//add a new page for reporting, reportQn will not be passed, it will be inside this component
+
+export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
   const totalQn = questions.length;
   const [subState,setSub] = useState(false);
   const [qAnswers, setqAns] = useState(Array(totalQn));
   const [save,setSave] = useState(Array<string>);
-  const [report,setReport] = useState(Array<string>);
   const [reportstring,setReportstring] = useState("");
+  const [currentReportQn, setCurrentQ] = useState("");
+  const [currentReportid, setCurrentI] = useState("");
+  const [pageNo, setPage]= useState(0)
   /*function callBack*/
   function updateAns(qst : QnProps){
     return function(answer:string) {
@@ -154,6 +160,8 @@ export function quizScroll(questions : Array<QnProps>) {
       setSub(false);
     }
   }
+
+  if (pageNo === 0 ){
   if (subState == false || qAnswers.includes(undefined)){
     return (<ScrollView>
       <FlatList
@@ -196,18 +204,13 @@ export function quizScroll(questions : Array<QnProps>) {
         };
       }
 
-    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i]])
+    const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i], qAnswers[i]])
     
     /*here we display the score, and tally up which qn is correct or wrong*/
     return (
       <View style = {{flex: 1}}>
-        <View style ={{flex: 2}}>
-          <Text>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
-          <TextInput 
-          multiline={true}
-          value={reportstring}
-          placeholder="If you had reported a question, please type the details here"
-                  onChangeText={setReportstring}/>
+        <View style ={{paddingBottom:20}}>
+          <Text style={{fontSize:18}}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
         </View>
         
         <ScrollView style={{ flex: 11, gap :10 }}>
@@ -230,10 +233,11 @@ export function quizScroll(questions : Array<QnProps>) {
             {...item[0]}
             saved = {save.includes(item[0].id)}
             correct={item[1]}
+            userAns={item[2]}
             reportQn={()=>{
-              var temp = Array.from(report);
-              temp.push(item[0].id);
-              setReport(temp)
+              setCurrentI(item[0].id);
+              setCurrentQ(item[0].quizstmt)
+              setPage(-1);
             }}
             saveQn={()=>{
               var temp = Array.from(save);
@@ -250,11 +254,34 @@ export function quizScroll(questions : Array<QnProps>) {
             } 
           />
         </ScrollView>
-        <View style={{flex:1}}>
-          <Button title="Return to Home" />
+        <View style={{paddingBottom:20, paddingTop:20}}>
+          <Button title="Return to Home" onPress={exitScreen}/>
         </View>
       </View>
     )
   }
+}
+
+else{
+  return(
+    <View style={{gap:5, paddingTop:20}}>
+    <Text style={{textAlign: "left"}}>Report Question: {currentReportQn} </Text>
+    <TextInput
+      style={styles.input}
+      multiline={true}
+      placeholder="Enter Text Here..."
+      onChangeText={setReportstring}
+      value={reportstring}
+    />
+    <View style={{ justifyContent:"flex-end", flexDirection:"row"}}>
+    <Button title="Submit" onPress={()=>{alert("Something should go to database here"); setPage(0)}} />
+    </View>
+    <View style={{height: 10}}/>
+    <View>
+    <Text> Note for reports, please follow the general guidelines for what is reportable content. Blah blah.</Text>
+    </View>
+  </View>
+  )
+}
 
 }

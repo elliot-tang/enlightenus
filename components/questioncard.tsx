@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput } from 'react-native';
+import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type QnProps = {
   id: string;
@@ -12,9 +13,9 @@ type QnProps = {
   explainText: string;
 };
 
-export type QnPropsDisplay = QnProps & { editQn: () => void , deleteQn:() =>void};
+export type QnPropsDisplay = QnProps & { editQn: () => void , deleteQn:() =>void, pushQn:()=>void, notpushed: boolean};
 
-export type QnPropsWithReport = QnProps & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , correct: boolean, saved: boolean};
+export type QnPropsWithReport = QnProps & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , userAns: string, correct: boolean, saved: boolean};
 
 export const QuestionCard = (question: QnPropsDisplay) => {
 
@@ -29,6 +30,8 @@ export const QuestionCard = (question: QnPropsDisplay) => {
 
   return (
     <View style={styles.cardContainer}>
+    <View style={{flexDirection:"row", flex:1}}>
+      <View style ={{flex:6}}>
       <Text style={styles.questionStatement}>{question.mcq? "MCQ":"Open"}: {question.quizstmt}</Text>
       {renderCorrectAnswers()}
       {(question.corrans.length > 3) && <Text style={styles.correctAnswer}>(And {question.corrans.length-3} others) </Text>}
@@ -36,12 +39,22 @@ export const QuestionCard = (question: QnPropsDisplay) => {
         <Button title="Edit" onPress={question.editQn} />
         <Button title="Delete" onPress={question.deleteQn} />
       </View>
+      <View style={{paddingTop:10}}>
+      <TouchableOpacity  style ={{flexDirection:"row",flex:1, justifyContent:"center", alignContent:"center"}} onPress={question.pushQn} disabled={!question.notpushed}>
+          <Text style ={{color :question.notpushed? "black":"gray"}}>Push question to database</Text>
+        <MaterialIcons name="arrow-right" size={24} color = {question.notpushed? "black":"gray"} />
+      </TouchableOpacity>
+      </View>
+      </View>
+    </View>
+      
     </View>
   );
 };
 
-export function TallyCard(question: QnPropsWithReport){
-  const shorten = question.corrans.slice(0,3)
+export function TallyCard(question: QnPropsWithReport) {
+  const shorten = question.corrans.slice(0, 3);
+
   const renderCorrectAnswers = () => {
     return shorten.map((answer) => (
       <Text key={answer} style={styles.correctAnswer}>
@@ -49,17 +62,25 @@ export function TallyCard(question: QnPropsWithReport){
       </Text>
     ));
   };
-  return(
-    <View style={{gap: 10, borderRadius: 10, backgroundColor:'#cdefff', borderColor: (question.correct? "green":"red"), borderWidth: 3}}>
-      <Text style={styles.questionStatement}>{question.mcq? "MCQ":"Open"}: {question.quizstmt}</Text>
+
+  return (
+    <View style={{ gap: 10, borderRadius: 10, backgroundColor: '#cdefff', borderWidth: 3 }}>
+      <Text style={styles.questionStatement}>
+        {question.mcq ? 'MCQ' : 'Open'}: {question.quizstmt}
+      </Text>
       {renderCorrectAnswers()}
-      {(question.corrans.length > 3) && <Text style={styles.correctAnswer}>(And {question.corrans.length-3} others) </Text>}
+      {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
+      <Text style={{color: question.correct ? 'green' : 'red',}}>Your answer: {question.userAns}</Text>
       <View style={styles.editIconContainer}>
-        <Button title="Report" onPress={question.reportQn} /> {/* a list of reports generated to the database*/}
-        {question.saved? <Button color = "red" title="Remove" onPress={question.unsaveQn} />:<Button title="Save" onPress={question.saveQn} />} {/*prob have to unpack the questions from quiz and pass the id individually, not looking fun*/}
+        <Button title="Report" onPress={question.reportQn} />
+        {question.saved ? (
+          <Button color="red" title="Remove" onPress={question.unsaveQn} />
+        ) : (
+          <Button title="Save" onPress={question.saveQn} />
+        )}
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
