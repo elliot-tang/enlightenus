@@ -1,7 +1,8 @@
 import React, { useState,} from 'react';
-import {Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, Alert} from 'react-native';
+import {Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, Alert, Dimensions} from 'react-native';
 import { TallyCard } from './questioncard';
-import { styles } from '@app/App';
+
+const {height,width} = Dimensions.get("window");
 
 export type QnProps = {
   id: string
@@ -36,15 +37,19 @@ export function Qn1b1(props: QnPropsFunc) {
       const [submitState, setSub] = useState(false);
       if (!props.corrans.includes(ansState) || submitState == false) {
           return (
-              <View>
+              <View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>
+                <View style={{backgroundColor:"#b1e2ee", borderRadius:10, height:200, justifyContent:'center', alignItems:'center'}}>
+                <Text style={{fontSize:22, textAlign:"center"}}>{props.quizstmt}</Text>
+                </View>
+                <View style={{height: 15}}/>
                 <Text>
                   {headertext(attemptState)}</Text>
-                <Text>Question: {props.quizstmt}</Text>
                 {attemptState != props.maxAttempt && <TextInput
                   style={{
                     height: 40,
-                    borderColor: 'gray',
+                    borderColor: 'green',
                     borderWidth: 1,
+                    borderRadius:10
                   }}
                   placeholder="Type Answer Here"
                   onChangeText={text => {setAns(text);
@@ -67,8 +72,8 @@ export function Qn1b1(props: QnPropsFunc) {
                   disabled={attemptState == props.maxAttempt || !ansState} /*dont allow submit when too many attempts,
                   or when nothing is entered*/ 
                 />
-                {attemptState == props.maxAttempt && <View>
-                  <Text style ={{color:'red'}}> The answer was {props.corrans[0]}             
+                {attemptState == props.maxAttempt && <View style={{borderTopColor:"black", borderTopWidth:2,paddingTop:20}}>
+                  <Text style ={{color:'red'}}>The answer was {props.corrans[0]}             
                   </Text>
                   <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
@@ -81,12 +86,18 @@ export function Qn1b1(props: QnPropsFunc) {
 
       else {
         return (
-            <View>
-              <Text style ={{color:'green'}}>Answer correct </Text>
-              <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
+            <View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>
+                <View style={{backgroundColor:"#b1e2ee", borderRadius:10, height:200, justifyContent:'center', alignItems:'center'}}>
+                <Text style={{fontSize:22, textAlign:"center"}}>{props.quizstmt}</Text>
+                </View>
+                <View style={{height: 15}}/>
+            <View style={{borderTopColor:"black", borderTopWidth:2, paddingTop:20}}>
+              <Text style ={{color:'green'}}>Answer correct: {ansState}</Text>
+              <Text style = {{fontWeight : "bold"}}>Explanation: {props.explainText}             
             </Text>
               <Button title = "Next Question"
               onPress={()=>{props.nextPage(); props.toAppendAnswer(ansState); props.addPoint()}} />
+            </View>
             </View>
         )
       }
@@ -107,13 +118,14 @@ export function Qn1b1(props: QnPropsFunc) {
     }
     
     if (randomiser == true) {
+      const seed = Math.floor(Math.random() * props.corrans.length);
       temp = fYS(temp);
       if (props.noOption > temp.length) {
-        temp.push(props.corrans[0]);
+        temp.push(props.corrans[seed]);
         temp = fYS(temp)
       }
       else {
-        temp[Math.floor(Math.random() * (props.noOption))] = props.corrans[0];
+        temp[Math.floor(Math.random() * (props.noOption))] = props.corrans[seed];
       }
       const options: string[] = temp.slice(0,Math.min(props.noOption));
       setOpt(options);
@@ -130,13 +142,13 @@ export function Qn1b1(props: QnPropsFunc) {
       textColor: string;
     };
     const Item = ({item, onPress, backgroundColor, textColor}: ItemProps) => (
-      <TouchableOpacity onPress={onPress} style={{backgroundColor}}>
-        <Text style={{color: textColor, textAlign : 'center'}}>{item}</Text>
+      <TouchableOpacity onPress={onPress} style={{backgroundColor, borderRadius:10}}>
+        <Text style={{color: textColor, textAlign : 'center', fontSize:20}}>{item}</Text>
       </TouchableOpacity>
     );
     
     const renderOps = ({item}: {item: string}) => {
-      const backgroundColor = (item === ansState ? '#6e3b6e' : '#f9c2ff');
+      const backgroundColor = (item === ansState ? '#2d93e4' : '#d4f1f6');
       const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; */
 
       return (
@@ -152,15 +164,27 @@ export function Qn1b1(props: QnPropsFunc) {
     };
     if (ansState != props.corrans[0] || submitState == false)
       return (
-        <View>
-          <Text>
-                  {headertext(attemptState)}</Text>
-          <Text>Question: {props.quizstmt}</Text>
+        <View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>
+          <View style={{backgroundColor:"#b1e2ee", borderRadius:10, height:200, justifyContent:'center', alignItems:'center'}}>
+                <Text style={{fontSize:22, textAlign:"center"}}>{props.quizstmt}</Text>
+                </View>
+                <View style={{height: 15}}/>
+          <View style={{height: height*0.3}}>
+          <ScrollView>
           <FlatList
           data={optState}
           renderItem={renderOps}
           extraData={ansState}
+          ItemSeparatorComponent={(() => (
+          <View
+            style={{height: 10}}
+          />
+        ))}
         />
+          </ScrollView>
+          </View>
+        <View style={{height: 15}}/>
+        <Text>{headertext(attemptState)}</Text>
         <Button
           title = "Submit"
           onPress={() => {
@@ -169,8 +193,10 @@ export function Qn1b1(props: QnPropsFunc) {
           }} 
           disabled={attemptState == props.maxAttempt || !ansState}
           />
+
+         
         
-        {attemptState == props.maxAttempt && <View>
+        {attemptState == props.maxAttempt && <View style={{borderTopColor:"black", borderTopWidth:2,paddingTop:20}}>
             <Text style = {{color:'red'}}>The answer was {props.corrans[0]}             
             </Text>
              <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
@@ -183,10 +209,16 @@ export function Qn1b1(props: QnPropsFunc) {
         );
     else {
       return (
-          <View>
-            <Text style ={{color:'green'}}> Answer correct </Text>
+          <View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>
+          <View style={{backgroundColor:"#b1e2ee", borderRadius:10, height:200, justifyContent:'center', alignItems:'center'}}>
+                <Text style={{fontSize:22, textAlign:"center"}}>{props.quizstmt}</Text>
+                </View>
+                <View style={{height: 15}}/>
+          <View style={{borderTopColor:"black", borderTopWidth:2,paddingTop:20}}>
+            <Text style ={{color:'green'}}>Answer correct: {ansState} </Text>
             <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
+          </View>
             <Button title = "Next Question" 
             onPress={()=>{props.nextPage(); props.toAppendAnswer(ansState); props.addPoint()}}/>  
           </View>)
@@ -194,6 +226,27 @@ export function Qn1b1(props: QnPropsFunc) {
 
   }
 };
+
+function ProgressBar(props:{now: number, total:number}){
+  const rectangles = [];
+  for (let i = 0; i < props.total; i++) {
+    const isShaded = i < props.now; 
+
+    if (i === props.now-1){
+      rectangles.push(
+      <View key={i} style={{backgroundColor: isShaded? "#b6cfbb":"white", borderRadius:5, borderColor: "gray", borderWidth:2, width: width*0.9/props.total, justifyContent:"center", alignContent:"center"}}>
+        <Text style={{textAlign:"center", fontSize:20}}>{props.now.toString()} </Text> 
+      </View>)
+    }
+    else {rectangles.push(
+      <View key={i} style={{backgroundColor: isShaded? "#b6cfbb":"white", borderRadius:5, borderColor: "gray", borderWidth:2, width: width*0.9/props.total}} />);}
+  }
+  return(
+    <View style={{height: height*0.05, width: width*0.9, flexDirection:"row"}}>
+    {rectangles}
+    </View>
+  )
+}
 
 export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void) => {
   const [pageNo, setPage] = useState(0);
@@ -223,10 +276,12 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void) => {
   {/*note: it adds the page first then runs the assignment, so this is correct; offset by -1 is wrong */}
 
   const renderQuestion = (question: QnProps) => (
-    <View key={question.id}>
-      <Text>Question {pageNo + 1}/{questions.length}</Text>
+    <View key={question.id} style={{backgroundColor:"white", justifyContent:"center", alignItems:"center"}}>
+      <View style={{height: 50}}/>
+      <ProgressBar now={pageNo+1} total={questions.length} />
+      <View style={{height: 15}}/>
       <Qn1b1
-        {...question} // Spread props from question object
+        {...question} 
         nextPage={nextPage}
         addPoint={addPoint(pageNo)}
         toAppendAnswer={appendAnswer}
@@ -238,11 +293,11 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void) => {
     const toShow = Array.from({ length: questions.length}, (_, i) => [questions[i], tally[i], qAnswers[i]])
     return (
       <View style = {{flex: 1}}>
-        <View style = {{paddingBottom:20}}>
+        <View style ={{flex: 1}}>
           <Text style={{fontSize:18}}>Your score is {point}/{questions.length}. Listed below is a breakdown.</Text>
         </View>
-        
-        <ScrollView style={{ gap :10 }}>
+        <View style={{ flex: 10}}>
+        <ScrollView>
           <FlatList
             ItemSeparatorComponent={
           (() => (
@@ -275,7 +330,8 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void) => {
             />} 
           />
         </ScrollView>
-        <View style={{paddingBottom:20,paddingTop:20}}>
+        </View>
+        <View style={{flex:1}}>
           <Button title="Return to Home" onPress={exitScreen}/>
         </View>
       </View>
@@ -287,7 +343,11 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void) => {
       <View style={{gap:5, paddingTop:20}}>
       <Text style={{textAlign: "left"}}>Report Question: {currentReportQn} </Text>
       <TextInput
-        style={styles.input}
+        style={{height: 50,
+          paddingHorizontal: 20,
+          borderColor: "green",
+          borderWidth: 1,
+          borderRadius: 7}}
         multiline={true}
         placeholder="Enter Text Here..."
         onChangeText={setReportstring}

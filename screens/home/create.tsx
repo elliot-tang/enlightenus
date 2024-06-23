@@ -203,8 +203,8 @@ const Create= ({route,navigation} : CreateProps) => {
               }
 
               else{
-                if (corrans.split(",").length >1 && (mcq == true)){
-                  alert("MCQs can only have 1 correct answer")
+                if ((!wrongs) && (mcq == true)) {
+                  alert("MCQs must have at least 1 wrong option")
                 }
 
                 else{
@@ -213,8 +213,8 @@ const Create= ({route,navigation} : CreateProps) => {
                   }
                   
                   else{
-                    if ((!wrongs) && (mcq == true)) {
-                      alert("MCQs should have at least 1 wrong option")
+                    if (corrans.split(",").length >1 && (mcq == true)){
+                      alert("Multiple answers in an MCQ, one will be randomly choosen as the sole correct option on each playthrough")
                     }
                     setRender(0); 
                     var localid = Math.random().toString();

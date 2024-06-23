@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import {Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView} from 'react-native';
 import { TallyCard } from './questioncard';
-import { styles } from '@app/App';
-
 
 export type QnProps = {
   id: string
@@ -15,7 +13,7 @@ export type QnProps = {
   explainText: string
 };
 
-export type QnPropsFuncs = QnProps & {updateFunc: (str:string) => void};
+export type QnPropsFuncs = QnProps & {updateFunc: (str:string) => void, enumerate: number};
 
 /*TO DO: progressbar that updates based on whether a question is attempted*/
 
@@ -24,13 +22,16 @@ export function QnScroll(props: QnPropsFuncs) {
   if (props.mcq == false) {
       const [ansState,setAns] = useState("");
       return (
-          <View>
-            <Text>Question: {props.quizstmt}</Text>
+          <View style={{borderRadius:10, borderColor:"black", borderWidth:2, backgroundColor:"#CAE1CB"}}>
+            <Text style={{fontSize:20}}>Q{props.enumerate}: {props.quizstmt}</Text>
+            <View style={{height:15}}/>
             <TextInput
               style={{
                 height: 40,
-                borderColor: 'gray',
+                borderColor: 'green',
                 borderWidth: 1,
+                backgroundColor: "white",
+                borderRadius: 10
               }}
               placeholder="Type Answer Here"
               onChangeText={text => {setAns(text);props.updateFunc(text)}}
@@ -54,13 +55,14 @@ export function QnScroll(props: QnPropsFuncs) {
       }
       
       if (randomiser == true) {
+        const seed = Math.floor(Math.random() * props.corrans.length);
         temp = fYS(temp);
         if (props.noOption > temp.length) {
-          temp.push(props.corrans[0]);
+          temp.push(props.corrans[seed]);
           temp = fYS(temp)
         }
         else {
-          temp[Math.floor(Math.random() * (props.noOption))] = props.corrans[0];
+          temp[Math.floor(Math.random() * (props.noOption))] = props.corrans[seed];
         }
         const options: string[] = temp.slice(0,Math.min(props.noOption));
         setOpt(options);
@@ -78,13 +80,13 @@ export function QnScroll(props: QnPropsFuncs) {
         textColor: string;
       };
       const Item = ({item, onPress, backgroundColor, textColor}: ItemProps) => (
-        <TouchableOpacity onPress={onPress} style={{backgroundColor}}>
-          <Text style={{color: textColor, textAlign : 'center'}}>{item}</Text>
+        <TouchableOpacity onPress={onPress} style={{backgroundColor, borderRadius:10}}>
+          <Text style={{color: textColor, textAlign : 'center', fontSize:15}}>{item}</Text>
         </TouchableOpacity>
       );
       
       const renderOps = ({item}: {item: string}) => {
-        const backgroundColor = (item === ansState ? '#6e3b6e' : '#f9c2ff');
+        const backgroundColor = (item === ansState ? '#2d93e4' : '#d4f1f6');
         const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; */
 
         return (
@@ -98,12 +100,20 @@ export function QnScroll(props: QnPropsFuncs) {
       };
 
       return (
-        <View>
-            <Text> Question: {props.quizstmt}</Text>
+        <View style={{borderRadius:10, borderColor:"black", borderWidth:2, backgroundColor:"#CAE1CB"}}>
+            <Text style={{fontSize:20}}>Q{props.enumerate}: {props.quizstmt}</Text>
+            <View style={{height:15}}/>
             <FlatList
             data={optState}
             renderItem={renderOps}
             extraData={ansState}
+            ItemSeparatorComponent={
+          (() => (
+            <View
+              style={{height: 7}}
+            />
+          ))
+        }
           />
         </View>
       )
@@ -138,9 +148,6 @@ export function AnsScroll(props:QnPropsVerify) {
 
 /*above defines a modified version of question component, below initialises a quiz component based on QnProps data */
 
-
-//add a new page for reporting, reportQn will not be passed, it will be inside this component
-
 export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
   const totalQn = questions.length;
   const [subState,setSub] = useState(false);
@@ -168,7 +175,7 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
         ItemSeparatorComponent={
           (() => (
             <View
-              style={{marginTop: 16}}
+              style={{height: 16}}
             />
           ))
         }
@@ -182,7 +189,9 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
         wrongs={item.wrongs} 
         noOption={item.noOption}
         explainText={item.explainText}
+        enumerate={questions.indexOf(item)+1}
         updateFunc={updateAns(item)}/>}
+        
       />
       <Button
         title = "Submit All"
@@ -209,7 +218,7 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
     /*here we display the score, and tally up which qn is correct or wrong*/
     return (
       <View style = {{flex: 1}}>
-        <View style ={{paddingBottom:20}}>
+        <View style ={{flex: 2}}>
           <Text style={{fontSize:18}}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
         </View>
         
@@ -254,7 +263,7 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
             } 
           />
         </ScrollView>
-        <View style={{paddingBottom:20, paddingTop:20}}>
+        <View style={{flex:1}}>
           <Button title="Return to Home" onPress={exitScreen}/>
         </View>
       </View>
@@ -267,7 +276,11 @@ else{
     <View style={{gap:5, paddingTop:20}}>
     <Text style={{textAlign: "left"}}>Report Question: {currentReportQn} </Text>
     <TextInput
-      style={styles.input}
+      style={{height: 50,
+        paddingHorizontal: 20,
+        borderColor: "green",
+        borderWidth: 1,
+        borderRadius: 7}}
       multiline={true}
       placeholder="Enter Text Here..."
       onChangeText={setReportstring}
