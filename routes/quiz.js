@@ -4,6 +4,7 @@ const { MCQ, OEQ } = require('../schema/question');
 const Quiz = require('../schema/quiz');
 const User = require('../schema/user');
 const { UserSavedQuestion, UserSavedQuiz } = require('../schema/usersavedquiz');
+const UserTakenQuiz = require('../schema/usertakenquiz');
 
 const router = express.Router();
 
@@ -622,6 +623,106 @@ router.post('/quiz/rateQuiz', async (req, res) => {
 })
 
 // submit taken quiz
+router.post('/quiz/takeQuiz', async (req, res) => {
+  try {
+    const { username, quizId, score, breakdown } = req.body;
 
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Checks for quizId
+    if (!quizId) {
+      return res.status(400).json({ message: 'quizId not provided' });
+    }
+
+    // Checks if quizId is valid
+    if (!mongoose.Types.ObjectId.isValid(quizId)) {
+      return res.status(400).json({ message: 'Invalid quizId' });
+    }
+    
+    // Checks for valid quiz
+    const quiz = await Quiz.findById(quizId).populate('questions.questionId').exec();
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
+
+    // Checks question breakdown
+    if (!breakdown || !Array.isArray(breakdown) || breakdown.length !== quiz.questions.length) {
+      return res.status(400).json({ message: 'Invalid breakdown' });
+    }
+
+    for (let i = 0; i < breakdown.length; i++) {
+      const qn = breakdown[i];
+      const fetchedQn = quiz.questions[i];
+
+      console.log(qn);
+      console.log(fetchedQn);
+
+      // Checks for question
+      if (!qn.question) {
+        return res.status(400).json({ message: 'question not provided' });
+      }
+
+      // Checks for questionId
+      if (!qn.question.questionId) {
+        return res.status(400).json({ message: 'questionId not provided' });
+      }
+
+      // Checks for valid question
+      if (qn.question.questionId !== fetchedQn.questionId._id.toString()) {
+        return res.status(400).json({ message: 'Invalid questionId' });
+      }
+
+      // Checks for questionType
+      if (!qn.question.questionType) {
+        return res.status(400).json({ message: 'questionType not provided' });
+      }
+
+      // Checks for valid questionType
+      if (qn.question.questionType !== fetchedQn.questionType) {
+        return res.status(400).json({ message: 'Invalid questionType' });
+      }
+
+      // Checks validity of noAttempts, responses, isCorrect
+      if (!qn.noAttempts || typeof qn.noAttempts !== 'number' || isNaN(qn.noAttempts) || qn.noAttempts > fetchedQn.questionAttempts) {
+        return res.status(400).json({ message: 'Invalid noAttempts' });
+      }
+
+      if (!qn.responses || !Array.isArray(qn.responses) || qn.responses.length <= 0) {
+        return res.status(400).json({ message: 'Invalid responses' });
+      }
+
+      if (!qn.isCorrect || typeof qn.isCorrect !== 'boolean') {
+        return res.status(400).json({ message: 'Invalid isCorrect' });
+      }
+    }
+
+    // Checks for valid score
+    if (!score || typeof score !== 'number' || isNaN(score) || score < 0 || score > breakdown.length) {
+      return res.status(400).json({ message: 'Invalid score' });
+    }
+
+    const takenQuiz = new UserTakenQuiz({
+      userId: user._id,
+      quizId: quizId,
+      score: score,
+      breakdown: breakdown
+    });
+    await takenQuiz.save()
+                   .then(takenQuiz => console.log(`Quiz ID: ${ quizId } taken by User ${ username } successfully.`))
+    res.status(201).json({ takenQuizId: takenQuiz._id });
+  } catch (error) {
+    console.log('Unable to submit taken quiz');
+    res.status(500).json({ message: 'Error submitting taken quiz', error });
+  }
+})
 
 module.exports = router;
