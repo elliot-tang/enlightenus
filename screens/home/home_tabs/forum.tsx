@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
+import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ForumCard } from '@app/components/forumpostcard';
@@ -7,11 +7,18 @@ import { styles } from '@app/App';
 import { useState } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+const {height,width} = Dimensions.get("window");
+
 type ForumStackNavigationParamList = {
   main: undefined,
-  individual: {postid: string}|undefined, // alternative: you may want to pass the whole post props over to the next screen.... (see in history)
+  individual: {postid: string}|undefined,
   create: undefined,
-  report: {reportid: string,contenttype: string}|undefined
+  report: {reportid: string, contenttype: string}|undefined
+}
+
+interface AttachData {
+   id: string;
+  single: boolean 
 }
 
 const Stack = createNativeStackNavigator<ForumStackNavigationParamList>();
@@ -21,11 +28,6 @@ interface ForumScreenProps extends NativeStackScreenProps<ForumStackNavigationPa
 type IndividualProps = NativeStackScreenProps<ForumStackNavigationParamList,"individual">
 
 type ReportProps = NativeStackScreenProps<ForumStackNavigationParamList,"report">
-
-type Attachments = {
-  id: string,
-  single: boolean
-}
 
 export default function ForumScreen() {
   return (
@@ -43,7 +45,7 @@ function MainForum({navigation}: ForumScreenProps){
 
   const data = testData; //from database instead
   return (
-    <View style={{ flex: 1 , paddingTop:70}}>
+    <View style={{ flex: 1 , paddingTop: height*0.07}}>
       <Button title = "Create New Forum Discussion!" onPress={()=>navigation.navigate("create")}/>
       <View style={{ height: 25 }} />
       <ScrollView style={{ flex: 1 }}>
@@ -73,9 +75,9 @@ function Individual({route,navigation}: IndividualProps){
   const toDisplay = testData.find((item) => item.id === temp);
   
   return (
-    <SafeAreaView style={{ paddingTop: 20 }}>
+    <SafeAreaView>
     <View style={{ 
-      backgroundColor: 'cdefff', borderColor: 'black', borderWidth: 2.5, borderRadius: 10 }}>
+      backgroundColor: 'cdefff', borderColor: 'black', borderWidth: 2.5, borderRadius: 10, paddingTop: height*0.05 }}>
       <Text style={{ fontWeight: 'bold', fontSize: 17 }}>
       {toDisplay.author}: {toDisplay.title}
       </Text>
@@ -123,7 +125,7 @@ function Individual({route,navigation}: IndividualProps){
           {item.author}: {item.body} 
           </Text>
           <View style={{flex:1}}>
-          <Button title="Report" onPress = {()=>{
+          <Button title="report" onPress = {()=>{
             const id = item.id;
             const contenttype = "reply";
             navigation.navigate("report", {reportid: id, contenttype: contenttype})
@@ -140,8 +142,6 @@ function Individual({route,navigation}: IndividualProps){
   )
 }
 
-/* the report screen is not stylised yet btw*/
-
 function Report({route,navigation}: ReportProps){
 
   var tempid: string;
@@ -154,10 +154,10 @@ function Report({route,navigation}: ReportProps){
   
   const [reportText, setReport] = useState('');
   return(
-    <View style={{gap:5, paddingTop:20}}>
-      <Text style={{textAlign: "left"}}>Report a {temptype} </Text>
+    <View style={{gap:5}}>
+      <Text style={styles.input}>Report a {temptype} </Text>
       <TextInput
-        style={styles.input}
+        style={{width: '100%', borderWidth: 1, borderColor: 'green', borderRadius: 5,}}
         multiline={true}
         placeholder="Enter Text Here..."
         onChangeText={setReport}
@@ -180,8 +180,7 @@ function CreatePost({navigation}: ForumScreenProps){
   const [postText, setPost] = useState("");
   const [title, setTitle] = useState("");
   const [render, setRender] = useState(0);
-  const [attachments, setAttach] = useState<Attachments[]>([]);
-  // const [attachments, setAttach] = useState(Array<{id:string,single:boolean}>);
+  const [attachments, setAttach] = useState<AttachData[]>([]);
   const [single,setSingle]=useState(true);
   const [saved,setSaved]=useState(true); 
   const [searchText, setSearchText] = useState('');
@@ -202,15 +201,37 @@ function CreatePost({navigation}: ForumScreenProps){
         <FlatList
               data={attachments}
               keyExtractor={item => item.id} 
-              renderItem={({item}) => {
-              const obj = item.single? mockqndatabase.find((ele)=>item.id == ele.id): mockqzdatabase.find((ele)=> item.id === ele.id);
-              return (<View style={{flexDirection:"row", gap:10}}>
-                <Text>{ item.single? "question":"quiz"}: {obj.title} </Text>
-                <TouchableOpacity onPress={()=>{
-                  const temp = attachments.filter((ele)=> !(ele.id === item.id && ele.single === item.single));
-                  setAttach(temp);
-                }}> <MaterialIcons name="remove" size={15} color= "red"/></TouchableOpacity>
-                </View>)
+              renderItem={({ item }) => {
+  // Find the matching object based on item.single and item.id
+  const obj = item.single
+    ? mockqndatabase.find((ele) => ele.id === item.id)
+    : mockqzdatabase.find((ele) => ele.id === item.id);
+
+  
+  if (!obj) {
+    return <View/>; 
+  }
+
+  return (
+    <View style={{ flexDirection: "row", gap: 10 }}>
+      <Text>
+        {item.single ? "question" : "quiz"}: {obj.title}
+      </Text>
+      <TouchableOpacity
+        onPress={() => {
+          
+          const newAttachments = attachments.filter(
+            (ele) => !(ele.id === item.id && ele.single === item.single)
+          );
+          // Update the state with the new array
+          setAttach(newAttachments);
+        }}
+      >
+        <MaterialIcons name="remove" size={15} color="red" />
+      </TouchableOpacity>
+    </View>
+  );
+
               }}/>
       </View>}
       <Button title ="Add attachment" onPress={()=> setRender(1)}/>
@@ -221,12 +242,12 @@ function CreatePost({navigation}: ForumScreenProps){
 
     else{
       return(
-        <View style={{gap:15}}>
+        <View style={{gap:15, flex:1, backgroundColor:"white", alignItems:"center"}}>
         <Text style={{ fontSize: 24}}> Choose type of attachment </Text> 
-  <View style={{ flexDirection: "row" ,flex:1}}>
+  <View style={{ flexDirection: "row" ,width:width*0.9, height: height*0.07}}>
     <TouchableOpacity
       onPress={() => setSingle(true)}
-      style={{ flex:1, backgroundColor: single === true ? '#6e3b6e' : '#f9c2ff' , height:50, justifyContent: 'center', alignItems: 'center' }}
+      style={{ flex:1, backgroundColor: single === true ? '#6e3b6e' : '#f9c2ff' , height:height*0.06, justifyContent: 'center', alignItems: 'center' }}
     >
       <Text style={{ fontSize: 24, color: single === true ? 'white' : 'black', textAlign: 'center' }}>
         Questions
@@ -234,17 +255,17 @@ function CreatePost({navigation}: ForumScreenProps){
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => setSingle(false)}
-      style={{flex:1, backgroundColor: single === false ? '#6e3b6e' : '#f9c2ff',height:50 , justifyContent: 'center', alignItems: 'center'}}
+      style={{flex:1, backgroundColor: single === false ? '#6e3b6e' : '#f9c2ff',height:height*0.06 , justifyContent: 'center', alignItems: 'center'}}
     >
       <Text style={{ fontSize: 24, color: single === false ? 'white' : 'black', textAlign: 'center' }}>
         Quizzes
       </Text>
     </TouchableOpacity>
   </View>
-  <View style={{ flexDirection: "row" ,flex:1}}>
+  <View style={{ flexDirection: "row" ,width:width*0.9, height: height*0.07}}>
     <TouchableOpacity
       onPress={() => setSaved(true)}
-      style={{ flex:1, backgroundColor: saved === true ? '#6e3b6e' : '#f9c2ff' , height:50, justifyContent: 'center', alignItems: 'center' }}
+      style={{ flex:1, backgroundColor: saved === true ? '#6e3b6e' : '#f9c2ff' , height:height*0.06, justifyContent: 'center', alignItems: 'center' }}
     >
       <Text style={{ fontSize: 24, color: saved === true ? 'white' : 'black', textAlign: 'center' }}>
         Saved Only
@@ -252,15 +273,14 @@ function CreatePost({navigation}: ForumScreenProps){
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => setSaved(false)}
-      style={{flex:1, backgroundColor: saved === false ? '#6e3b6e' : '#f9c2ff',height:50 , justifyContent: 'center', alignItems: 'center'}}
+      style={{flex:1, backgroundColor: saved === false ? '#6e3b6e' : '#f9c2ff',height:height*0.06, justifyContent: 'center', alignItems: 'center'}}
     >
       <Text style={{ fontSize: 24, color: saved === false ? 'white' : 'black', textAlign: 'center' }}>
         All
       </Text>
     </TouchableOpacity>
   </View>
-
-  <View style={{flexDirection:"row",backgroundColor:'white', flex:1}}>
+  <View style={{flexDirection:"row",backgroundColor:'white', height: height*0.05, width:width*0.9}}>
       <TextInput
         style={{flex:10}}
         placeholder="Search..."
@@ -272,18 +292,16 @@ function CreatePost({navigation}: ForumScreenProps){
       </TouchableOpacity>
     </View>
     <Button title="placeholder for test" onPress={()=>{
-      // var temp = attachments;
-      // temp.push({id: "quizid1", single: false});
-      // setAttach(temp);
-      
-      // TODO: Jerrell fix this
-      setRender(0);
-    }}/>
-  </View>
+      var temp = attachments;
+      temp.push({id: "quizid1", single: false});
+      setAttach(temp);
+      setRender(0);}}/>
+</View>
       )
     }
     
 }
+
 const testData = [
   {
     id: "dsdhsbdsjndskjds",
@@ -387,6 +405,7 @@ const testData = [
   },
 
   ];
+
 
   const mockqndatabase = [{id: "qnid1", title: "Question fun"}]
   const mockqzdatabase = [{id: "quizid1", title: "Quiz funner"}, {id: "quizid2", title: "Quiz funner2"}]
