@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard, Platform, TouchableOpacity } from 'react-native';
+import { Button, Text, View, Switch, FlatList, SafeAreaView, ScrollView, TextInput, TouchableWithoutFeedback, Keyboard, Platform, TouchableOpacity, Dimensions } from 'react-native';
 import { useState } from 'react';
 import { HomeStackParamList, styles, UnfinishedQuizCreationData } from '@app/App';
 import { QnProps } from '@app/components/question1by1';
@@ -8,6 +8,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
+const {height,width} = Dimensions.get("window")
+
 type CreateProps = NativeStackScreenProps<HomeStackParamList,"Create">
 
 interface FetchedQuestion{
@@ -15,7 +17,35 @@ interface FetchedQuestion{
 _id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {option: string, isCorrect?:boolean}[];
 }
 
-
+function AnswerEdittorBox(props: {
+  text: string;
+  deletePress: () => void;
+  setCorrectPress: () => void;
+  deselectCorrectPress: () => void;
+  isCorrect: boolean;
+}) {
+  return (
+    <View
+      style={{ backgroundColor: "#bdfbf9", flexDirection: "row", width: width * 0.9 }}
+    >
+      <Text style={{ flex: 1, fontSize:18 }}>{props.text}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+        {props.isCorrect ? (
+          <TouchableOpacity onPress={props.deselectCorrectPress}>
+            <MaterialIcons name="check" size={25} color="green" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={props.setCorrectPress}>
+            <MaterialIcons name="close" size={25} color="red" />
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity onPress={props.deletePress}>
+          <MaterialIcons name="delete" size={25} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
 
 // the search feature fetches an array of datatype jasons
 
@@ -45,14 +75,18 @@ const Create= ({route,navigation} : CreateProps) => {
   const [mcq,setMcq] = useState(false);
   const [maxAttempt,setMax] = useState(1);
   const [quizstmt,setQuizstmt] = useState("");
-  const [corrans,setCorrans] = useState("")
-  const [wrongs,setWrongs] = useState("") //use string.split
+  const [corrans,setCorrans] = useState<string[]>([])
+  const [wrongs,setWrongs] = useState<string[]>([]) 
   const [noOption,setNoOpt] = useState(1);
   const [explainText,setExp] = useState("");
+  const [anyAns, setAnyAns]= useState("");
+
+  var dataFlatlist = [...corrans,...wrongs];
   
   if (renderstate ==0) {
     return (
       <ScrollView>
+        <View style={{height: height*0.1}}/>
         <Text style={styles.header}>Create New Quiz ({topic})</Text>
 
         <View style={styles.buttonContainer}>
@@ -69,8 +103,8 @@ const Create= ({route,navigation} : CreateProps) => {
               setMcq(item.mcq);
               setMax(item.maxAttempt);
               setQuizstmt(item.quizstmt);
-              setCorrans(item.corrans.join(","));
-              setWrongs(item.wrongs.join(",")) ;
+              setCorrans(item.corrans);
+              setWrongs(item.wrongs) ;
               setNoOpt(item.noOption);
               setExp(item.explainText);
               const temp = deleteQuestion(questions, item.id);
@@ -109,6 +143,7 @@ const Create= ({route,navigation} : CreateProps) => {
       <TouchableWithoutFeedback onPress={()=>Keyboard.dismiss()} style={styles.buttonContainer}>
           <SafeAreaView>
           <KeyboardAwareScrollView>
+          <View style={{height: height*0.04}}/>
       {renderstate == 1? <Text style={styles.header}>Create a new question</Text>:<Text style={styles.header}>Edit Question</Text>}
       <View style={{height: 10}}/>
       {/* Input for ID */}
@@ -146,24 +181,27 @@ const Create= ({route,navigation} : CreateProps) => {
             setMax(0)}}}
       />
 
-      <View style={{height: 10}}/>
+      <View style={{height: 5}}/>
       {/* Input for Correct Answers */}
+      <View style={{flexDirection:"row"}}>
       <TextInput 
-        style={styles.input}
-        placeholder="Correct Answers (comma-separated)"
-        value={corrans}
-        onChangeText={(text) => setCorrans(text)}
+        style={[styles.input, {flex:5}]}
+        placeholder="Type an answer here"
+        value={anyAns}
+        onChangeText={(text) => setAnyAns(text)}
+        onSubmitEditing={()=>{
+        if (dataFlatlist.includes(anyAns.trim())){
+          alert("Repeat answers are not allowed")
+          return
+        }
+        if (!anyAns){
+          alert("Answer field cannot be empty")
+        }
+        else
+        {setWrongs((prevArray) => [...prevArray, anyAns.trim()]); setAnyAns("");}}}
       />
-      <View style={{height: 10}}/>
-      {/* Input for Wrong Answers */}
-      {mcq && <TextInput
-        style={styles.input}
-        placeholder="Wrong Answers (comma-separated)"
-        value={wrongs}
-        onChangeText={(text) => setWrongs(text)}
-      />}
-      <View style={{height: 10}}/>
-      {/* Dropdown for Number of Options */}
+      </View>
+      
       {mcq && <View>
       <Text> No of options
       </Text>
@@ -189,6 +227,36 @@ const Create= ({route,navigation} : CreateProps) => {
         onChangeText={(text) => setExp(text)}
       />
       <View style={{height: 10}}/>
+      <View style={{ gap: 10 }}>
+        <FlatList
+          data={[...corrans, ...wrongs]}
+          renderItem={({ item }) => (
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <AnswerEdittorBox
+                text={item}
+                deletePress={() => {
+                  const updatedCorrans = corrans.filter((el) => el !== item);
+                  const updatedWrongs = wrongs.filter((el) => el !== item);
+                  setCorrans(updatedCorrans);
+                  setWrongs(updatedWrongs);
+                }}
+                deselectCorrectPress={() => {
+                  const updatedCorrans = corrans.filter((el) => el !== item);
+                  setCorrans(updatedCorrans);
+                  setWrongs((prevArray) => [...prevArray, item]);
+                }}
+                setCorrectPress={() => {
+                  const updatedWrongs = wrongs.filter((el) => el !== item);
+                  setWrongs(updatedWrongs);
+                  setCorrans((prevArray) => [...prevArray, item]);
+                }}
+                isCorrect={corrans.includes(item)}
+              />
+            </View>
+          )}
+        />
+      </View>
+      <View style={{height: 10}}/>
 {/* bunch of checks so that we actually get valid question props*/}
       <Button title="Save Question" onPress={() => {
         if (!quizstmt){
@@ -204,62 +272,59 @@ const Create= ({route,navigation} : CreateProps) => {
             }
 
             else{
-              if (!corrans) {
+              if (corrans.length==0) {
                 alert("Question must have at least 1 correct answer")
               }
 
               else{
-                if (wrongs.split(",").length + 1> noOption && (mcq == true)){
+                if ((noOption > 1 + wrongs.length) && (mcq ==true)){
                   alert("Too many options to be populated by not enough wrong answers")
                 }
 
                 else{
-                  if (corrans.split(",").map((ele)=>ele.trim()).filter(value => wrongs.split(",").map((ele)=>ele.trim()).includes(value)).length >0){
-                    alert("Wrong answer and Correct Answer cannot be the same")
-                  }
-                  
-                  else{
-                    if ((!wrongs) && (mcq == true)) {
-                      alert("MCQs should have at least 1 wrong option")
+                    if ((wrongs.length == 0) && (mcq == true)) {
+                      alert("MCQs must have at least 1 wrong option")
                     }
-                    if (corrans.split(",").length >1 && (mcq == true)){
-                      alert("You have entered multiple answers for an MCQ. The options will be randomised and exactly one of these options will be chosen as the correct answer on each playthrough")
+                    else{
+                      if ((corrans.length > 1) && (mcq == true)) {
+                        alert("You have entered multiple answers for an MCQ. The options will be randomised and exactly one of these options will be chosen as the correct answer on each playthrough")
+                      }
+                      setRender(0); 
+                      var localid = Math.random().toString();
+                      while (questions.map((ele)=>ele.id).includes(localid)) {
+                        localid = Math.random().toString();
+                      }
+                      const temp = {
+                        id: localid, 
+                        mcq: mcq,
+                        maxAttempt: maxAttempt,
+                        quizstmt: quizstmt,
+                        corrans: corrans, 
+                        wrongs: wrongs, 
+                        noOption: noOption,
+                        explainText: explainText
+                      }
+                      var getquestions = Array.from(questions);
+                      getquestions.push(temp);
+                      var getnew = Array.from(newQnsLocalID);
+                      getnew.push(temp.id);
+                      setNew(getnew);
+                      setQuestions(getquestions);
+                      setMcq(false);
+                      setMax(1);
+                      setQuizstmt("");
+                      setCorrans([])
+                      setWrongs([]) 
+                      setNoOpt(1);
+                      setExp("");
                     }
-                    setRender(0); 
-                    var localid = Math.random().toString();
-                    while (questions.map((ele)=>ele.id).includes(localid)) {
-                      localid = Math.random().toString();
-                    }
-                    const temp = {
-                      id: localid, 
-                      mcq: mcq,
-                      maxAttempt: maxAttempt,
-                      quizstmt: quizstmt,
-                      corrans: corrans.split(",").map((ele)=>ele.trim()), 
-                      wrongs: wrongs.split(",").map((ele)=>ele.trim()), 
-                      noOption: noOption,
-                      explainText: explainText
-                    }
-                    var getquestions = Array.from(questions);
-                    getquestions.push(temp);
-                    var getnew = Array.from(newQnsLocalID);
-                    getnew.push(temp.id);
-                    setNew(getnew);
-                    setQuestions(getquestions);
-                    setMcq(false);
-                    setMax(1);
-                    setQuizstmt("");
-                    setCorrans("")
-                    setWrongs("") 
-                    setNoOpt(1);
-                    setExp("");
-                  }
+                  } 
                 }
               }
             }
           }
         }
-      }}/>
+      }/>
     <View style={{height: 10}}/>
     {(renderstate == 1) && <Button title="Back" onPress={()=>setRender(0)}/>}
     </KeyboardAwareScrollView>
@@ -280,6 +345,7 @@ const Create= ({route,navigation} : CreateProps) => {
   if (renderstate == 3) {
     return(
         <SafeAreaView style={{gap:15, flex:1}}>
+        <View style={{height: height*0.04}}/>
         <Text style={{ fontSize: 24}}> Search questions from? </Text> 
   <View style={{ flexDirection: "row"}}>
     <TouchableOpacity
@@ -358,44 +424,44 @@ const Create= ({route,navigation} : CreateProps) => {
     }
   if (renderstate == 4) {
     return(
-      <SafeAreaView style={{gap : 10, flex: 1,
-      flexDirection: 'column',
-      justifyContent: 'flex-end'}}>
-        <View style ={{flex:1}}>
-          <Text style={{fontWeight:"bold", fontSize:18}}>Finalise and Publish Quiz
-              </Text>
-          <View style ={{flexDirection :'row', gap :10}}>
-              <Text>
-                  Questions one by one:
-                </Text>
-                <Switch
-                  trackColor={{false: '#767577', true: '#81b0ff'}}
-                  thumbColor={is1b1Enabled ? '#f5dd4b' : '#f4f3f4'}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={() => setIs1b1Enabled(previousState => !previousState)}
-                  value={is1b1Enabled}
-                />
-                {is1b1Enabled && <Text>
-                  (Yes)
-                </Text>}
-            </View>
-            <Text> Give your ({topic}) quiz a title
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Your Quiz will be searchable by its title"
-              value={quiztitle}
-              onChangeText={(text) => setTitle(text)}
-            />
-        </View>
-        
-        <View>
-          <Button title="Back" onPress={()=>setRender(0)}/>
-          <Button title="Publish Quiz" onPress={()=> {alert("here should be the final pushing, first the questions to get their id, then feed those ids into the quiz and push the quiz");navigation.goBack(); passedunfinished.setData([]); passedunfinished.setSaved([])}}/>
-        </View>
-        
-      </SafeAreaView>
-    )
+      <SafeAreaView>
+  <View style={{ height: height * 0.05 }} />
+  <View style={{ gap: 10 }}>
+    <Text style={{ fontWeight: "bold", fontSize: 22 }}>Finalise and Publish Quiz</Text>
+    <View style={{ flexDirection: 'row', gap: 10 }}>
+      <Text>
+        Questions one by one:
+      </Text>
+      <Switch
+        trackColor={{ false: '#767577', true: '#81b0ff' }}
+        thumbColor={is1b1Enabled ? '#f5dd4b' : '#f4f3f4'}
+        ios_backgroundColor="#3e3e3e"
+        onValueChange={() => setIs1b1Enabled(previousState => !previousState)}
+        value={is1b1Enabled}
+      />
+      {is1b1Enabled && <Text>
+        (Yes)
+      </Text>}
+    </View>
+    <Text>Give your ({topic}) quiz a title</Text>
+    <TextInput
+      style={styles.input}
+      placeholder="Your Quiz will be searchable by its title"
+      value={quiztitle}
+      onChangeText={(text) => setTitle(text)}
+    />
+
+    <View>
+      <Button title="Back" onPress={() => setRender(0)} />
+      <Button title="Publish Quiz" onPress={() => {
+        alert("here should be the final pushing, first the questions to get their id, then feed those ids into the quiz and push the quiz");
+        navigation.goBack();
+        passedunfinished.setData([]);
+        passedunfinished.setSaved([]);
+      }} />
+    </View>
+  </View>
+</SafeAreaView>)
   }
 }
 
