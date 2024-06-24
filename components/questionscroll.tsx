@@ -45,6 +45,7 @@ export function QnScroll(props: QnPropsFuncs) {
       const [ansState,setAns] = useState("");
       const [randomiser,setRan] = useState(true);
       const [optState,setOpt] = useState(Array<string>);
+      const [seed, setSeed] = useState(0);
       var temp = Array.from(props.wrongs) /*this function permutes the array of wrong answers */
       function fYS(arr: Array<string>){
         for (let i = arr.length -1; i>0;i--) {
@@ -56,6 +57,7 @@ export function QnScroll(props: QnPropsFuncs) {
       
       if (randomiser == true) {
         const seed = Math.floor(Math.random() * props.corrans.length);
+        setSeed(seed);
         temp = fYS(temp);
         if (props.noOption > temp.length) {
           temp.push(props.corrans[seed]);
@@ -122,29 +124,10 @@ export function QnScroll(props: QnPropsFuncs) {
   }
 export type QnPropsVerify = QnProps & {ans:string}
 export function AnsScroll(props:QnPropsVerify) {
-  /*create a component that renders the correct or wrong screen*/
-  if (props.corrans.includes(props.ans)) {
     return (
-      <View>
-        <Text style = {{color : 'green'}}>
-      "{props.ans}" is a correct answer!
-    </Text>
     <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
             </Text>
-      </View>
-      )}
-  else {
-    return(
-    <View>
-        <Text style = {{color : 'red'}}>
-      "{props.ans}" is the wrong answer!
-    </Text>
-    <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
-            </Text>
-      </View>
-      )
-    }
-  }
+    )}
 
 /*above defines a modified version of question component, below initialises a quiz component based on QnProps data */
 
@@ -206,8 +189,7 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
     var score = 0;
     const tally = Array(questions.length).fill(false); 
     for (var i =0; i < questions.length; i++) {
-      if ((questions[i].mcq == true && (questions[i].corrans[0] == qAnswers[i])) || 
-      (questions[i].mcq == false && questions[i].corrans.includes(qAnswers[i]))) {
+      if (questions[i].corrans.includes(qAnswers[i])) {
         score +=1;
         tally[i] = true;
         };
@@ -235,9 +217,6 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
             keyExtractor={item => item[0].id} 
             renderItem={({item}) => 
             <View>
-              <AnsScroll 
-              {...item[0]}
-              ans = {qAnswers[questions.indexOf(item[0])]}/>
               <TallyCard
             {...item[0]}
             saved = {save.includes(item[0].id)}
@@ -258,6 +237,9 @@ export function quizScroll(questions : Array<QnProps>, exitScreen: () => void) {
               setSave(temp)
             }}
             />
+            <AnsScroll 
+              {...item[0]}
+             />
             </View>
             
             } 
