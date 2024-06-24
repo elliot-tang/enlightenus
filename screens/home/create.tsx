@@ -209,8 +209,8 @@ const Create= ({route,navigation} : CreateProps) => {
               }
 
               else{
-                if (corrans.split(",").length >1 && (mcq == true)){
-                  alert("MCQs can only have 1 correct answer")
+                if (wrongs.split(",").length + 1> noOption && (mcq == true)){
+                  alert("Too many options to be populated by not enough wrong answers")
                 }
 
                 else{
@@ -221,6 +221,9 @@ const Create= ({route,navigation} : CreateProps) => {
                   else{
                     if ((!wrongs) && (mcq == true)) {
                       alert("MCQs should have at least 1 wrong option")
+                    }
+                    if (corrans.split(",").length >1 && (mcq == true)){
+                      alert("You have entered multiple answers for an MCQ. The options will be randomised and exactly one of these options will be chosen as the correct answer on each playthrough")
                     }
                     setRender(0); 
                     var localid = Math.random().toString();

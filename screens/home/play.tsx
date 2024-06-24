@@ -20,10 +20,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
       onPress={() => setSearchFrom("Saved")}
       style={{
         flex: 1,
-        backgroundColor: searchFrom === "Saved" ? '#6e3b6e' : '#f9c2ff',
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center'
+        backgroundColor: searchFrom === "Saved" ? '#079A04' : '#D3ECD3' , height:50, justifyContent: 'center', alignItems: 'center',borderTopLeftRadius:10 , borderBottomLeftRadius:10
       }}
     >
       <Text style={{ fontSize: 24, color: searchFrom === "Saved" ? 'white' : 'black', textAlign: 'center' }}>
@@ -34,8 +31,8 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
       onPress={() => setSearchFrom("All")}
       style={{
         flex: 1,
-        backgroundColor: searchFrom === "All" ? '#6e3b6e' : '#f9c2ff',
-        height: 50,
+        backgroundColor: searchFrom === "All" ? '#079A04' : '#D3ECD3',
+
         justifyContent: 'center',
         alignItems: 'center'
       }}
@@ -48,10 +45,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
       onPress={() => setSearchFrom("Mine")}
       style={{
         flex: 1, 
-        backgroundColor: searchFrom === "Mine" ? '#6e3b6e' : '#f9c2ff',
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center'
+        backgroundColor: searchFrom === "Mine" ? '#079A04' : '#D3ECD3',height:50 , justifyContent: 'center', alignItems: 'center', borderTopEndRadius:10, borderEndEndRadius:10
       }}
     >
       <Text style={{ fontSize: 24, color: searchFrom === "Mine" ? 'white' : 'black', textAlign: 'center' }}>
