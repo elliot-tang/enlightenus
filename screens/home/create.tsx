@@ -74,10 +74,11 @@ const Create= ({route,navigation} : CreateProps) => {
   const [renderstate,setRender] =useState(0);
   const [questions,setQuestions] = useState(passedunfinished.data); 
   const [quiztitle,setTitle] = useState("");
-  const [saveorall, setSaveorall] = useState(true);
+  const [saveorall, setSaveorall] = useState("Saved");
   const [searchText, setSearchText] = useState("");
   const [newQnsLocalID, setNew] = useState(passedunfinished.save);
   const [selectionRender, setSelection] = useState<FetchedQuestion[]>([]);
+  const [oldQnsmongoIDs, setMongo] = useState(passedunfinished.mongo)
 
   //pingpong bad design
 
@@ -177,6 +178,7 @@ const Create= ({route,navigation} : CreateProps) => {
             navigation.goBack();
             passedunfinished.setData(questions);
             passedunfinished.setSaved(newQnsLocalID)
+            passedunfinished.setMongo(oldQnsmongoIDs)
           }} />
         </View>
         
@@ -396,18 +398,26 @@ const Create= ({route,navigation} : CreateProps) => {
         <Text style={{ fontSize: 24}}> Search questions from? </Text> 
   <View style={{ flexDirection: "row"}}>
     <TouchableOpacity
-      onPress={() => setSaveorall(true)}
-      style={{ flex:1, backgroundColor: saveorall === true ? '#079A04' : '#D3ECD3' , height:50, justifyContent: 'center', alignItems: 'center',borderTopLeftRadius:10 , borderBottomLeftRadius:10}}
+      onPress={() => setSaveorall("Saved")}
+      style={{ flex:1, backgroundColor: saveorall === "Saved" ? '#079A04' : '#D3ECD3' , height:50, justifyContent: 'center', alignItems: 'center',borderTopLeftRadius:10 , borderBottomLeftRadius:10}}
     >
-      <Text style={{ fontSize: 24, color: saveorall === true ? 'white' : 'black', textAlign: 'center' }}>
+      <Text style={{ fontSize: 24, color: saveorall === "Saved" ? 'white' : 'black', textAlign: 'center' }}>
         Saved Only
       </Text>
     </TouchableOpacity>
     <TouchableOpacity
-      onPress={() => setSaveorall(false)}
-      style={{flex:1, backgroundColor: saveorall === false ? '#079A04' : '#D3ECD3',height:50 , justifyContent: 'center', alignItems: 'center', borderTopEndRadius:10, borderEndEndRadius:10}}
+      onPress={() => setSaveorall("Create")}
+      style={{ flex:1, backgroundColor: saveorall === "Create" ? '#079A04' : '#D3ECD3' , height:50, justifyContent: 'center', alignItems: 'center'}}
     >
-      <Text style={{ fontSize: 24, color: saveorall === false ? 'white' : 'black', textAlign: 'center' }}>
+      <Text style={{ fontSize: 24, color: saveorall === "Create" ? 'white' : 'black', textAlign: 'center' }}>
+        Created Questions
+      </Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={() => setSaveorall("All")}
+      style={{flex:1, backgroundColor: saveorall === "All" ? '#079A04' : '#D3ECD3',height:50 , justifyContent: 'center', alignItems: 'center', borderTopEndRadius:10, borderEndEndRadius:10}}
+    >
+      <Text style={{ fontSize: 24, color: saveorall === "All" ? 'white' : 'black', textAlign: 'center' }}>
         All
       </Text>
     </TouchableOpacity>
