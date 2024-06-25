@@ -21,7 +21,7 @@ interface FetchedQuestion {
   explainText: string; 
   dateCreated: string; 
   questionType: string; 
-  options?: {answer: string, isCorrect?:boolean}[];
+  options?: {option: string, isCorrect?:boolean}[];
 }
 
 function AnswerEdittorBox(props: {
