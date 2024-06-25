@@ -23,7 +23,26 @@ interface FetchedQuestion {
   explainText: string; 
   dateCreated: string; 
   questionType: string; 
-  options?: {option: string, isCorrect?:boolean}[];
+  options?: {answer: string, isCorrect?:boolean}[];
+}
+
+type MCQOptionProps = {
+  answer: string,
+  isCorrect?: boolean,
+}
+
+type MCQProps = {
+  questionBody: string,
+  options: Array<MCQOptionProps>,
+  author: string,
+  explainText?: string,
+}
+
+type OEQProps = {
+  questionBody: string,
+  correctOptions: Array<string>,
+  author: string,
+  explainText?: string,
 }
 
 function AnswerEdittorBox(props: {
@@ -94,9 +113,28 @@ const Create= ({route,navigation} : CreateProps) => {
 
   var dataFlatlist = [...corrans,...wrongs];
 
-  const fetchSavedQuestion : () => Promise<FetchedQuestion> = async () => {
+  const fetchSavedQuestions : () => Promise<FetchedQuestion> = async () => {
     try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchSavedQuestion`, { params: { username: user } });
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchSavedQuestions`, { params: { username: user } });
+      const questions = response.data;
+      return questions.questions;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  }
+
+  const fetchCreatedQuestions : () => Promise<FetchedQuestion> = async () => {
+    try {
+      console.log(user);
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchCreatedQuestions`, { params: { username: user } });
       const questions = response.data;
       return questions.questions;
     } catch (error) {
@@ -116,7 +154,6 @@ const Create= ({route,navigation} : CreateProps) => {
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchAllQuestions`);
       const questions = response.data;
-      console.log(questions.questions);
       return questions.questions;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -130,6 +167,39 @@ const Create= ({route,navigation} : CreateProps) => {
       }
     }
   }
+
+   const pushMCQ : (qn : MCQProps) => Promise<string> = async (qn : MCQProps) => {
+    try {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/createMCQ`, qn);
+      return response.data.questionId;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  }
+    const pushOEQ : (qn : OEQProps) => Promise<string> = async (qn: OEQProps) => {
+      try {
+        const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/createOEQ`, qn);
+        return response.data.questionId;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const errorMessage: string = error.response?.data.message;
+          alert(`Axios Error: ${errorMessage}`);
+          console.error('Axios error:', error.message);
+          console.error('Error response:', error.response?.data);
+        } else {
+          alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+          console.error('Unexpected error:', error);
+        }
+      }
+    }
   
   if (renderstate ==0) {
     return (
@@ -166,7 +236,32 @@ const Create= ({route,navigation} : CreateProps) => {
               setNew(tempnew);
             }}
             notpushed = {newQnsLocalID.includes(item.id)}
-            pushQn = {()=> {const tempnew = newQnsLocalID.filter((localid)=> localid !== item.id); setNew(tempnew); alert("Pushing logic here")}}
+            pushQn = { async () => {
+              const tempnew = newQnsLocalID.filter((localid)=> localid !== item.id); 
+              setNew(tempnew); 
+              var mongoID;
+              if (item.mcq == true) {
+                const allOptions = [
+                  ...item.corrans.map((answer) => ({ answer: answer, isCorrect: true })),
+                  ...item.wrongs.map((answer) => ({ answer: answer})),
+                ];
+                mongoID = await pushMCQ({
+                  questionBody: item.quizstmt,
+                  options: allOptions,
+                  author: user,
+                  explainText: item.explainText? item.explainText: undefined
+                });
+              } else {
+                mongoID = await pushOEQ({
+                  questionBody: item.quizstmt,
+                  correctOptions: item.corrans,
+                  author: user,
+                  explainText: item.explainText? item.explainText: undefined
+                });
+              }
+              const temp = {localID: item.id, mongoID: mongoID}
+              setMongo((prevArray) => [...prevArray, temp])
+            }}
             />} 
             />
           ): <Text style ={{textAlign : "center"}}> No questions add yet.....</Text>
@@ -433,9 +528,10 @@ const Create= ({route,navigation} : CreateProps) => {
         style={{justifyContent:"center", flex:1}} 
         onPress={async () => {
           var fetched;
-          if (saveorall == true) {
-            alert('Not implemented')
-            fetched = dummydata;
+          if (saveorall == "Saved") {
+            fetched = await fetchSavedQuestions();
+          } else if (saveorall == "Create") {
+            fetched = await fetchCreatedQuestions();
           } else {
             fetched = await fetchAllQuestions();
           }
@@ -457,14 +553,14 @@ const Create= ({route,navigation} : CreateProps) => {
               while (questions.map((ele)=>ele.id).includes(localid)) {
                 localid = Math.random().toString();
               };
-              const corrects = (item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect).map((ele)=>ele.option): []);
+              const corrects = (item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect).map((ele)=>ele.answer): []);
               const temp = {
                 id: localid, 
                 mcq: item.questionType==="MCQ",
                 maxAttempt: 1,
                 quizstmt: item.questionBody,
                 corrans: item.questionType==="MCQ"? corrects:item.correctOptions, 
-                wrongs: item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect===undefined).map((ele)=>ele.option):[], 
+                wrongs: item.questionType==="MCQ"? item.options.filter((ele)=>ele.isCorrect===undefined).map((ele)=>ele.answer):[], 
                 noOption: 10,
                 explainText: item.explainText
               };
@@ -532,29 +628,5 @@ const Create= ({route,navigation} : CreateProps) => {
 </SafeAreaView>)
   }
 }
-
-
-const dummydata = [
-  {
-    _id:"jfnsjfnsj",
-    questionBody: "some oeq rubbish",
-    __v: 0 ,
-    correctOptions: ["here","there","everywhere"],
-    author: "creator",
-    explainText: "this is a quarter note, the quarter note blah blab",
-    dateCreated: Date(),
-    questionType: 'OEQ'
-  },
-  {
-    _id: "jfnsjfnsjee",
-    questionBody: "some mcq rubbish",
-    __v: 0 ,
-    options: [{option: "true", isCorrect: true},{option:"false"}],
-    author: "creator",
-    explainText: "im not typing that shit again",
-    dateCreated: Date(),
-    questionType: 'MCQ'
-  },
-]
 
 export default Create

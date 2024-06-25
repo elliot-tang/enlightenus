@@ -19,7 +19,6 @@ const LoginScreen : React.FC<Props> = ({ navigation }: Props) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAwareScrollView>
       <Image style={styles.banner} source={require("@app/assets/banner.png")}></Image>
       
       <View style={styles.headerContainer}>
@@ -49,7 +48,6 @@ const LoginScreen : React.FC<Props> = ({ navigation }: Props) => {
         <Text>Don't have an account? </Text>
         <Text style={styles.link} onPress={() => navigation.navigate('Register')}>Register here!</Text>
       </View>
-    </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };

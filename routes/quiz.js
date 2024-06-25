@@ -126,11 +126,17 @@ router.get('/quiz/fetchSavedQuestions', async (req, res) => {
     const fetched = await UserSavedQuestion.find({ userId: user._id, }, 'question -_id')
                                            .sort({ dateSaved: -1 })
                                            .limit(20)
-                                           .populate('question.questionId')
+                                           .populate({
+                                              path: 'question.questionId', 
+                                              populate: {
+                                                path: 'author',
+                                              }
+                                            })
                                            .exec();
     const questions = fetched.map(doc => {
       const toObj = doc.question.questionId.toObject ? doc.question.questionId.toObject() : doc.question.questionId;
       toObj['questionType'] = doc.question.questionType;
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
     console.log('Saved questions fetched successfully!');
@@ -159,19 +165,21 @@ router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
 
     // Fetches only 20 for now
     const [fetchedMCQs, fetchedOEQs] = await Promise.all([
-      MCQ.find({ author: user._id }).exec(), 
-      OEQ.find({ author: user._id }).exec()
+      MCQ.find({ author: user._id }).populate('author').exec(), 
+      OEQ.find({ author: user._id }).populate('author').exec()
     ]);
 
     const MCQs = fetchedMCQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'MCQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
 
     const OEQs = fetchedOEQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'OEQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
 
