@@ -3,6 +3,7 @@ import { View, TextInput, Button, Switch, Text, StyleSheet, Image, SafeAreaView 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@app/App';
 import { useAuth } from '@app/context/AuthContext';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -18,7 +19,7 @@ const LoginScreen : React.FC<Props> = ({ navigation }: Props) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      
+      <KeyboardAwareScrollView>
       <Image style={styles.banner} source={require("@app/assets/banner.png")}></Image>
       
       <View style={styles.headerContainer}>
@@ -48,7 +49,7 @@ const LoginScreen : React.FC<Props> = ({ navigation }: Props) => {
         <Text>Don't have an account? </Text>
         <Text style={styles.link} onPress={() => navigation.navigate('Register')}>Register here!</Text>
       </View>
-
+    </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };

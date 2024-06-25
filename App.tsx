@@ -76,7 +76,7 @@ const AuthStack = () => (
 const HomeStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }}/>
-    <Stack.Screen name="Create" component={CreateScreen} options={{ headerLeft: ()=> null}}/>
+    <Stack.Screen name="Create" component={CreateScreen} options={{ headerShown: false}}/>
     <Stack.Screen name="Play" component={PlayScreen} />
     <Stack.Screen name="DisplayPlay" component={QuizScreen} />
     <Stack.Screen name="ScrollScreen" component={ScrollScreen} />

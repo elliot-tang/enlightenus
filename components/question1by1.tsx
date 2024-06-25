@@ -107,6 +107,7 @@ export function Qn1b1(props: QnPropsFunc) {
     const [ansState,setAns] = useState("");
     const [randomiser,setRan] = useState(true);
     const [optState,setOpt] = useState(Array<string>);
+    const [seed,setSeed]=useState(0);
     
     var temp = Array.from(props.wrongs) /*this function permutes the array of wrong answers */
     function fYS(arr: Array<string>){
@@ -119,6 +120,7 @@ export function Qn1b1(props: QnPropsFunc) {
     
     if (randomiser == true) {
       const seed = Math.floor(Math.random() * props.corrans.length);
+      setSeed(seed)
       temp = fYS(temp);
       if (props.noOption > temp.length) {
         temp.push(props.corrans[seed]);
@@ -162,9 +164,23 @@ export function Qn1b1(props: QnPropsFunc) {
         />
       );
     };
-    if (ansState != props.corrans[0] || submitState == false)
+    if (ansState != props.corrans[seed] || submitState == false)
       return (
-        <View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>
+        (attemptState == props.maxAttempt) ? (
+          <View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>
+              <View style={{backgroundColor:"#b1e2ee", borderRadius:10, height:200, justifyContent:'center', alignItems:'center'}}>
+                <Text style={{fontSize:22, textAlign:"center"}}>{props.quizstmt}</Text>
+              </View>
+                <View style={{height: 15}}/>
+          <View style={{borderTopColor:"black", borderTopWidth:2,paddingTop:20}}>
+            <Text style = {{color:'red'}}>The answer was {props.corrans[seed]}             
+            </Text>
+             <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
+            </Text>
+            <Button title = "Next Question" 
+            onPress={()=>{props.nextPage(); props.toAppendAnswer(ansState)}}/>
+          </View>
+          </View>):(<View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>
           <View style={{backgroundColor:"#b1e2ee", borderRadius:10, height:200, justifyContent:'center', alignItems:'center'}}>
                 <Text style={{fontSize:22, textAlign:"center"}}>{props.quizstmt}</Text>
                 </View>
@@ -193,20 +209,8 @@ export function Qn1b1(props: QnPropsFunc) {
           }} 
           disabled={attemptState == props.maxAttempt || !ansState}
           />
-
-         
-        
-        {attemptState == props.maxAttempt && <View style={{borderTopColor:"black", borderTopWidth:2,paddingTop:20}}>
-            <Text style = {{color:'red'}}>The answer was {props.corrans[0]}             
-            </Text>
-             <Text style = {{fontWeight : "bold"}} >Explanation: {props.explainText}             
-            </Text>
-            <Button title = "Next Question" 
-            onPress={()=>{props.nextPage(); props.toAppendAnswer(ansState)}}/>
-          </View>}
-
-        </View>
-        );
+          </View>)
+      );
     else {
       return (
           <View style= {{backgroundColor:"white", height:height*0.9, width: width*0.9}}>

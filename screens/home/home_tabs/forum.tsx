@@ -247,7 +247,7 @@ function CreatePost({navigation}: ForumScreenProps){
   <View style={{ flexDirection: "row" ,width:width*0.9, height: height*0.07}}>
     <TouchableOpacity
       onPress={() => setSingle(true)}
-      style={{ flex:1, backgroundColor: single === true ? '#6e3b6e' : '#f9c2ff' , height:height*0.06, justifyContent: 'center', alignItems: 'center' }}
+      style={{ flex:1, backgroundColor: single === true ? '#079A04' : '#D3ECD3' , height:height*0.06, justifyContent: 'center', alignItems: 'center' , borderTopLeftRadius:10 , borderBottomLeftRadius:10}}
     >
       <Text style={{ fontSize: 24, color: single === true ? 'white' : 'black', textAlign: 'center' }}>
         Questions
@@ -255,7 +255,7 @@ function CreatePost({navigation}: ForumScreenProps){
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => setSingle(false)}
-      style={{flex:1, backgroundColor: single === false ? '#6e3b6e' : '#f9c2ff',height:height*0.06 , justifyContent: 'center', alignItems: 'center'}}
+      style={{flex:1, backgroundColor: single === false ? '#079A04' : '#D3ECD3',height:height*0.06 , justifyContent: 'center', alignItems: 'center', borderTopEndRadius:10, borderEndEndRadius:10}}
     >
       <Text style={{ fontSize: 24, color: single === false ? 'white' : 'black', textAlign: 'center' }}>
         Quizzes
@@ -265,7 +265,7 @@ function CreatePost({navigation}: ForumScreenProps){
   <View style={{ flexDirection: "row" ,width:width*0.9, height: height*0.07}}>
     <TouchableOpacity
       onPress={() => setSaved(true)}
-      style={{ flex:1, backgroundColor: saved === true ? '#6e3b6e' : '#f9c2ff' , height:height*0.06, justifyContent: 'center', alignItems: 'center' }}
+      style={{ flex:1, backgroundColor: saved === true ? '#079A04' : '#D3ECD3' , height:height*0.06, justifyContent: 'center', alignItems: 'center', borderTopLeftRadius:10 , borderBottomLeftRadius:10 }}
     >
       <Text style={{ fontSize: 24, color: saved === true ? 'white' : 'black', textAlign: 'center' }}>
         Saved Only
@@ -273,7 +273,7 @@ function CreatePost({navigation}: ForumScreenProps){
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => setSaved(false)}
-      style={{flex:1, backgroundColor: saved === false ? '#6e3b6e' : '#f9c2ff',height:height*0.06, justifyContent: 'center', alignItems: 'center'}}
+      style={{flex:1, backgroundColor: saved === false ? '#079A04' : '#D3ECD3',height:height*0.06, justifyContent: 'center', alignItems: 'center', borderTopEndRadius:10, borderEndEndRadius:10}}
     >
       <Text style={{ fontSize: 24, color: saved === false ? 'white' : 'black', textAlign: 'center' }}>
         All
