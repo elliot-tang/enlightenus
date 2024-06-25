@@ -109,7 +109,7 @@ router.post('/quiz/createOEQ', async (req, res) => {
 // fetch all questions saved by user, limited to 20 for now
 router.get('/quiz/fetchSavedQuestions', async (req, res) => {
   try {
-    const username = req.body.username;
+    const username = req.query.username;
     
     // No user provided
     if (!username) {
@@ -144,7 +144,7 @@ router.get('/quiz/fetchSavedQuestions', async (req, res) => {
 // fetch all questions created by user, limited to 20 for now
 router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
   try {
-    const username = req.body.username;
+    const username = req.query.username;
     
     // No user provided
     if (!username) {
@@ -189,15 +189,23 @@ router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
 // fetch all questions from database, limited to 20 for now
 router.get('/quiz/fetchAllQuestions', async (req, res) => {
   try {
-    const [fetchedMCQs, fetchedOEQs] = await Promise.all([MCQ.find({}).exec(), OEQ.find({}).exec()]);
+    const [fetchedMCQs, fetchedOEQs] = await Promise.all([
+      MCQ.find({})
+         .populate('author')
+         .exec(), 
+      OEQ.find({})
+         .populate('author')
+         .exec()]);
     const MCQs = fetchedMCQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'MCQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
     const OEQs = fetchedOEQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'OEQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
     const questions = [...MCQs, ...OEQs];   
@@ -502,7 +510,7 @@ router.post('/quiz/saveQuiz', async (req, res) => {
 // fetch quiz saved by user, limited to 20 for now
 router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
   try {
-    const username = req.body.username;
+    const username = req.query.username;
 
     // No user provided
     if (!username) {
@@ -538,7 +546,8 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
 // fetch all quiz matching criteria, limited to 20 for now
 router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
   try {
-    const { criteriaName, criteriaBody } = req.body;
+    const criteriaName = req.query.criteriaName;
+    const criteriaBody = req.query.criteriaBody;
 
     // Checks that the search query is title, topic or verified
     if (!['title', 'topic', 'verified'].includes(criteriaName.toLowerCase())) {

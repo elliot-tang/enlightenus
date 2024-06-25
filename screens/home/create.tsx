@@ -6,7 +6,9 @@ import { QnProps } from '@app/components/question1by1';
 import { QuestionCard } from '@app/components/questioncard';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { returnUser } from '@app/context/AuthContext';
+import axios from 'axios';
 
 const {height,width} = Dimensions.get("window")
 
@@ -21,7 +23,7 @@ interface FetchedQuestion {
   explainText: string; 
   dateCreated: string; 
   questionType: string; 
-  options?: {answer: string, isCorrect?:boolean}[];
+  options?: {option: string, isCorrect?:boolean}[];
 }
 
 function AnswerEdittorBox(props: {
@@ -87,8 +89,46 @@ const Create= ({route,navigation} : CreateProps) => {
   const [noOption,setNoOpt] = useState(1);
   const [explainText,setExp] = useState("");
   const [anyAns, setAnyAns]= useState("");
+  const user = returnUser();
 
   var dataFlatlist = [...corrans,...wrongs];
+
+  const fetchSavedQuestion : () => Promise<FetchedQuestion> = async () => {
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchSavedQuestion`, { params: { username: user } });
+      const questions = response.data;
+      return questions.questions;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  }
+
+  const fetchAllQuestions : () => Promise<FetchedQuestion> = async () => {
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchAllQuestions`);
+      const questions = response.data;
+      console.log(questions.questions);
+      return questions.questions;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  }
   
   if (renderstate ==0) {
     return (
@@ -379,7 +419,18 @@ const Create= ({route,navigation} : CreateProps) => {
         onChangeText={setSearchText}
         value={searchText}
       />
-      <TouchableOpacity style={{justifyContent:"center", flex:1}} onPress={() => {setSelection(dummydata)}}>
+      <TouchableOpacity 
+        style={{justifyContent:"center", flex:1}} 
+        onPress={async () => {
+          var fetched;
+          if (saveorall == true) {
+            alert('Not implemented')
+            fetched = dummydata;
+          } else {
+            fetched = await fetchAllQuestions();
+          }
+          setSelection(fetched);
+        }}>
         <MaterialIcons name="search" size={24} color="gray" />
       </TouchableOpacity>
     </View>
