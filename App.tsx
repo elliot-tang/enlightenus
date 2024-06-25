@@ -38,8 +38,8 @@ interface UnfinwithCall {
   setData: (newd: Array<QnProps>)=>void
   save: Array<String>
   setSaved: (newd: Array<String>)=>void
-  mongo: Array<String>
-  setMongo: (newd: Array<String>)=>void
+  mongo: Array<{localID: string, mongoID: string}>
+  setMongo: (newd: Array<{localID: string, mongoID: string}>)=>void
 }
 
 export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
@@ -98,8 +98,8 @@ function App() {
   function childTrafficking2(newData: Array<String>) {
     setUnfin2(newData);
   }
-  const [unfin3,setUnfin3] = useState(Array<String>);
-  function childTrafficking3(newData: Array<String>) {
+  const [unfin3,setUnfin3] = useState(Array<{localID: string, mongoID: string}>);
+  function childTrafficking3(newData: Array<{localID: string, mongoID: string}>) {
     setUnfin3(newData);
   }
   return(
