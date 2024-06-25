@@ -9,10 +9,17 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type CreateProps = NativeStackScreenProps<HomeStackParamList,"Create">
 
-interface FetchedQuestion{
-  _id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {answer: string, isCorrect?:boolean}[];
-  }
-//
+interface FetchedQuestion {
+  _id: string; 
+  questionBody: string;
+  __v: number; 
+  correctOptions?: string[]; 
+  author: string; 
+  explainText: string; 
+  dateCreated: string; 
+  questionType: string; 
+  options?: {answer: string, isCorrect?:boolean}[];
+}
 
 //note the id created here is a local id, it SHOULD NOT be passed into mongobongo in page 4
 

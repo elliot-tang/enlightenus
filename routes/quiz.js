@@ -227,9 +227,9 @@ router.post('/quiz/createQuiz', async (req, res) => {
       return res.status(400).json({ message: 'Please provide a quiz title!' });
     }
 
-    // Default topic: Miscellaneous
+    // Default topic: Uncategorised
     if (!topic || topic.trim() === '') {
-      topic = 'Miscellaneous';
+      topic = 'Uncategorised';
     }
 
     // Ensures quiz has at least 1 question
@@ -663,9 +663,6 @@ router.post('/quiz/takeQuiz', async (req, res) => {
       const qn = breakdown[i];
       const fetchedQn = quiz.questions[i];
 
-      console.log(qn);
-      console.log(fetchedQn);
-
       // Checks for question
       if (!qn.question) {
         return res.status(400).json({ message: 'question not provided' });
@@ -723,6 +720,6 @@ router.post('/quiz/takeQuiz', async (req, res) => {
     console.log('Unable to submit taken quiz');
     res.status(500).json({ message: 'Error submitting taken quiz', error });
   }
-})
+});
 
 module.exports = router;
