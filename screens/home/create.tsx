@@ -12,9 +12,16 @@ const {height,width} = Dimensions.get("window")
 
 type CreateProps = NativeStackScreenProps<HomeStackParamList,"Create">
 
-interface FetchedQuestion{
-
-_id: string; questionBody: string; __v: number; correctOptions?: string[]; author: string; explainText: string; dateCreated: string; questionType: string; options?: {option: string, isCorrect?:boolean}[];
+interface FetchedQuestion {
+  _id: string; 
+  questionBody: string;
+  __v: number; 
+  correctOptions?: string[]; 
+  author: string; 
+  explainText: string; 
+  dateCreated: string; 
+  questionType: string; 
+  options?: {answer: string, isCorrect?:boolean}[];
 }
 
 function AnswerEdittorBox(props: {
