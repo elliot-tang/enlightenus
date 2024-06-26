@@ -1,24 +1,9 @@
-import React from 'react';
-import { createContext } from "react";
-import {
-  Button,
-  Text,
-  View,
-  Image,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Button, Text, View, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LineChart } from 'react-native-chart-kit';
-import { HomeScreenProps, styles } from '@app/App';
-import { returnUser } from '@app/context/AuthContext';
-import { useAuth } from '@app/context/AuthContext';
+import { HomeScreenProps } from '@app/App';
+import { returnUser, useAuth } from '@app/context/AuthContext';
 
 // Attribution for icons:
 // - Math: https://www.flaticon.com/free-icons/math
@@ -27,8 +12,6 @@ import { useAuth } from '@app/context/AuthContext';
 // - All/No Category: https://www.flaticon.com/free-icons/forbidden
 
 const { width, height } = Dimensions.get("window");
-
-// const user_id = "Demo User"; // To retrieve from database instead
 
 const chartConfig = {
   backgroundGradientFrom: "#B3E5FF",
@@ -49,7 +32,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
     logout();
   }
 
-  const [topic, setSel] = useState("");
+  const [topic, setTopic] = useState("");
 
   const toShowdata =
     topic === "Uncategorised" || topic === ""
@@ -61,7 +44,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
     datasets: [
       {
         data: toShowdata.map((ele) => ele.percent * 100),
-        color: (opacity = 1) => `rgba(21, 114, 219, 0.8, ${opacity})`, // optional
+        color: (opacity = 0.8) => `rgba(21, 114, 219, ${opacity})`, // optional
         strokeWidth: 2, // optional
       },
     ],
@@ -69,22 +52,15 @@ function StartScreen({ navigation }: HomeScreenProps) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          height: 0.1 * height,
-          flexDirection: "row",
-          backgroundColor: "#73deff",
-          alignItems: "center",
-          gap: 16,
-          width: "100%",
-          justifyContent: "center",
-        }}
-      >
+      
+      <View style={styles.banner}>
         <Text style={{ textAlign: 'center', fontSize: 24 }}>
-          Welcome back {user}!
+          Welcome back, {user}!
         </Text>
-        <Button title="Logout" color="black" onPress={handleLogout}/>
+
+        <Button title="Logout" color="#6cac48" onPress={handleLogout}/>
       </View>
+
       <Image
         style={{ height: 0.15 * height, width: width }}
         source={require("@app/assets/banner.png")}
@@ -95,37 +71,32 @@ function StartScreen({ navigation }: HomeScreenProps) {
         </Text>
       </View>
       <View style={{ flexDirection: "row", width: 0.73 * width, height: 0.15 * height }}>
-        <ScrollView horizontal={true}>
-          <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Uncategorised")}>
-            {/* <Image source={require("./traffic-signal.png")} style={styles.image} /> */}
+        <ScrollView horizontal={true} persistentScrollbar={true}>
+          <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Uncategorised")}>
             <Image source={require("@app/assets/traffic-signal.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>All</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("NUS Modules")}>
-            {/* <Image source={require("./nuslogo.png")} style={styles.image} /> */}
+          <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("NUS Modules")}>
             <Image source={require("@app/assets/nuslogo.jpeg")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>NUS Modules</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.imagecontainer} onPress={() => setSel("Coding")}>
-            {/* <Image source={require("./browser.png")} style={styles.image} /> */}
+          <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Coding")}>
             <Image source={require("@app/assets/browser.png")} style={styles.image} />
             <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Coding</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("Math")}>
-          {/* <Image source={require("./math.png")} style={styles.image} /> */}
+        <TouchableOpacity style={styles.imageContainer} onPress={()=>setTopic("Math")}>
           <Image source={require("@app/assets/math.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Math</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.imagecontainer} onPress={()=>setSel("General Knowledge")}>
-          {/* <Image source={require("./open-book.png")} style={styles.image} /> */}
+        <TouchableOpacity style={styles.imageContainer} onPress={()=>setTopic("General Knowledge")}>
           <Image source={require("@app/assets/open-book.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>General Knowledge</Text>
@@ -166,6 +137,60 @@ function StartScreen({ navigation }: HomeScreenProps) {
 );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 30,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  banner: {
+    height: 0.1 * height,
+    flexDirection: "row",
+    backgroundColor: "#73deff",
+    alignItems: "center",
+    gap: 16,
+    width: "100%",
+    justifyContent: "center",
+  },
+
+  imageContainer: {
+    width: 100, 
+    height: 100, 
+    borderRadius: 15,
+    borderWidth: 3,
+    borderColor: '#cdeeff', 
+    overflow: 'hidden',
+  }, 
+
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain', 
+  },
+
+  textContainer: {
+    position: 'absolute',
+    bottom: 0, 
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+    padding: 5,
+  },
+
+  icon: {
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 15,
+    borderWidth: 3,
+    borderColor: 'black',
+  }
+})
+
+export default StartScreen;
+
 const testData = [
   { quizid: "sfnjsnfs", percent: 0.8, topic: "NUS Modules" },
   { quizid: "fnk", percent: 0.95, topic: "NUS Modules" },
@@ -177,5 +202,3 @@ const testData = [
   { quizid: "doug", percent: 0.32, topic: "General Knowledge" },
   { quizid: "fjsfsl", percent: 0.89, topic: "General Knowledge" },
 ]; /* To retrieve from database instead */
-
-export default StartScreen;

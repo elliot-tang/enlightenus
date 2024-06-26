@@ -3,7 +3,6 @@ import { View, TextInput, Button, Switch, Text, StyleSheet, Image, SafeAreaView 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@app/App';
 import { useAuth } from '@app/context/AuthContext';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
