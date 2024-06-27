@@ -20,7 +20,7 @@ interface FetchedQuestion {
   __v: number;
   correctOptions?: string[];
   author: string;
-  explainText: string;
+  explainText?: string;
   dateCreated: string;
   questionType: string;
   options?: { answer: string, isCorrect?: boolean }[];
@@ -148,7 +148,6 @@ const Create = ({ route, navigation }: CreateProps) => {
 
   const fetchCreatedQuestions: () => Promise<FetchedQuestion> = async () => {
     try {
-      console.log(user);
       const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchCreatedQuestions`, { params: { username: user } });
       const questions = response.data;
       return questions.questions;

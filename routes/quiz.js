@@ -537,19 +537,127 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
                                        .limit(20)
                                        .populate({
                                         path: 'quizId',
-                                        populate: {
-                                          path: 'questions.questionId',
+                                        populate: [
+                                            { 
+                                              path: 'questions.questionId',
+                                              populate: {
+                                                path: 'author'
+                                              } 
+                                            }, 
+                                            { 
+                                              path: 'author' 
+                                            }
+                                          ]
                                         }
-                                       })
+                                      )
                                        .exec();
     const quizzes = fetched.map(doc => doc.quizId);
-    console.log('Saved quizzes fetched successfully!');
+    const mappedQuizzes = quizzes.map(quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.author = toObj.author.username;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      return quizObject;
+    });
+    console.log('Quizzes fetched successfully!');
+    res.status(200).json({ quizzes: mappedQuizzes });
+  } catch (error) {
+    console.log('Unable to fetch quizzes');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quizzes', error });
+  }
+});
+
+router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
+  try {
+    const username = req.query.username;
+
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const fetched = await Quiz.find({ author: user._id })
+                              .sort({ dateCreated: -1 })
+                              .limit(20)
+                              .populate({
+                                path: 'questions.questionId',
+                                populate: {
+                                  path: 'author',
+                                }
+                              })
+                              .populate('author')
+                              .exec();
+    const quizzes = fetched.map(quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        toObj.author = toObj.author.username;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      return quizObject;
+    });
+    console.log('Quizzes fetched successfully!');
     res.status(200).json({ quizzes: quizzes });
   } catch (error) {
     console.log('Unable to fetch quizzes');
     res.status(500).json({ message: 'Error fetching quizzes', error });
   }
-})
+});
+
+router.get('/quiz/fetchAllQuizzes', async (req, res) => {
+  try {
+    const fetched = await Quiz.find({})
+                              .sort({ dateCreated: -1 })
+                              .limit(20)
+                              .populate({
+                                path: 'questions.questionId',
+                                populate: {
+                                  path: 'author',
+                                }
+                              })
+                              .populate('author')
+                              .exec();
+    const quizzes = fetched.map(quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        toObj.author = toObj.author.username;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      return quizObject;
+    });
+    console.log('Quizzes fetched successfully!');
+    res.status(200).json({ quizzes: quizzes });
+  } catch (error) {
+    console.log('Unable to fetch quizzes');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quizzes', error });
+  }
+});
 
 // fetch all quiz matching criteria, limited to 20 for now
 router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
