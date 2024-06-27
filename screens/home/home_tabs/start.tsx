@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Text, View, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LineChart } from 'react-native-chart-kit';
 import { HomeScreenProps } from '@app/App';
 import { returnUser, useAuth } from '@app/context/AuthContext';
+import axios from 'axios';
 
 // Attribution for icons:
 // - Math: https://www.flaticon.com/free-icons/math
@@ -25,7 +26,7 @@ const chartConfig = {
 };
 
 function StartScreen({ navigation }: HomeScreenProps) {
-  const user : string = returnUser();
+  const user: string = returnUser();
   const { logout } = useAuth();
 
   const handleLogout = () => {
@@ -33,11 +34,33 @@ function StartScreen({ navigation }: HomeScreenProps) {
   }
 
   const [topic, setTopic] = useState("");
+  const [quizStats, setQuizStats] = useState([]);
+
+  // Loads 20 most recently taken quizzes into graph
+  useEffect(() => {
+    async function loadQuizzes() {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
+      const quizzes = response.data.quizzes;
+      const data = quizzes.map(quiz => {
+        const topic = quiz.topic;
+        const score = quiz.score;
+        const totalQuestions = quiz.questions.length;
+        const quizId = quiz._id;
+        return {
+          quizid: quizId,
+          percent: score / totalQuestions,
+          topic: topic,
+        }
+      });
+      setQuizStats(data);
+    }
+    loadQuizzes();
+  }, [])
 
   const toShowdata =
     topic === "Uncategorised" || topic === ""
-      ? testData
-      : testData.filter((ele) => ele.topic === topic);
+      ? quizStats
+      : quizStats.filter((ele) => ele.topic === topic);
 
   const data = {
     labels: Array(toShowdata.length).fill(""),
@@ -52,13 +75,13 @@ function StartScreen({ navigation }: HomeScreenProps) {
 
   return (
     <SafeAreaView style={styles.container}>
-      
+
       <View style={styles.banner}>
         <Text style={{ textAlign: 'center', fontSize: 24 }}>
           Welcome back, {user}!
         </Text>
 
-        <Button title="Logout" color="#6cac48" onPress={handleLogout}/>
+        <Button title="Logout" color="#6cac48" onPress={handleLogout} />
       </View>
 
       <Image
@@ -87,54 +110,54 @@ function StartScreen({ navigation }: HomeScreenProps) {
           <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Coding")}>
             <Image source={require("@app/assets/browser.png")} style={styles.image} />
             <View style={styles.textContainer}>
-            <Text style={{color :"white"}}>Coding</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.imageContainer} onPress={()=>setTopic("Math")}>
-          <Image source={require("@app/assets/math.png")} style={styles.image} />
-          <View style={styles.textContainer}>
-            <Text style={{color :"white"}}>Math</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.imageContainer} onPress={()=>setTopic("General Knowledge")}>
-          <Image source={require("@app/assets/open-book.png")} style={styles.image} />
-          <View style={styles.textContainer}>
-            <Text style={{color :"white"}}>General Knowledge</Text>
-          </View>
-        </TouchableOpacity>
+              <Text style={{ color: "white" }}>Coding</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Math")}>
+            <Image source={require("@app/assets/math.png")} style={styles.image} />
+            <View style={styles.textContainer}>
+              <Text style={{ color: "white" }}>Math</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("General Knowledge")}>
+            <Image source={require("@app/assets/open-book.png")} style={styles.image} />
+            <View style={styles.textContainer}>
+              <Text style={{ color: "white" }}>General Knowledge</Text>
+            </View>
+          </TouchableOpacity>
         </ScrollView>
-    <View style={{ height: 0.03 * height }} />
-  </View>
-  <View style={{ height: 0.14 * height, flexDirection: "row", gap: 10 }}>
-    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Play", {topic: topic})}>
-      <MaterialIcons name="search" size={74} color="black" />
-      <Text> Play </Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create", {topic: topic})}>
-      <MaterialIcons name="add" size={74} color="black" />
-      <Text> Add </Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create", {topic: topic})}>
-      <MaterialIcons name="delete" size={74} color="black" />
-      <Text> Delete </Text>
-    </TouchableOpacity>
-  </View>
-  <View style={{ height: 0.03 * height }} />
-  <Text style={{ textAlign: "left", fontSize: 19 }}>
-    Your recent performance in {topic === "Uncategorised" || topic === "" ? "everything" : topic}
-  </Text>
-  <View style={{ height: 0.01 * height }} />
-  <View>
-    <LineChart
-      data={data}
-      width={0.8 * width}
-      height={0.2 * height}
-      chartConfig={chartConfig}
-      yAxisSuffix="%"
-    />
-  </View>
-</SafeAreaView>
-);
+        <View style={{ height: 0.03 * height }} />
+      </View>
+      <View style={{ height: 0.14 * height, flexDirection: "row", gap: 10 }}>
+        <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Play", { topic: topic })}>
+          <MaterialIcons name="search" size={74} color="black" />
+          <Text> Play </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create", { topic: topic })}>
+          <MaterialIcons name="add" size={74} color="black" />
+          <Text> Add </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create", { topic: topic })}>
+          <MaterialIcons name="delete" size={74} color="black" />
+          <Text> Delete </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={{ height: 0.03 * height }} />
+      <Text style={{ textAlign: "left", fontSize: 19 }}>
+        Your recent performance in {topic === "Uncategorised" || topic === "" ? "everything" : topic}
+      </Text>
+      <View style={{ height: 0.01 * height }} />
+      <View>
+        {quizStats.length > 0 && <LineChart
+          data={data}
+          width={0.8 * width}
+          height={0.2 * height}
+          chartConfig={chartConfig}
+          yAxisSuffix="%"
+        />}
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -157,26 +180,26 @@ const styles = StyleSheet.create({
   },
 
   imageContainer: {
-    width: 100, 
-    height: 100, 
+    width: 100,
+    height: 100,
     borderRadius: 15,
     borderWidth: 3,
-    borderColor: '#cdeeff', 
+    borderColor: '#cdeeff',
     overflow: 'hidden',
-  }, 
+  },
 
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain', 
+    resizeMode: 'contain',
   },
 
   textContainer: {
     position: 'absolute',
-    bottom: 0, 
+    bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: 5,
   },
 
@@ -190,15 +213,3 @@ const styles = StyleSheet.create({
 })
 
 export default StartScreen;
-
-const testData = [
-  { quizid: "sfnjsnfs", percent: 0.8, topic: "NUS Modules" },
-  { quizid: "fnk", percent: 0.95, topic: "NUS Modules" },
-  { quizid: "notmsynfjsk", percent: 0.5, topic: "Math" },
-  { quizid: "mmmdjq", percent: 0.8, topic: "Math" },
-  { quizid: "sfsfsfsf", percent: 0.7, topic: "Coding" },
-  { quizid: "snkoss", percent: 0.76, topic: "Coding" },
-  { quizid: "etiewof", percent: 0.81, topic: "Coding" },
-  { quizid: "doug", percent: 0.32, topic: "General Knowledge" },
-  { quizid: "fjsfsl", percent: 0.89, topic: "General Knowledge" },
-]; /* To retrieve from database instead */

@@ -93,7 +93,7 @@ function Individual({route,navigation}: IndividualProps){
               keyExtractor={item => item.id} 
               renderItem={({item}) => {
               const obj = item.single? mockqndatabase.find((ele)=>item.id == ele.id): mockqzdatabase.find((ele)=> item.id === ele.id);
-              return (<Text style={styles.link} onPress={()=>alert("This should be saved, logic goes here")}>Save { item.single? "Question":"Quiz"}: {obj.title} </Text>)
+              return (<Text style={styles.link} onPress={()=>alert("Currently under development!")}>Save { item.single? "Question":"Quiz"}: {obj.title} </Text>)
               }}/>
       </View>}
       <View style={{height: 10}}/>
@@ -164,11 +164,14 @@ function Report({route,navigation}: ReportProps){
         value={reportText}
       />
       <View style={{ justifyContent:"flex-end", flexDirection:"row"}}>
-      <Button title="Submit" onPress={()=>{alert("Something should go to database here"); navigation.goBack()}} />
+      <Button title="Submit" onPress={()=>{
+        // TODO: Report forum post
+        alert("Currently under development!"); 
+        navigation.goBack()}} />
       </View>
       <View style={{height: 10}}/>
       <View>
-      <Text> Note for reports, please follow the general guidelines for what is reportable content. Blah blah.</Text>
+      <Text> Note for reports, please follow the general guidelines for what is reportable content.</Text>
       </View>
     </View>
   )
@@ -235,7 +238,7 @@ function CreatePost({navigation}: ForumScreenProps){
               }}/>
       </View>}
       <Button title ="Add attachment" onPress={()=> setRender(1)}/>
-      <Button title ="Post" onPress={()=> navigation.goBack()}/>
+      <Button title ="Post" onPress={()=> {alert('Currently under development!'); navigation.goBack();}}/>
     </View>
   )
     }
@@ -287,11 +290,13 @@ function CreatePost({navigation}: ForumScreenProps){
         onChangeText={setSearchText}
         value={searchText}
       />
-      <TouchableOpacity style={{justifyContent:"center", flex:1}} onPress={() => alert("Some thing happens to trigger the render below to change")}>
+      <TouchableOpacity style={{justifyContent:"center", flex:1}} onPress={() => 
+        alert("Currently under development")
+      }>
         <MaterialIcons name="search" size={24} color="gray" />
       </TouchableOpacity>
     </View>
-    <Button title="placeholder for test" onPress={()=>{
+    <Button title="Placeholder to Add Attachment" onPress={()=>{
       var temp = attachments;
       temp.push({id: "quizid1", single: false});
       setAttach(temp);
@@ -305,107 +310,36 @@ function CreatePost({navigation}: ForumScreenProps){
 const testData = [
   {
     id: "dsdhsbdsjndskjds",
-  title: "My nuts",
+  title: "Welcome to the Forum!",
   topic: "Misc",
-  body: "My nuts is a common term for balls or ballsack. I dont know can someone answer me please please please",
+  body: "This is a placeholder post to showcase the layout of the forum feature. Stay tuned for future developments!",
   votes: 0,
-  author: "User1",
+  author: "enlighteNUS",
   replies: [{id: "fjnjdfnd",
-  author: "User2",
-  body: "ithinkuwrong"},{id: "nfjk",
-  author: "User3",
-  body: "okbye"}],
-  attached: [{id:"quizid1", single: false}]
+  author: "excitedUser1",
+  body: "Wow! I am so excited!"},{id: "nfjk",
+  author: "skepticalUser2",
+  body: "Hopefully the UI gets better."}],
+  attached: []
   },
 
   {
-    id: 'someotherrandomstring',
-    title: "His nuts",
+    id: "dsdhsbdsjndskfffjds",
+  title: "This post has attachments",
   topic: "Misc",
-  body: "Your nuts is a common term for balls or ballsack. I dont know can someone answer me please please please nasjfnjaknfkjmsfjksnfjsnjsnfkjsbhfjsknf shfbshfsjfnfsfnjsnfhsjfbsbfjs fsjfsk nskjnfjk kkfnjsknfjsnfjkn sjfnsjkn fsjknfkjsnfkjsnfjksn skfnsjknfjjodso",
+  body: "Questions and quizzes can be shared via the upcoming attachment feature for users to save and share!",
   votes: 0,
-  author: "User4",
-  replies: [],
-  attached: [{id:"quizid1", single: false}]
-  },
-
-  {
-    id: "dsdhsbdsjnds",
-  title: "My nuts",
-  topic: "Misc",
-  body: "My nuts is a common term for balls or ballsack. I dont know can someone answer me please please please",
-  votes: 0,
-  author: "User1",
+  author: "enlighteNUS",
   replies: [{id: "fjnjdfnd",
-  author: "User2",
-  body: "ithinkuwrong"},{id: "nfjk",
-  author: "User3",
-  body: "okbye"}],
-  attached: [{id:"quizid2", single: false},{id: "qnid1",single: true}]
-  },
-
-  {
-    id: "dsdh78ndskjds",
-  title: "My nuts",
-  topic: "Misc",
-  body: "My nuts is a common term for balls or ballsack. I dont know can someone answer me please please please",
-  votes: 0,
-  author: "User1",
-  replies: [{id: "fjnjdfnd",
-  author: "User2",
-  body: "ithinkuwrong"},{id: "nfjk",
-  author: "User3",
-  body: "okbye"}],
-  attached:[]
-  },
-
-  {
-    id: "dsyghbhjjds",
-  title: "My nuts",
-  topic: "Misc",
-  body: "My nuts is a common term for balls or ballsack. I dont know can someone answer me please please please",
-  votes: 0,
-  author: "User1",
-  replies: [{id: "fjnjdfnd",
-  author: "User2",
-  body: "ithinkuwrong"},{id: "nfjk",
-  author: "User3",
-  body: "okbye"}],
-  attached:[]
-  },
-
-  {
-    id: "74667ds",
-  title: "My nuts",
-  topic: "Misc",
-  body: "My nuts is a common term for balls or ballsack. I dont know can someone answer me please please please",
-  votes: 0,
-  author: "User1",
-  replies: [{id: "fjnjdfnd",
-  author: "User2",
-  body: "ithinkuwrong"},{id: "nfjk",
-  author: "User3",
-  body: "okbye"}],
-  attached:[]
-  },
-
-  {
-    id: "dsdhsbdsjndskjds",
-  title: "My nuts",
-  topic: "Misc",
-  body: "My nuts is a common term for balls or ballsack. I dont know can someone answer me please please please",
-  votes: 0,
-  author: "User1",
-  replies: [{id: "fjnjdfnd",
-  author: "User2",
-  body: "ithinkuwrong"},{id: "nfjk",
-  author: "User3",
-  body: "okbye"}],
-  attached:[]
+  author: "excitedUser1",
+  body: "Yay! I can't wait to share and save questions!"},{id: "nfjk",
+  author: "excitedUser2",
+  body: "Yay!"}],
+  attached:[{id:"quizid1", single: false}]
   },
 
   ];
 
 
   const mockqndatabase = [{id: "qnid1", title: "Question fun"}]
-  const mockqzdatabase = [{id: "quizid1", title: "Quiz funner"}, {id: "quizid2", title: "Quiz funner2"}]
+  const mockqzdatabase = [{id: "quizid1", title: "Future Quiz"}, {id: "quizid2", title: "Quiz funner2"}]

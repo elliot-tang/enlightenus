@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { QuestionPropsForHistory } from './historycard';
 
 type QnProps = {
   id: string;
@@ -16,6 +17,8 @@ type QnProps = {
 export type QnPropsDisplay = QnProps & { editQn: () => void , deleteQn:() =>void, pushQn:()=>void, notpushed: boolean};
 
 export type QnPropsWithReport = QnProps & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , userAns: string, correct: boolean, saved: boolean};
+
+export type HistoryQnPropsWithReport = QuestionPropsForHistory & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , saved: boolean};
 
 export const QuestionCard = (question: QnPropsDisplay) => {
 
@@ -71,6 +74,41 @@ export function TallyCard(question: QnPropsWithReport) {
       {renderCorrectAnswers()}
       {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
       <Text style={{color: question.correct ? 'green' : 'red',}}>Your answer: {question.userAns}</Text>
+      <View style={styles.editIconContainer}>
+        <Button title="Report" onPress={question.reportQn} />
+        {question.saved ? (
+          <Button color="red" title="Remove" onPress={question.unsaveQn} />
+        ) : (
+          <Button title="Save" onPress={question.saveQn} />
+        )}
+      </View>
+    </View>
+  );
+}
+
+export function HistoryTallyCard(question: HistoryQnPropsWithReport) {
+  const shorten = question.corrans.slice(0, 3);
+
+  const renderCorrectAnswers = () => {
+    return shorten.map((answer) => (
+      <Text key={answer} style={styles.correctAnswer}>
+        {answer}
+      </Text>
+    ));
+  };
+
+  const renderUserAnswers = () => {
+    return '[' + question.responses.toString() + ']';
+  }
+
+  return (
+    <View style={{ gap: 10, borderRadius: 10, backgroundColor: '#cdefff', borderWidth: 3 }}>
+      <Text style={styles.questionStatement}>
+        {question.mcq ? 'MCQ' : 'Open'}: {question.quizstmt}
+      </Text>
+      {renderCorrectAnswers()}
+      {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
+      <Text style={{color: question.isCorrect ? 'green' : 'red',}}>Your answer(s): {renderUserAnswers()}</Text>
       <View style={styles.editIconContainer}>
         <Button title="Report" onPress={question.reportQn} />
         {question.saved ? (

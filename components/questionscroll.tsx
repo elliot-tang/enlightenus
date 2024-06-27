@@ -285,11 +285,15 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
                     correct={item[1]}
                     userAns={item[2]}
                     reportQn={() => {
+                      // TODO: Report question
+                      alert('Currently under development!');
                       setCurrentI(item[0].id);
                       setCurrentQ(item[0].quizstmt)
                       setPage(-1);
                     }}
                     saveQn={() => {
+                      // TODO: Save question
+                      alert('Currently under development!');
                       var temp = Array.from(save);
                       temp.push(item[0].id);
                       setSave(temp)
@@ -340,7 +344,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
           value={reportstring}
         />
         <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
-          <Button title="Submit" onPress={() => { alert("Something should go to database here"); setPage(0) }} />
+          <Button title="Submit" onPress={() => { alert("Currently under development!"); setPage(0) }} />
         </View>
         <View style={{ height: 10 }} />
         <View>

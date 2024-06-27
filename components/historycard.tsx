@@ -2,14 +2,26 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { QnProps } from './question1by1';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
+export type QuestionPropsForHistory = {
+  id: string,
+  mcq: boolean;
+  maxAttempt: number;
+  quizstmt: string;
+  corrans: Array<string>;
+  wrongs: Array<string>;
+  noOption: number;
+  explainText: string;
+  responses: Array<string>
+  isCorrect: boolean,
+  noAttempts: number
+}
+
 export type HistoryProps = {
-  id: string
-  title: string
-  topic: string
-  questions: Array<QnProps>
-  tally: Array<boolean>
-  // userAnswers: Array<string|Array<string>>
-  serAnswers: Array<string>
+  id: string,
+  title: string,
+  topic: string,
+  questions: Array<QuestionPropsForHistory>,
+  score: number,
   hasSaved: boolean
 } 
 
@@ -21,7 +33,7 @@ type HistoryPropswFunc = HistoryProps & { goToInd: () => void};
 export default function HistoryCard(hprops: HistoryPropswFunc) {
   return(<TouchableOpacity style = {styles.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
-    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>{hprops.tally.filter(ele=>ele==true).length}/{hprops.tally.length} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>{hprops.score}/{hprops.questions.length} </Text>
     <View style={{flexDirection:"row-reverse"}}>
     <MaterialIcons name="save" size={22} color= {(hprops.hasSaved? "green":"red")}/>
     </View>
