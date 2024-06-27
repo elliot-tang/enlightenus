@@ -822,7 +822,7 @@ router.post('/quiz/takeQuiz', async (req, res) => {
         return res.status(400).json({ message: 'Invalid responses' });
       }
 
-      if (!qn.isCorrect || typeof qn.isCorrect !== 'boolean') {
+      if (qn.isCorrect === undefined || typeof qn.isCorrect !== 'boolean') {
         return res.status(400).json({ message: 'Invalid isCorrect' });
       }
     }

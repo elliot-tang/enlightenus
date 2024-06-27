@@ -6,7 +6,6 @@ export type QuizProps = {
   title: string
   topic: string
   questions: Array<QnProps>
-  oneByOne: boolean
   authorid: string
 } 
 
@@ -17,7 +16,6 @@ export default function QuizCard(qzprops: QuizPropsFunc) {
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{qzprops.topic}: {qzprops.title} </Text>
     <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Created by {qzprops.authorid} </Text>
     <View style={{flexDirection:"row-reverse"}}>
-    <Text>{qzprops.oneByOne? "Questions one by one": "Questions scroll"}</Text> 
     </View>
   </TouchableOpacity>)
 }

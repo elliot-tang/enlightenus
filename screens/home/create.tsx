@@ -104,7 +104,6 @@ const deleteQuestion = (questionProps: Array<QnProps>, questionId: string) => {
 const Create = ({ route, navigation }: CreateProps) => {
   const passedunfinished = React.useContext(UnfinishedQuizCreationData)
   const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised" || route.params.topic === "")) ? "Uncategorised" : route.params.topic;
-  const [is1b1Enabled, setIs1b1Enabled] = useState(false);
   const [renderstate, setRender] = useState(0);
   const [questions, setQuestions] = useState(passedunfinished.data);
   const [quiztitle, setTitle] = useState("");
@@ -640,19 +639,6 @@ const Create = ({ route, navigation }: CreateProps) => {
         <View style={{ gap: 10 }}>
           <Text style={{ fontWeight: "bold", fontSize: 22 }}>Finalise and Publish Quiz</Text>
           <View style={{ flexDirection: 'row', gap: 10 }}>
-            <Text>
-              Questions one by one:
-            </Text>
-            <Switch
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={is1b1Enabled ? '#f5dd4b' : '#f4f3f4'}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={() => setIs1b1Enabled(previousState => !previousState)}
-              value={is1b1Enabled}
-            />
-            {is1b1Enabled && <Text>
-              (Yes)
-            </Text>}
           </View>
           <Text>Give your ({topic}) quiz a title</Text>
           <TextInput
@@ -694,10 +680,6 @@ const Create = ({ route, navigation }: CreateProps) => {
                 setMongo(prevMongo);
               }
 
-              // console.log(oldQnsmongoIDs);
-              // console.log(newQnsLocalID);
-              // console.log(questions);
-
               // Creates quiz with stored MongoDB ObjectIds
               const questionData = Array.from(questions);
               var toPush : Array<QuestionIdProps> = questionData.map(qn => {
@@ -709,8 +691,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
                 return { questionId, questionType, questionAttempts, noOptions };
               });
-              // console.log(toPush);
-
+              
               const quizId = await pushQuiz({
                 title: quiztitle,
                 topic: topic,

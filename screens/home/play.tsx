@@ -44,7 +44,6 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
   const [quizzes, setQuizzes] = useState([]);
   const user = returnUser();
 
-  // Do typecasting for following functions
   const fetchSavedQuizzes : () => Promise<Array<FetchedQuizProps>> = async () => {
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchSavedQuizzes`, { params: { username: user } });
@@ -155,7 +154,6 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           } else {
             response = await fetchAllQuizzes();
           }
-          console.log(response);
 
           // Maps response to quiz card props
           const finalQuizzes = response.map(quiz => {
@@ -177,7 +175,6 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
             });
             return { id, title, topic, oneByOne, authorid, questions };
           });
-          console.log(finalQuizzes);
           setQuizzes(finalQuizzes);
         }}>
           <MaterialIcons name="search" size={24} color="gray" />

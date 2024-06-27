@@ -26,9 +26,9 @@ export type HomeStackParamList = {
   HomeTabs: undefined;
   Create: { topic: string };
   Play: { topic: string };
-  DisplayPlay: {qzprop:QuizProps};
-  ScrollScreen: {qzprop:QuizProps};
-  OneScreen: {qzprop:QuizProps};
+  DisplayPlay: { qzprop: QuizProps };
+  ScrollScreen: { qzprop: QuizProps };
+  OneScreen: { qzprop: QuizProps };
 }
 
 export interface HomeScreenProps extends NativeStackScreenProps<HomeStackParamList>{}
