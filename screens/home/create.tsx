@@ -371,7 +371,7 @@ const Create = ({ route, navigation }: CreateProps) => {
             <View style={{ flexDirection: "row" }}>
               <TextInput
                 style={[styles.input, { flex: 5 }]}
-                placeholder="Type an answer here"
+                placeholder="Type an answer here and press the submit/OK button on your keyboard to submit!"
                 value={anyAns}
                 onChangeText={(text) => setAnyAns(text)}
                 onSubmitEditing={() => {
@@ -521,7 +521,7 @@ const Create = ({ route, navigation }: CreateProps) => {
   if (renderstate == 2) {
     return (
       <View>
-        <Text>ChatGPT goes here </Text>
+        <Text>Work in progress!</Text>
         <Button title="Go back" onPress={() => setRender(0)} />
       </View>
     )
@@ -559,6 +559,9 @@ const Create = ({ route, navigation }: CreateProps) => {
               All
             </Text>
           </TouchableOpacity>
+        </View>
+        <View style={{ gap: 25 }}>
+          <Text>Press the search button to search for quizzes!</Text>
         </View>
         <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
           <TextInput

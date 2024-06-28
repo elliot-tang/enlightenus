@@ -135,6 +135,9 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           </Text>
         </TouchableOpacity>
       </View>
+      <View style={{ gap: 25 }}>
+        <Text>Press the search button to search for quizzes!</Text>
+      </View>
       <View style={{ gap: 25 }} />
       {searchFrom === "Mine" && <Text>*Note: You can only playtest your own quizzes and the scores will not be reflected in the leaderboards</Text>}
       <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
