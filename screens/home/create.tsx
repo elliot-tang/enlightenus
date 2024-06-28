@@ -243,58 +243,63 @@ const Create = ({ route, navigation }: CreateProps) => {
           <Button color='#6cac48' title="Add question from AI" onPress={() => setRender(2)} />
           <Button color='#6cac48' title="Add question from database" onPress={() => setRender(3)} />
           {questions.length > 0 ? (
-            <FlatList
-              data={questions}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => <QuestionCard
-                {...item}
-                editQn={() => {
-                  setMcq(item.mcq);
-                  setMax(item.maxAttempt);
-                  setQuizstmt(item.quizstmt);
-                  setCorrans(item.corrans);
-                  setWrongs(item.wrongs);
-                  setNoOpt(item.noOption);
-                  setExp(item.explainText);
-                  const temp = deleteQuestion(questions, item.id);
-                  setQuestions(temp);
-                  setRender(1.5);
-                }}
-                deleteQn={() => {
-                  const temp = deleteQuestion(questions, item.id);
-                  setQuestions(temp);
-                  const tempnew = newQnsLocalID.filter((localid) => localid !== item.id);
-                  setNew(tempnew);
-                }}
-                notpushed={newQnsLocalID.includes(item.id)}
-                pushQn={async () => {
-                  const tempnew = newQnsLocalID.filter((localid) => localid !== item.id);
-                  setNew(tempnew);
-                  var mongoID;
-                  if (item.mcq == true) {
-                    const allOptions = [
-                      ...item.corrans.map((answer) => ({ answer: answer, isCorrect: true })),
-                      ...item.wrongs.map((answer) => ({ answer: answer })),
-                    ];
-                    mongoID = await pushMCQ({
-                      questionBody: item.quizstmt,
-                      options: allOptions,
-                      author: user,
-                      explainText: item.explainText ? item.explainText : undefined
-                    });
-                  } else {
-                    mongoID = await pushOEQ({
-                      questionBody: item.quizstmt,
-                      correctOptions: item.corrans,
-                      author: user,
-                      explainText: item.explainText ? item.explainText : undefined
-                    });
-                  }
-                  const temp = { localID: item.id, mongoID: mongoID }
-                  setMongo((prevArray) => [...prevArray, temp])
-                }}
-              />}
-            />
+            questions.map((item) => <QuestionCard
+              {...item}
+              editQn={() => {
+                setMcq(item.mcq);
+                setMax(item.maxAttempt);
+                setQuizstmt(item.quizstmt);
+                setCorrans(item.corrans);
+                setWrongs(item.wrongs);
+                setNoOpt(item.noOption);
+                setExp(item.explainText);
+                const temp = deleteQuestion(questions, item.id);
+                setQuestions(temp);
+                if (!newQnsLocalID.includes(item.id)) {
+                  const temp = Array.from(oldQnsmongoIDs).filter((ele) => ele.localID !== item.id)
+                  setMongo(temp);
+                }
+                setRender(1.5);
+              }}
+              deleteQn={() => {
+                const temp = deleteQuestion(questions, item.id);
+                setQuestions(temp);
+                const tempnew = newQnsLocalID.filter((localid) => localid !== item.id);
+                setNew(tempnew);
+                if (!newQnsLocalID.includes(item.id)) {
+                  const temp = Array.from(oldQnsmongoIDs).filter((ele) => ele.localID !== item.id)
+                  setMongo(temp);
+                }
+              }}
+              notpushed={newQnsLocalID.includes(item.id)}
+              pushQn={async () => {
+                const tempnew = newQnsLocalID.filter((localid) => localid !== item.id);
+                setNew(tempnew);
+                var mongoID;
+                if (item.mcq == true) {
+                  const allOptions = [
+                    ...item.corrans.map((answer) => ({ answer: answer, isCorrect: true })),
+                    ...item.wrongs.map((answer) => ({ answer: answer })),
+                  ];
+                  mongoID = await pushMCQ({
+                    questionBody: item.quizstmt,
+                    options: allOptions,
+                    author: user,
+                    explainText: item.explainText ? item.explainText : undefined
+                  });
+                } else {
+                  mongoID = await pushOEQ({
+                    questionBody: item.quizstmt,
+                    correctOptions: item.corrans,
+                    author: user,
+                    explainText: item.explainText ? item.explainText : undefined
+                  });
+                }
+                const temp = { localID: item.id, mongoID: mongoID }
+                setMongo((prevArray) => [...prevArray, temp])
+              }}
+            />)
+
           ) : <Text style={{ textAlign: "center" }}> No questions add yet.....</Text>
           }
         </View>
@@ -327,6 +332,7 @@ const Create = ({ route, navigation }: CreateProps) => {
               style={styles.input}
               placeholder="Question statement"
               value={quizstmt}
+              multiline={true}
               onChangeText={(text) => setQuizstmt(text)}
             />
             <View style={{ height: 10 }} />
@@ -376,7 +382,7 @@ const Create = ({ route, navigation }: CreateProps) => {
                   if (!anyAns) {
                     alert("Answer field cannot be empty")
                   }
-                  else { setWrongs((prevArray) => [...prevArray, anyAns.trim()]); setAnyAns(""); }
+                  else { setCorrans((prevArray) => [...prevArray, anyAns.trim()]); setAnyAns(""); }
                 }}
               />
             </View>
@@ -410,33 +416,31 @@ const Create = ({ route, navigation }: CreateProps) => {
             />
             <View style={{ height: 10 }} />
             <View style={{ gap: 10 }}>
-              <FlatList
-                data={[...corrans, ...wrongs]}
-                renderItem={({ item }) => (
-                  <View style={{ justifyContent: "center", alignItems: "center" }}>
-                    <AnswerEdittorBox
-                      text={item}
-                      deletePress={() => {
-                        const updatedCorrans = corrans.filter((el) => el !== item);
-                        const updatedWrongs = wrongs.filter((el) => el !== item);
-                        setCorrans(updatedCorrans);
-                        setWrongs(updatedWrongs);
-                      }}
-                      deselectCorrectPress={() => {
-                        const updatedCorrans = corrans.filter((el) => el !== item);
-                        setCorrans(updatedCorrans);
-                        setWrongs((prevArray) => [...prevArray, item]);
-                      }}
-                      setCorrectPress={() => {
-                        const updatedWrongs = wrongs.filter((el) => el !== item);
-                        setWrongs(updatedWrongs);
-                        setCorrans((prevArray) => [...prevArray, item]);
-                      }}
-                      isCorrect={corrans.includes(item)}
-                    />
-                  </View>
-                )}
-              />
+              {[...corrans, ...wrongs].map((item) => (
+                <View style={{ justifyContent: "center", alignItems: "center", paddingTop: 5 }}>
+                  <AnswerEdittorBox
+                    key={item}
+                    text={item}
+                    deletePress={() => {
+                      const updatedCorrans = corrans.filter((el) => el !== item);
+                      const updatedWrongs = wrongs.filter((el) => el !== item);
+                      setCorrans(updatedCorrans);
+                      setWrongs(updatedWrongs);
+                    }}
+                    deselectCorrectPress={() => {
+                      const updatedCorrans = corrans.filter((el) => el !== item);
+                      setCorrans(updatedCorrans);
+                      setWrongs((prevArray) => [...prevArray, item]);
+                    }}
+                    setCorrectPress={() => {
+                      const updatedWrongs = wrongs.filter((el) => el !== item);
+                      setWrongs(updatedWrongs);
+                      setCorrans((prevArray) => [...prevArray, item]);
+                    }}
+                    isCorrect={corrans.includes(item)}
+                  />
+                </View>
+              ))}
             </View>
             <View style={{ height: 10 }} />
             {/* bunch of checks so that we actually get valid question props*/}
@@ -544,7 +548,7 @@ const Create = ({ route, navigation }: CreateProps) => {
             style={{ flex: 1, backgroundColor: saveorall === "Create" ? '#079A04' : '#D3ECD3', height: 50, justifyContent: 'center', alignItems: 'center' }}
           >
             <Text style={{ fontSize: 24, color: saveorall === "Create" ? 'white' : 'black', textAlign: 'center' }}>
-              Created Questions
+              Created
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -580,52 +584,45 @@ const Create = ({ route, navigation }: CreateProps) => {
           </TouchableOpacity>
         </View>
         <ScrollView style={{ flex: 10 }}>
-          <FlatList
-            data={selectionRender}
-            keyExtractor={item => item._id}
-            renderItem={({ item }) =>
-              <TouchableOpacity style={{
-                backgroundColor: '#cdefff',
-                padding: 15,
-                borderRadius: 10,
-              }} onPress={() => {
-                var localid = Math.random().toString();
-                while (questions.map((ele) => ele.id).includes(localid)) {
-                  localid = Math.random().toString();
-                };
-                const corrects = (item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect).map((ele) => ele.answer) : []);
-                const temp = {
-                  id: localid,
-                  mcq: item.questionType === "MCQ",
-                  maxAttempt: 1,
-                  quizstmt: item.questionBody,
-                  corrans: item.questionType === "MCQ" ? corrects : item.correctOptions,
-                  wrongs: item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect === false || ele.isCorrect === undefined).map((ele) => ele.answer) : [],
-                  noOption: 10,
-                  explainText: item.explainText
-                };
+          {selectionRender.map((item) => <View style={{ paddingTop: 10 }}>
+            <TouchableOpacity style={{
+              backgroundColor: '#cdefff',
+              padding: 15,
+              borderRadius: 10,
+            }} onPress={() => {
+              var localid = Math.random().toString();
+              while (questions.map((ele) => ele.id).includes(localid)) {
+                localid = Math.random().toString();
+              };
+              const corrects = (item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect).map((ele) => ele.answer) : []);
+              const temp = {
+                id: localid,
+                mcq: item.questionType === "MCQ",
+                maxAttempt: 1,
+                quizstmt: item.questionBody,
+                corrans: item.questionType === "MCQ" ? corrects : item.correctOptions,
+                wrongs: item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect === false || ele.isCorrect === undefined).map((ele) => ele.answer) : [],
+                noOption: 10,
+                explainText: item.explainText
+              };
 
-                // Updates the list of questions in the draft quiz
-                var getquestions = Array.from(questions);
-                getquestions.push(temp);
-                setQuestions(getquestions);
+              // Updates the list of questions in the draft quiz
+              var getquestions = Array.from(questions);
+              getquestions.push(temp);
+              setQuestions(getquestions);
 
-                // Updates the MongoID list
-                var getMongoId = Array.from(oldQnsmongoIDs);
-                getMongoId.push({ localID: localid, mongoID: item._id });
-                setMongo(getMongoId);
-                setRender(0);
-                return;
-              }
-              }>
-                <Text>{item.questionType}: {item.questionBody} by {item.author}</Text>
-              </TouchableOpacity>}
-            ItemSeparatorComponent={(() => (
-              <View
-                style={{ height: 10 }}
-              />
-            ))}
-          />
+              // Updates the MongoID list
+              var getMongoId = Array.from(oldQnsmongoIDs);
+              getMongoId.push({ localID: localid, mongoID: item._id });
+              setMongo(getMongoId);
+              setRender(0);
+              return;
+            }
+            }>
+              <Text>{item.questionType}: {item.questionBody}</Text>
+              <Text style={{ fontSize: 10 }}>By {item.author}</Text>
+            </TouchableOpacity>
+          </View>)}
         </ScrollView>
         <Button title="Go back" onPress={() => setRender(0)} />
         <View style={{ height: 20 }} />
@@ -651,6 +648,10 @@ const Create = ({ route, navigation }: CreateProps) => {
           <View>
             <Button title="Back" onPress={() => setRender(0)} />
             <Button title="Publish Quiz" onPress={async () => {
+              console.log(oldQnsmongoIDs);
+              console.log(newQnsLocalID);
+              console.log(questions);
+
               // Pushes all locally created questions to database
               for (const qn of newQnsLocalID) {
                 const qnData = questions.find(question => question.id === qn);
@@ -682,7 +683,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
               // Creates quiz with stored MongoDB ObjectIds
               const questionData = Array.from(questions);
-              var toPush : Array<QuestionIdProps> = questionData.map(qn => {
+              var toPush: Array<QuestionIdProps> = questionData.map(qn => {
                 const mongoIds = Array.from(oldQnsmongoIDs);
                 const questionId = mongoIds.find(ids => ids.localID === qn.id).mongoID;
                 const questionType = qn.mcq ? 'MCQ' : 'OEQ';
@@ -691,7 +692,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
                 return { questionId, questionType, questionAttempts, noOptions };
               });
-              
+
               const quizId = await pushQuiz({
                 title: quiztitle,
                 topic: topic,

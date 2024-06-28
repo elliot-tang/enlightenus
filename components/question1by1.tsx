@@ -364,22 +364,14 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
     const toShow = Array.from({ length: questions.length }, (_, i) => [questions[i], tally[i], qAnswers[i]])
     return (
       <View style={{ flex: 1 }}>
-        <View style={{ flex: 1 }}>
+        <View style={{height: height*0.07}}>
           <Text style={{ fontSize: 18 }}>Your score is {point}/{questions.length}. Listed below is a breakdown.</Text>
         </View>
-        <View style={{ flex: 10 }}>
+        <View style={{height: height*0.69}}>
           <ScrollView>
-            <FlatList
-              ItemSeparatorComponent={
-                (() => (
-                  <View
-                    style={{ marginTop: 16 }}
-                  />
-                ))
-              }
-              data={toShow}
-              keyExtractor={item => item[0].id}
-              renderItem={({ item }) => <TallyCard
+            {toShow.map((item) => <View style={{paddingBottom:10}}>
+              <TallyCard
+                key={item[0].id}
                 {...item[0]}
                 saved={save.includes(item[0].id)}
                 correct={item[1]}
@@ -402,11 +394,11 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
                   var temp = save.filter(ele => ele != item[0].id)
                   setSave(temp)
                 }}
-              />}
-            />
+              />
+              </View>)}
           </ScrollView>
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{height: height*0.07, gap:10 }}>
           <Button title="Return to Home" onPress={ async () => {
             try {
               // Saves the taken quiz and user response into the database
@@ -450,6 +442,7 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
               exitScreen();
             }
           }} />
+          <Button title= "Save quiz" onPress={()=> alert("Currently Under Development")}/>
         </View>
       </View>
     );

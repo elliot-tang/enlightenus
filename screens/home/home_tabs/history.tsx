@@ -10,30 +10,35 @@ import { HistoryTallyCard } from '@app/components/questioncard';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
 
-const {height,width} = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 type HistoryStackNavigationParamList = {
   main: undefined,
-  individual: {indivProps: HistoryProps}|undefined,
+  individual: { indivProps: HistoryProps } | undefined,
 }
 
 const Stack = createNativeStackNavigator<HistoryStackNavigationParamList>();
 
-interface HistoryScreenProps extends NativeStackScreenProps<HistoryStackNavigationParamList>{}
+interface HistoryScreenProps extends NativeStackScreenProps<HistoryStackNavigationParamList> { }
 
-type IndividualProps = NativeStackScreenProps<HistoryStackNavigationParamList,"individual">
+type IndividualProps = NativeStackScreenProps<HistoryStackNavigationParamList, "individual">
+
+function capitalizeFLetter(tochange: string) {
+  return (tochange[0].toUpperCase() +
+    tochange.slice(1));
+}
 
 
 export default function PlayHist() {
   return (
     <Stack.Navigator initialRouteName="main">
-      <Stack.Screen name="main" component={MainHistory} options={{ headerShown: false }}/>
-      <Stack.Screen name="individual" component={Individual} />
+      <Stack.Screen name="main" component={MainHistory} options={{ headerShown: false }} />
+      <Stack.Screen name="individual" component={Individual} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
 
-function MainHistory({navigation}:HistoryScreenProps) {
+function MainHistory({ navigation }: HistoryScreenProps) {
   const [topic, setTopic] = useState("Uncategorised");
   const [quizStats, setQuizStats] = useState([]);
   const user = returnUser();
@@ -72,63 +77,57 @@ function MainHistory({navigation}:HistoryScreenProps) {
     loadQuizzes();
   }, []);
 
-  const toShowData = (topic==="Uncategorised" || topic ==="")? quizStats: quizStats.filter(ele=>ele.topic === topic);
+  const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);
   return (
-    <View style={{flex:1, paddingTop:70}}>
-    <View style ={{zIndex:1}}>
-      <CustomPicker
-        options={options}
-        selectedValue={topic}
-        onValueChange={setTopic}
-        label="View past quizzes by topic:"
-      />
-    </View>
-    <ScrollView style={{ flex: 1, }}>
-      <FlatList
-        data={toShowData}
-        keyExtractor={item => item.id} 
-        renderItem={({item}) => <HistoryCard
-        {...item}
-        goToInd = {()=>navigation.navigate("individual", {indivProps: item})}/>} 
-        ItemSeparatorComponent={()=><View style={{ height: 10 }} />}
-      />
-    </ScrollView>
+    <View style={{ flex: 1 }}>
+      <View style={{ height: height * 0.07 }} />
+      <Text style={{ fontSize: 23, fontWeight: "bold" }}>
+        View Previous Quizzes Here
+      </Text>
+      <View style={{ zIndex: 1 }}>
+        <CustomPicker
+          options={options}
+          selectedValue={topic}
+          onValueChange={setTopic}
+          label="Topic:"
+        />
+      </View>
+      <ScrollView style={{ flex: 1 }}>
+        {toShowData.map((item) => <View style={{paddingTop:10}}>
+          <HistoryCard
+            key={item.id}
+            {...item}
+            goToInd={() => navigation.navigate("individual", { indivProps: item })} />
+        </View>)}
+      </ScrollView>
     </View>
   )
 }
 
-function Individual({route,navigation}: IndividualProps){
-  const toShowProps = (route.params === undefined)? {id:"",title:"", topic:"", questions: Array<QuestionPropsForHistory>(), score: 0}: route.params.indivProps
+function Individual({ route, navigation }: IndividualProps) {
+  const toShowProps = (route.params === undefined) ? { id: "", title: "", topic: "", questions: Array<QuestionPropsForHistory>(), score: 0 } : route.params.indivProps
   const toShow = toShowProps.questions
   return (
-    <View style={{flex:1, paddingTop:20}}>
-      <Text style={{fontSize:18, fontWeight:"bold"}}>{toShowProps.topic} : {toShowProps.title}</Text>
-      <View style={{height: 0.05*height, flexDirection: "row"}}/>
-      <ScrollView style={{ flex: 11, gap :10 }}>
-          <FlatList
-            ItemSeparatorComponent={
-          (() => (
-            <View
-              style={{marginTop: 16}}
-            />
-          ))
-        }
-            data={toShow}
-            keyExtractor={item => item.id} 
-            renderItem={({item}) => <HistoryTallyCard
+    <View style={{ flex: 1 }}>
+      <View style={{ height: height * 0.07 }} />
+      <Text style={{ fontSize: 21, fontWeight: "bold" }}>{capitalizeFLetter(toShowProps.topic)} : {toShowProps.title}</Text>
+      <View style={{ height: 0.05 * height, flexDirection: "row" }} />
+      <ScrollView style={{ height: height * 0.67, gap: 10 }}>
+        {toShow.map((item) => <View style={{paddingTop:10}}>
+          <HistoryTallyCard
             {...item}
-            saved = {true}
+            saved={true}
             reportQn={() => alert('Currently under development!')}
             saveQn={() => alert('Currently under development!')}
             unsaveQn={() => alert('Currently under development!')}
-            />} 
           />
-        </ScrollView>
-      <Button title="Go Back" onPress={()=>navigation.goBack()}/>
+          </View>)}
+      </ScrollView>
+      <Button title="Go Back" onPress={() => navigation.goBack()} />
     </View>
-    
+
   )
-  
+
 }
 
 const options = [
@@ -139,41 +138,41 @@ const options = [
 ]
 
 const testData = [
-  { 
-    id: "hsbfhbfj", 
-    title: "myquiz", 
-    topic: "Coding", 
+  {
+    id: "hsbfhbfj",
+    title: "myquiz",
+    topic: "Coding",
     questions: [
       {
-        id: "jddjs", 
-        mcq: false, 
-        maxAttempt: 1, 
-        quizstmt: "questio hcshcjkn", 
-        corrans: ["dhsbdh","dhsdh"], 
-        wrongs:[], 
-        noOption: 2, 
-        explainText:"hdbsh",
+        id: "jddjs",
+        mcq: false,
+        maxAttempt: 1,
+        quizstmt: "questio hcshcjkn",
+        corrans: ["dhsbdh", "dhsdh"],
+        wrongs: [],
+        noOption: 2,
+        explainText: "hdbsh",
         responses: ['dhsdh'],
         isCorrect: true,
         noAttempts: 1
       },
       {
-        id: "jddjs2", 
-        mcq: false, 
-        maxAttempt: 1, 
-        quizstmt: "questio hcshcjkn", 
-        corrans: ["dhsbdh","dhsdh"], 
-        wrongs:[], 
-        noOption:2, 
-        explainText:"hdbsh",
+        id: "jddjs2",
+        mcq: false,
+        maxAttempt: 1,
+        quizstmt: "questio hcshcjkn",
+        corrans: ["dhsbdh", "dhsdh"],
+        wrongs: [],
+        noOption: 2,
+        explainText: "hdbsh",
         responses: ['wrjhfe', 'effj'],
         isCorrect: false,
         noAttempts: 1
       }
-    ], 
+    ],
     hasSaved: true,
     score: 1
   },
-  {id: "hsbfbfj", title: "myquiz2", topic: "Math", questions: [], hasSaved: true, score: 0}, 
-  {id: "hsdjiofj", title: "myquiz3", topic: "Coding", questions: [], hasSaved: false, score: 0}
+  { id: "hsbfbfj", title: "myquiz2", topic: "Math", questions: [], hasSaved: true, score: 0 },
+  { id: "hsdjiofj", title: "myquiz3", topic: "Coding", questions: [], hasSaved: false, score: 0 }
 ]

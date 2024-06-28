@@ -97,7 +97,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
 
   return (
     <View style={{ gap: 15 }}>
-      <Text style={{ fontSize: 22 }}>Search quizzes in {topic} from? </Text>
+      <Text style={{ fontSize: 22 }}>Search quizzes from? </Text>
       <View style={{ flexDirection: "row" }}>
         <TouchableOpacity
           onPress={() => setSearchFrom("Saved")}

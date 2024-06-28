@@ -40,6 +40,7 @@ export default function QuizScreen({ route, navigation }: DisplayProps) {
       
       <View style={styles.buttonContainer}>
         {OneByOne ? <Button title="Play this Quiz" onPress={() => navigation.navigate("OneScreen", { qzprop: quizparams })} /> : <Button title="Play this Quiz" onPress={() => navigation.navigate("ScrollScreen", { qzprop: quizparams })} />}
+        <Button title= "Save this quiz" onPress={()=> alert("Currently Under Development")}/>
         <Button title="Choose another Quiz" onPress={() => navigation.goBack()} />
       </View>
     </View>)

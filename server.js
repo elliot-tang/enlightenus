@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const AuthRouter = require("./routes/auth");
 const QuizRouter = require("./routes/quiz");
+const ReportRouter = require("./routes/report");
 
 const app = express();
 require('dotenv').config()
@@ -20,8 +21,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/', AuthRouter);
 app.use('/', QuizRouter);
+app.use('/', ReportRouter);
 app.use('/auth', AuthRouter);
 app.use('/quiz', QuizRouter);
+app.use('/report', ReportRouter);
 
 // starts server and connects to database
 if (process.env.MONGO_URL) {

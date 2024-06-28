@@ -35,6 +35,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
 
   const [topic, setTopic] = useState("");
   const [quizStats, setQuizStats] = useState([]);
+  const [home, setHome] = useState(true);
 
   // Loads 20 most recently taken quizzes into graph
   useEffect(() => {

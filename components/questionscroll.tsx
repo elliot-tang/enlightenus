@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import { Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { TallyCard } from './questioncard';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
@@ -228,6 +228,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
                 breakdown.push(qn);
               }
 
+              console.log(tmpScore);
               const TakenQuiz: TakenQuizProps = {
                 username: user,
                 quizId: quizId,
@@ -261,67 +262,55 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
       /*here we display the score, and tally up which qn is correct or wrong*/
       return (
-        <View style={{ flex: 1 }}>
-          <View >
+        <SafeAreaView style={{ flex: 1, gap: 10 }}>
+          <View>
             <Text style={{ fontSize: 18 }}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
           </View>
-
-          <ScrollView style={{ gap: 10 }}>
-            <FlatList
-              ItemSeparatorComponent={
-                (() => (
-                  <View
-                    style={{ marginTop: 16 }}
-                  />
-                ))
-              }
-              data={toShow}
-              keyExtractor={item => item[0].id}
-              renderItem={({ item }) =>
-                <View>
-                  <TallyCard
-                    {...item[0]}
-                    saved={save.includes(item[0].id)}
-                    correct={item[1]}
-                    userAns={item[2]}
-                    reportQn={() => {
-                      // TODO: Report question
-                      alert('Currently under development!');
-                      setCurrentI(item[0].id);
-                      setCurrentQ(item[0].quizstmt)
-                      setPage(-1);
-                    }}
-                    saveQn={() => {
-                      // TODO: Save question
-                      alert('Currently under development!');
-                      var temp = Array.from(save);
-                      temp.push(item[0].id);
-                      setSave(temp)
-                    }}
-                    unsaveQn={() => {
-                      var temp = save.filter(ele => ele != item[0].id)
-                      setSave(temp)
-                    }}
-                  />
-                  <AnsScroll
-                    {...item[0]}
-                  />
-                </View>
-
-              }
-            />
-
-            <View style={{ flex: 1 }}>
-              <Button title="Return to Home" onPress={() => {
-                // Resets score and isCorrects and returns to home page
-                setScore(0);
-                setIsCorrects([]);
-                exitScreen();
-              }} />
-            </View>
-
-          </ScrollView>
-        </View>
+          <View>
+            <ScrollView>
+              {toShow.map((item) => <View style={{paddingTop:10}}>
+                <TallyCard
+                  key={item[0].id}
+                  {...item[0]}
+                  saved={save.includes(item[0].id)}
+                  correct={item[1]}
+                  userAns={item[2]}
+                  reportQn={() => {
+                    // TODO: Report question
+                    alert('Currently under development!');
+                    setCurrentI(item[0].id);
+                    setCurrentQ(item[0].quizstmt)
+                    setPage(-1);
+                  }}
+                  saveQn={() => {
+                    // TODO: Save question
+                    alert('Currently under development!');
+                    var temp = Array.from(save);
+                    temp.push(item[0].id);
+                    setSave(temp)
+                  }}
+                  unsaveQn={() => {
+                    var temp = save.filter(ele => ele != item[0].id)
+                    setSave(temp)
+                  }}
+                />
+                <AnsScroll
+                  {...item[0]}
+                />
+              </View>)}
+              <View style={{ flex: 1, gap: 10 }}>
+                <Button title="Return to Home" onPress={() => {
+                  // Resets score and isCorrects and returns to home page
+                  setScore(0);
+                  setIsCorrects([]);
+                  exitScreen();
+                }} />
+                <Button title="Save this quiz" onPress={() => alert("Currently Under Development")} />
+              </View>
+              <View style={{height:45}}/>
+            </ScrollView>
+          </View>
+        </SafeAreaView>
       )
     }
   }

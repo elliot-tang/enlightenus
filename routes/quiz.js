@@ -125,7 +125,7 @@ router.get('/quiz/fetchSavedQuestions', async (req, res) => {
     // Fetches only 20 for now
     const fetched = await UserSavedQuestion.find({ userId: user._id, }, 'question -_id')
                                            .sort({ dateSaved: -1 })
-                                           .limit(20)
+                                           .limit(50)
                                            .populate({
                                               path: 'question.questionId', 
                                               populate: {
@@ -185,7 +185,7 @@ router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
 
     const questions = [...MCQs, ...OEQs];   
     questions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-    const limited = questions.slice(0, 20);
+    const limited = questions.slice(0, 50);
     console.log('All questions fetched successfully!');
     res.status(200).json({ questions: limited });
   } catch (error) {
@@ -218,7 +218,7 @@ router.get('/quiz/fetchAllQuestions', async (req, res) => {
     });
     const questions = [...MCQs, ...OEQs];   
     questions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-    const limited = questions.slice(0, 20);
+    const limited = questions.slice(0, 50);
     console.log('All questions fetched successfully!');
     res.status(200).json({ questions: limited });
   } catch (error) {
@@ -534,7 +534,7 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
     // Fetches only 20 for now
     const fetched = await UserSavedQuiz.find({ userId: user._id })
                                        .sort({ dateSaved: -1 })
-                                       .limit(20)
+                                       .limit(50)
                                        .populate({
                                         path: 'quizId',
                                         populate: [
@@ -592,7 +592,7 @@ router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
 
     const fetched = await Quiz.find({ author: user._id })
                               .sort({ dateCreated: -1 })
-                              .limit(20)
+                              .limit(50)
                               .populate({
                                 path: 'questions.questionId',
                                 populate: {
@@ -627,7 +627,7 @@ router.get('/quiz/fetchAllQuizzes', async (req, res) => {
   try {
     const fetched = await Quiz.find({})
                               .sort({ dateCreated: -1 })
-                              .limit(20)
+                              .limit(50)
                               .populate({
                                 path: 'questions.questionId',
                                 populate: {
@@ -678,7 +678,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
       }
       fetched = await Quiz.find({ title: { $regex: criteriaBody, $options: 'i' } })
                           .sort({ dateSaved: -1 })
-                          .limit(20)
+                          .limit(50)
                           .populate('questions.questionId')
                           .exec();
     } else if (criteriaName.toLowerCase() === 'topic') {
@@ -688,7 +688,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
       }
       fetched = await Quiz.find({ topic: criteriaBody.toLowerCase() })
                           .sort({ dateSaved: -1 })
-                          .limit(20)
+                          .limit(50)
                           .populate('questions.questionId')
                           .exec();
     } else {
@@ -697,7 +697,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
       }
       fetched = await Quiz.find({ isVerified: criteriaBody })
                           .sort({ dateSaved: -1 })
-                          .limit(20)
+                          .limit(50)
                           .populate('questions.questionId')
                           .exec();
     }
@@ -828,7 +828,7 @@ router.post('/quiz/takeQuiz', async (req, res) => {
     }
 
     // Checks for valid score
-    if (!score || typeof score !== 'number' || isNaN(score) || score < 0 || score > breakdown.length) {
+    if (score === undefined || typeof score !== 'number' || isNaN(score) || score < 0 || score > breakdown.length) {
       return res.status(400).json({ message: 'Invalid score' });
     }
 
@@ -866,7 +866,7 @@ router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
     // Fetches only 20 for now
     const fetched = await UserTakenQuiz.find({ userId: user._id })
                                        .sort({ dateTaken: -1 })
-                                       .limit(20)
+                                       .limit(50)
                                        .populate({
                                         path: 'quizId',
                                         populate: [
