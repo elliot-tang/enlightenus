@@ -26,9 +26,9 @@ export type HomeStackParamList = {
   HomeTabs: undefined;
   Create: { topic: string };
   Play: { topic: string };
-  DisplayPlay: {qzprop:QuizProps};
-  ScrollScreen: {qzprop:QuizProps};
-  OneScreen: {qzprop:QuizProps};
+  DisplayPlay: { qzprop: QuizProps };
+  ScrollScreen: { qzprop: QuizProps };
+  OneScreen: { qzprop: QuizProps };
 }
 
 export interface HomeScreenProps extends NativeStackScreenProps<HomeStackParamList>{}
@@ -36,8 +36,8 @@ export interface HomeScreenProps extends NativeStackScreenProps<HomeStackParamLi
 interface UnfinwithCall {
   data: Array<QnProps>
   setData: (newd: Array<QnProps>)=>void
-  save: Array<String>
-  setSaved: (newd: Array<String>)=>void
+  save: Array<string>
+  setSaved: (newd: Array<string>)=>void
   mongo: Array<{localID: string, mongoID: string}>
   setMongo: (newd: Array<{localID: string, mongoID: string}>)=>void
 }
@@ -48,7 +48,7 @@ export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
   save: [],
   setSaved: (newSaved) => {},
   mongo:[],
-  setMongo: (newSaved) => {},
+  setMongo: (newMongo) => {},
 });
 
 type BottomTabNavigationParamList = {
@@ -94,8 +94,8 @@ function App() {
   const [unfin,setUnfin] = useState(Array<QnProps>);
   function childTrafficking(newData: Array<QnProps>) {
     setUnfin(newData);}
-  const [unfin2,setUnfin2] = useState(Array<String>);
-  function childTrafficking2(newData: Array<String>) {
+  const [unfin2,setUnfin2] = useState(Array<string>);
+  function childTrafficking2(newData: Array<string>) {
     setUnfin2(newData);
   }
   const [unfin3,setUnfin3] = useState(Array<{localID: string, mongoID: string}>);
@@ -172,6 +172,8 @@ export const styles = StyleSheet.create({
   link: {
     color: "blue",
   },
+
+  // End of login styles
 
   pickerStyle: {
     height: 50, 

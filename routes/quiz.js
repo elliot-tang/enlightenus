@@ -109,7 +109,7 @@ router.post('/quiz/createOEQ', async (req, res) => {
 // fetch all questions saved by user, limited to 20 for now
 router.get('/quiz/fetchSavedQuestions', async (req, res) => {
   try {
-    const username = req.body.username;
+    const username = req.query.username;
     
     // No user provided
     if (!username) {
@@ -125,12 +125,18 @@ router.get('/quiz/fetchSavedQuestions', async (req, res) => {
     // Fetches only 20 for now
     const fetched = await UserSavedQuestion.find({ userId: user._id, }, 'question -_id')
                                            .sort({ dateSaved: -1 })
-                                           .limit(20)
-                                           .populate('question.questionId')
+                                           .limit(50)
+                                           .populate({
+                                              path: 'question.questionId', 
+                                              populate: {
+                                                path: 'author',
+                                              }
+                                            })
                                            .exec();
     const questions = fetched.map(doc => {
       const toObj = doc.question.questionId.toObject ? doc.question.questionId.toObject() : doc.question.questionId;
       toObj['questionType'] = doc.question.questionType;
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
     console.log('Saved questions fetched successfully!');
@@ -144,7 +150,7 @@ router.get('/quiz/fetchSavedQuestions', async (req, res) => {
 // fetch all questions created by user, limited to 20 for now
 router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
   try {
-    const username = req.body.username;
+    const username = req.query.username;
     
     // No user provided
     if (!username) {
@@ -159,25 +165,27 @@ router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
 
     // Fetches only 20 for now
     const [fetchedMCQs, fetchedOEQs] = await Promise.all([
-      MCQ.find({ author: user._id }).exec(), 
-      OEQ.find({ author: user._id }).exec()
+      MCQ.find({ author: user._id }).populate('author').exec(), 
+      OEQ.find({ author: user._id }).populate('author').exec()
     ]);
 
     const MCQs = fetchedMCQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'MCQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
 
     const OEQs = fetchedOEQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'OEQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
 
     const questions = [...MCQs, ...OEQs];   
     questions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-    const limited = questions.slice(0, 20);
+    const limited = questions.slice(0, 50);
     console.log('All questions fetched successfully!');
     res.status(200).json({ questions: limited });
   } catch (error) {
@@ -189,20 +197,28 @@ router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
 // fetch all questions from database, limited to 20 for now
 router.get('/quiz/fetchAllQuestions', async (req, res) => {
   try {
-    const [fetchedMCQs, fetchedOEQs] = await Promise.all([MCQ.find({}).exec(), OEQ.find({}).exec()]);
+    const [fetchedMCQs, fetchedOEQs] = await Promise.all([
+      MCQ.find({})
+         .populate('author')
+         .exec(), 
+      OEQ.find({})
+         .populate('author')
+         .exec()]);
     const MCQs = fetchedMCQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'MCQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
     const OEQs = fetchedOEQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'OEQ';
+      toObj['author'] = toObj.author.username;
       return toObj;
     });
     const questions = [...MCQs, ...OEQs];   
     questions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-    const limited = questions.slice(0, 20);
+    const limited = questions.slice(0, 50);
     console.log('All questions fetched successfully!');
     res.status(200).json({ questions: limited });
   } catch (error) {
@@ -502,7 +518,7 @@ router.post('/quiz/saveQuiz', async (req, res) => {
 // fetch quiz saved by user, limited to 20 for now
 router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
   try {
-    const username = req.body.username;
+    const username = req.query.username;
 
     // No user provided
     if (!username) {
@@ -518,27 +534,136 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
     // Fetches only 20 for now
     const fetched = await UserSavedQuiz.find({ userId: user._id })
                                        .sort({ dateSaved: -1 })
-                                       .limit(20)
+                                       .limit(50)
                                        .populate({
                                         path: 'quizId',
-                                        populate: {
-                                          path: 'questions.questionId',
+                                        populate: [
+                                            { 
+                                              path: 'questions.questionId',
+                                              populate: {
+                                                path: 'author'
+                                              } 
+                                            }, 
+                                            { 
+                                              path: 'author' 
+                                            }
+                                          ]
                                         }
-                                       })
+                                      )
                                        .exec();
     const quizzes = fetched.map(doc => doc.quizId);
-    console.log('Saved quizzes fetched successfully!');
+    const mappedQuizzes = quizzes.map(quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.author = toObj.author.username;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      return quizObject;
+    });
+    console.log('Quizzes fetched successfully!');
+    res.status(200).json({ quizzes: mappedQuizzes });
+  } catch (error) {
+    console.log('Unable to fetch quizzes');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quizzes', error });
+  }
+});
+
+router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
+  try {
+    const username = req.query.username;
+
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const fetched = await Quiz.find({ author: user._id })
+                              .sort({ dateCreated: -1 })
+                              .limit(50)
+                              .populate({
+                                path: 'questions.questionId',
+                                populate: {
+                                  path: 'author',
+                                }
+                              })
+                              .populate('author')
+                              .exec();
+    const quizzes = fetched.map(quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        toObj.author = toObj.author.username;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      return quizObject;
+    });
+    console.log('Quizzes fetched successfully!');
     res.status(200).json({ quizzes: quizzes });
   } catch (error) {
     console.log('Unable to fetch quizzes');
     res.status(500).json({ message: 'Error fetching quizzes', error });
   }
-})
+});
+
+router.get('/quiz/fetchAllQuizzes', async (req, res) => {
+  try {
+    const fetched = await Quiz.find({})
+                              .sort({ dateCreated: -1 })
+                              .limit(50)
+                              .populate({
+                                path: 'questions.questionId',
+                                populate: {
+                                  path: 'author',
+                                }
+                              })
+                              .populate('author')
+                              .exec();
+    const quizzes = fetched.map(quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        toObj.author = toObj.author.username;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      return quizObject;
+    });
+    console.log('Quizzes fetched successfully!');
+    res.status(200).json({ quizzes: quizzes });
+  } catch (error) {
+    console.log('Unable to fetch quizzes');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quizzes', error });
+  }
+});
 
 // fetch all quiz matching criteria, limited to 20 for now
 router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
   try {
-    const { criteriaName, criteriaBody } = req.body;
+    const criteriaName = req.query.criteriaName;
+    const criteriaBody = req.query.criteriaBody;
 
     // Checks that the search query is title, topic or verified
     if (!['title', 'topic', 'verified'].includes(criteriaName.toLowerCase())) {
@@ -553,7 +678,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
       }
       fetched = await Quiz.find({ title: { $regex: criteriaBody, $options: 'i' } })
                           .sort({ dateSaved: -1 })
-                          .limit(20)
+                          .limit(50)
                           .populate('questions.questionId')
                           .exec();
     } else if (criteriaName.toLowerCase() === 'topic') {
@@ -563,7 +688,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
       }
       fetched = await Quiz.find({ topic: criteriaBody.toLowerCase() })
                           .sort({ dateSaved: -1 })
-                          .limit(20)
+                          .limit(50)
                           .populate('questions.questionId')
                           .exec();
     } else {
@@ -572,7 +697,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
       }
       fetched = await Quiz.find({ isVerified: criteriaBody })
                           .sort({ dateSaved: -1 })
-                          .limit(20)
+                          .limit(50)
                           .populate('questions.questionId')
                           .exec();
     }
@@ -697,13 +822,13 @@ router.post('/quiz/takeQuiz', async (req, res) => {
         return res.status(400).json({ message: 'Invalid responses' });
       }
 
-      if (!qn.isCorrect || typeof qn.isCorrect !== 'boolean') {
+      if (qn.isCorrect === undefined || typeof qn.isCorrect !== 'boolean') {
         return res.status(400).json({ message: 'Invalid isCorrect' });
       }
     }
 
     // Checks for valid score
-    if (!score || typeof score !== 'number' || isNaN(score) || score < 0 || score > breakdown.length) {
+    if (score === undefined || typeof score !== 'number' || isNaN(score) || score < 0 || score > breakdown.length) {
       return res.status(400).json({ message: 'Invalid score' });
     }
 
@@ -721,5 +846,72 @@ router.post('/quiz/takeQuiz', async (req, res) => {
     res.status(500).json({ message: 'Error submitting taken quiz', error });
   }
 });
+
+// fetch all taken quizzes, limited to 20 for now
+router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
+  try {
+    const username = req.query.username;
+    
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Fetches only 20 for now
+    const fetched = await UserTakenQuiz.find({ userId: user._id })
+                                       .sort({ dateTaken: -1 })
+                                       .limit(50)
+                                       .populate({
+                                        path: 'quizId',
+                                        populate: [
+                                            { 
+                                              path: 'questions.questionId',
+                                              populate: {
+                                                path: 'author'
+                                              } 
+                                            }, 
+                                            { 
+                                              path: 'author' 
+                                            }
+                                          ]
+                                        }
+                                      )
+                                       .exec();
+
+    const quizzes = fetched.map(doc => {
+      const quiz = doc.quizId.toObject();
+      quiz.score = doc.score;
+      const mappedQuestions = quiz.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.author = toObj.author.username;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+
+        const matchingBreakdown = doc.breakdown.find(qn => qn.question.questionId.toString() === toObj._id.toString());
+        toObj.noAttempts = matchingBreakdown.noAttempts;
+        toObj.responses = matchingBreakdown.responses;
+        toObj.isCorrect = matchingBreakdown.isCorrect;
+        
+        return toObj;
+      });
+      quiz.questions = mappedQuestions;
+      quiz.author = quiz.author.username;
+      return quiz;
+    });
+    console.log('Quizzes fetched successfully!');
+    res.status(200).json({ quizzes: quizzes });
+  } catch (error) {
+    console.log('Unable to fetch taken quizzes');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching taken quizzes', error });
+  }
+})
 
 module.exports = router;
