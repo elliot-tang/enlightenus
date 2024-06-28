@@ -7,7 +7,7 @@ const { ReportedPost, ReportedReply, ReportedQuestion } = require('../schema/rep
 const router = express.Router();
 
 // report question
-router.post('report/reportQuestion', async (req, res) => {
+router.post('/report/reportQuestion', async (req, res) => {
   try {
     const { username, questionId, reportReason } = req.body;
 

@@ -2,7 +2,7 @@
   "expo": {
     "name": "enlighteNUS",
     "slug": "enlighteNUS",
-    "version": "1.0.4",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -18,9 +18,9 @@
     },
     "android": {
       "package": "com.enlighteNUS.enlighteNUS",
-      "versionCode": 5,
+      "versionCode": 6,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
+        "foregroundImage": "./assets/squareLogo.png",
         "backgroundColor": "#ffffff"
       }
     },
