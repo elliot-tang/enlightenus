@@ -342,7 +342,6 @@ const testData = [
     title: "Welcome to the Forum!",
     topic: "Misc",
     body: "This is a placeholder post to showcase the layout of the forum feature. Stay tuned for future developments!",
-    votes: 0,
     author: "enlighteNUS",
     replies: [{
       id: "fjnjdfnd",
@@ -361,7 +360,6 @@ const testData = [
     title: "This post has attachments",
     topic: "Misc",
     body: "Questions and quizzes can be shared via the upcoming attachment feature for users to save and share!",
-    votes: 0,
     author: "enlighteNUS",
     replies: [{
       id: "fjnjdfnd",
@@ -376,7 +374,6 @@ const testData = [
   },
 
 ];
-
 
 const mockqndatabase = [{ id: "qnid1", title: "Question fun" }]
 const mockqzdatabase = [{ id: "quizid1", title: "Future Quiz" }, { id: "quizid2", title: "Quiz funner2" }]

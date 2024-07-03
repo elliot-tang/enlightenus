@@ -248,6 +248,9 @@ router.post('/quiz/createQuiz', async (req, res) => {
       topic = 'Uncategorised';
     }
 
+    // Ensures correct capitalisation of topic
+    topic = topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase();
+
     // Ensures quiz has at least 1 question
     if (!questions || questions.length === 0) {
       return res.status(400).json({ message: 'You must have at least one question!' });
@@ -575,6 +578,7 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
   }
 });
 
+// fetch quizzes created by user, limited to 50 for now
 router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
   try {
     const username = req.query.username;
@@ -623,6 +627,7 @@ router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
   }
 });
 
+// fetch all quizzes in the database, limited to 50 for now
 router.get('/quiz/fetchAllQuizzes', async (req, res) => {
   try {
     const fetched = await Quiz.find({})
@@ -662,52 +667,67 @@ router.get('/quiz/fetchAllQuizzes', async (req, res) => {
 // fetch all quiz matching criteria, limited to 20 for now
 router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
   try {
-    const criteriaName = req.query.criteriaName;
-    const criteriaBody = req.query.criteriaBody;
+    const { title, topic, isVerified } = req.query;
 
-    // Checks that the search query is title, topic or verified
-    if (!['title', 'topic', 'verified'].includes(criteriaName.toLowerCase())) {
-      return res.status(400).json({ message: 'Invalid query: searching supported for title, topic and verified quizzes only!'});
+    var query = {};
+
+    // Checks validity of title and adds it to query
+    if (title) {
+      if (typeof title !== 'string' || title.trim() === '') {
+        return res.status(400).json('Invalid title');
+      } 
+      query.title = { $regex: title, $options: 'i' };
     }
 
-    var fetched;
-    if (criteriaName.toLowerCase() === 'title') {
-      // Check that the search body is a String
-      if (typeof criteriaBody !== 'string') {
-        return res.status(400).json({ message: 'Invalid query: Please provide a string for query by title! '});
-      }
-      fetched = await Quiz.find({ title: { $regex: criteriaBody, $options: 'i' } })
-                          .sort({ dateSaved: -1 })
-                          .limit(50)
-                          .populate('questions.questionId')
-                          .exec();
-    } else if (criteriaName.toLowerCase() === 'topic') {
-      // Check that the search body is a String
-      if (typeof criteriaBody !== 'string') {
-        return res.status(400).json({ message: 'Invalid query: Please provide a string for query by topic! '});
-      }
-      fetched = await Quiz.find({ topic: criteriaBody.toLowerCase() })
-                          .sort({ dateSaved: -1 })
-                          .limit(50)
-                          .populate('questions.questionId')
-                          .exec();
-    } else {
-      if (typeof criteriaBody !== 'boolean') {
-        return res.status(400).json({ message: 'Invalid query: Please provide a boolean for query by verified! '});
-      }
-      fetched = await Quiz.find({ isVerified: criteriaBody })
-                          .sort({ dateSaved: -1 })
-                          .limit(50)
-                          .populate('questions.questionId')
-                          .exec();
+    // Checks validity of topic and adds it to query
+    if (topic) {
+      if (typeof topic !== 'string' || topic.trim() === '') {
+        return res.status(400).json('Invalid topic');
+      } 
+      query.topic = { $regex: `^${topic}$`, $options: 'i' };
     }
+
+    // Checks validity of isVerified and adds it to query
+    if (isVerified !== undefined && isVerified !== null) {
+      if (typeof isVerified !== 'string' || isVerified.trim() === '' || (isVerified !== 'true' && isVerified !== 'false')) {
+        return res.status(400).json('Invalid isVerified');
+      } 
+      query.isVerified = isVerified === 'true';
+    }
+
+    const fetched = await Quiz.find(query)
+                              .sort({ dateSaved: -1 })
+                              .limit(50)
+                              .populate({
+                                path: 'questions.questionId',
+                                populate: {
+                                  path: 'author',
+                                }
+                              })
+                              .populate('author')
+                              .exec();
+    const quizzes = fetched.map(quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        toObj.author = toObj.author.username;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      return quizObject;
+    });
     console.log('Quizzes fetched successfully!');
-    res.status(200).json({ quizzes: fetched });
+    res.status(200).json({ quizzes: quizzes });
   } catch (error) {
     console.log('Unable to fetch quizzes');
-    res.status(500).json({ message: 'Error fetching quizzes', error });
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quizzes \n' + error.message, error });
   }
-})
+});
 
 // rate quiz
 router.post('/quiz/rateQuiz', async (req, res) => {

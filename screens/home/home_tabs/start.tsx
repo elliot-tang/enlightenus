@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { Button, Text, View, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LineChart } from 'react-native-chart-kit';
@@ -38,25 +39,32 @@ function StartScreen({ navigation }: HomeScreenProps) {
   const [home, setHome] = useState(true);
 
   // Loads 20 most recently taken quizzes into graph
-  useEffect(() => {
-    async function loadQuizzes() {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
-      const quizzes = response.data.quizzes;
-      const data = quizzes.map(quiz => {
-        const topic = quiz.topic;
-        const score = quiz.score;
-        const totalQuestions = quiz.questions.length;
-        const quizId = quiz._id;
-        return {
-          quizid: quizId,
-          percent: score / totalQuestions,
-          topic: topic,
+  useFocusEffect(
+    React.useCallback(() => {
+      async function loadQuizzes() {
+        try {
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
+          const quizzes = response.data.quizzes;
+          const data = quizzes.map(quiz => {
+            const topic = quiz.topic;
+            const score = quiz.score;
+            const totalQuestions = quiz.questions.length;
+            const quizId = quiz._id;
+            return {
+              quizid: quizId,
+              percent: score / totalQuestions,
+              topic: topic,
+            }
+          });
+          setQuizStats(data.reverse());
+        } catch (error) {
+          console.error('Error loading quizzes:', error);
+          setQuizStats([]);
         }
-      });
-      setQuizStats(data);
-    }
-    loadQuizzes();
-  }, [])
+      }
+      loadQuizzes();
+    }, [])
+  )
 
   const toShowdata =
     topic === "Uncategorised" || topic === ""
@@ -144,19 +152,29 @@ function StartScreen({ navigation }: HomeScreenProps) {
         </TouchableOpacity>
       </View>
       <View style={{ height: 0.03 * height }} />
-      <Text style={{ textAlign: "left", fontSize: 19 }}>
-        Your recent performance in {topic === "Uncategorised" || topic === "" ? "everything" : topic}
-      </Text>
-      <View style={{ height: 0.01 * height }} />
-      <View>
-        {quizStats.length > 0 && <LineChart
-          data={data}
-          width={0.8 * width}
-          height={0.2 * height}
-          chartConfig={chartConfig}
-          yAxisSuffix="%"
-        />}
-      </View>
+      {toShowdata.length > 0 ? (
+        <>
+          <Text style={{ textAlign: "left", fontSize: 19 }}>
+            Your recent performance in {topic === "Uncategorised" || topic === "" ? "everything" : topic}
+          </Text>
+          <View style={{ height: 0.01 * height }} />
+          <View>
+            {quizStats.length > 0 && (
+              <LineChart
+                data={data}
+                width={0.8 * width}
+                height={0.2 * height}
+                chartConfig={chartConfig}
+                yAxisSuffix="%"
+              />
+            )}
+          </View>
+        </>
+      ) : (
+        <Text style={{ textAlign: "center", fontSize: 19 }}>
+          Take some quizzes to see your statistics!
+        </Text>
+      )}
     </SafeAreaView>
   );
 }

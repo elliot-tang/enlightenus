@@ -4,6 +4,7 @@ const cors = require("cors");
 const AuthRouter = require("./routes/auth");
 const QuizRouter = require("./routes/quiz");
 const ReportRouter = require("./routes/report");
+const ForumRouter = require("./routes/forum");
 
 const app = express();
 require('dotenv').config()
@@ -17,14 +18,16 @@ require('dotenv').config()
 // app.use(cors(corsOptions));
 app.use(cors());
 
-// defines routes for auth
+// uses routers for respective routes
 app.use(express.json());
 app.use('/', AuthRouter);
 app.use('/', QuizRouter);
 app.use('/', ReportRouter);
+app.use('/', ForumRouter);
 app.use('/auth', AuthRouter);
 app.use('/quiz', QuizRouter);
 app.use('/report', ReportRouter);
+app.use('forum', ForumRouter);
 
 // starts server and connects to database
 if (process.env.MONGO_URL) {
