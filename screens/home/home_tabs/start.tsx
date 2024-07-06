@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button, Text, View, Image, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LineChart } from 'react-native-chart-kit';
-import { HomeScreenProps } from '@app/App';
-import { returnUser, useAuth } from '@app/context/AuthContext';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import axios from 'axios';
+import { HomeScreenProps } from '@app/App';
+import { returnUser, useAuth } from '@app/context/AuthContext'
 
 // Attribution for icons:
 // - Math: https://www.flaticon.com/free-icons/math
@@ -38,11 +38,12 @@ function StartScreen({ navigation }: HomeScreenProps) {
   const [quizStats, setQuizStats] = useState([]);
   const [home, setHome] = useState(true);
 
-  // Loads 20 most recently taken quizzes into graph
+  // Loads 10 most recently taken quizzes into graph
   useFocusEffect(
     React.useCallback(() => {
       async function loadQuizzes() {
         try {
+          console.log("Loading quizzes!");
           const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
           const quizzes = response.data.quizzes;
           const data = quizzes.map(quiz => {
@@ -56,9 +57,10 @@ function StartScreen({ navigation }: HomeScreenProps) {
               topic: topic,
             }
           });
-          setQuizStats(data.reverse());
+          setQuizStats(data.reverse().slice(0, 10));
         } catch (error) {
           console.error('Error loading quizzes:', error);
+          alert('Error loading quizzes!');
           setQuizStats([]);
         }
       }
@@ -66,10 +68,11 @@ function StartScreen({ navigation }: HomeScreenProps) {
     }, [])
   )
 
+  // Data for analytics graphs
   const toShowdata =
     topic === "Uncategorised" || topic === ""
       ? quizStats
-      : quizStats.filter((ele) => ele.topic === topic);
+      : quizStats.filter((ele) => ele.topic.toUpperCase() === topic.toUpperCase());
 
   const data = {
     labels: Array(toShowdata.length).fill(""),
@@ -97,11 +100,13 @@ function StartScreen({ navigation }: HomeScreenProps) {
         style={{ height: 0.15 * height, width: width }}
         source={require("@app/assets/banner.png")}
       />
+
       <View style={{ height: 0.05 * height, flexDirection: "row" }}>
         <Text style={{ fontSize: 30, textAlign: "left" }}>
           {topic ? topic : "Select a Category"}
         </Text>
       </View>
+
       <View style={{ flexDirection: "row", width: 0.73 * width, height: 0.15 * height }}>
         <ScrollView horizontal={true} persistentScrollbar={true}>
           <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Uncategorised")}>
@@ -110,33 +115,40 @@ function StartScreen({ navigation }: HomeScreenProps) {
               <Text style={{ color: "white" }}>All</Text>
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("NUS Modules")}>
             <Image source={require("@app/assets/nuslogo.jpeg")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>NUS Modules</Text>
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Coding")}>
             <Image source={require("@app/assets/browser.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>Coding</Text>
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Math")}>
             <Image source={require("@app/assets/math.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>Math</Text>
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("General Knowledge")}>
             <Image source={require("@app/assets/open-book.png")} style={styles.image} />
             <View style={styles.textContainer}>
               <Text style={{ color: "white" }}>General Knowledge</Text>
             </View>
           </TouchableOpacity>
+
         </ScrollView>
-        <View style={{ height: 0.03 * height }} />
       </View>
+
+      <View style={{ height: 0.03 * height }} />
+
       <View style={{ height: 0.14 * height, flexDirection: "row", gap: 10 }}>
         <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Play", { topic: topic })}>
           <MaterialIcons name="search" size={74} color="black" />
@@ -151,7 +163,9 @@ function StartScreen({ navigation }: HomeScreenProps) {
           <Text> Delete </Text>
         </TouchableOpacity>
       </View>
+
       <View style={{ height: 0.03 * height }} />
+
       {toShowdata.length > 0 ? (
         <>
           <Text style={{ textAlign: "left", fontSize: 19 }}>

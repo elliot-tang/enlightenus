@@ -477,6 +477,91 @@ router.post('/quiz/saveQuestion', async (req, res) => {
   }
 });
 
+// checks if question has already been saved by user
+router.get('/quiz/checkSavedQuestion', async (req, res) => {
+  try {
+    const { username, questionId } = req.query;
+    
+    // checks for valid questionId
+    if (!mongoose.Types.ObjectId.isValid(questionId)) {
+      return res.status(400).json({ message: 'Invalid questionId' });
+    }
+
+    // Checks if user and question both exist
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    var question = await OEQ.findById(questionId).exec();
+    if (!question) {
+      question = await MCQ.findById(questionId).exec();
+      if (!question) {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+    }
+
+    // Checks if question has already been saved by user
+    const existing = await UserSavedQuestion.findOne({ userId: user._id, 'question.questionId': questionId });
+    if (existing) {
+      console.log(`Question ID: ${questionId} has already been saved by user ${username}: Saved Question ID: ${existing._id}`);
+      return res.status(200).json({ saved: true });
+    } else {
+      console.log(`Question ID: ${questionId} has not been saved by user ${username}`);
+      return res.status(200).json({ saved: false });
+    }
+  } catch (error) {
+    console.log('Unable to check for saved question');
+    console.error(error);
+    res.status(500).json({ message: 'Error checking for saved question', error });
+  }
+});
+
+// unsave question
+router.post('/quiz/unsaveQuestion', async (req, res) => {
+  try {
+    const { username, questionId } = req.body;
+    
+    // checks for valid questionId
+    if (!mongoose.Types.ObjectId.isValid(questionId)) {
+      return res.status(400).json({ message: 'Invalid questionId' });
+    }
+
+    // Checks if user and question both exist
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    var question = await OEQ.findById(questionId).exec();
+    var questionType;
+    if (question) {
+      questionType = 'OEQ';
+    } else {
+      question = await MCQ.findById(questionId).exec();
+      if (question) {
+        questionType = 'MCQ';
+      } else {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+    }
+
+    // Checks if question has already been saved by user
+    const existing = await UserSavedQuestion.findOne({ userId: user._id, 'question.questionId': questionId });
+    if (!existing) {
+      return res.status(400).json({ message: 'Question not saved by user!' });
+    }
+
+    await UserSavedQuestion.findByIdAndDelete(existing._id);
+    console.log(`Question ID: ${questionId} unsaved by user ${username} successfully`);
+    res.status(200).json({ message: "Question unsaved successfully!" });
+  } catch (error) {
+    console.log('Unable to unsave question');
+    console.error(error);
+    res.status(500).json({ message: 'Error unsaving question', error });
+  }
+});
+
 // save quiz
 router.post('/quiz/saveQuiz', async (req, res) => {
   try {
@@ -932,6 +1017,6 @@ router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Error fetching taken quizzes', error });
   }
-})
+});
 
 module.exports = router;

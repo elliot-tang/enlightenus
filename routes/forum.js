@@ -383,6 +383,7 @@ router.get('/forum/fetchPostReplies', async (req, res) => {
       const mappedReply = {
         user: doc.userId.username,
         replyBody: doc.replyBody,
+        replyId: doc._id,
       };
       return mappedReply;
     })

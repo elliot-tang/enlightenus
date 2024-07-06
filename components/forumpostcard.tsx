@@ -6,14 +6,73 @@ export type ReplyProps = {
   body: string,
 }
 
+type AttachmentProps = {
+  _id: string,
+  attachmentType: string,
+  attachmentName: string,
+  attachmentId: AttachmentQuizProps | AttachmentMCQProps | AttachmentOEQProps
+}
+
+type AttachmentQuizQuestionProps = {
+  _id: string,
+  questionBody: string,
+  options?: Array<AttachmentMCQOptionProps>,
+  correctOptions?: Array<string>,
+  author: string,
+  dateCreated: string,
+  __v: number
+  questionType: string,
+  questionAttempts: number,
+  noOptions: number
+}
+
+type AttachmentQuizProps = {
+  _id: string,
+  title: string,
+  topic: string,
+  questions: Array<AttachmentQuizQuestionProps>,
+  author: string,
+  rating: number,
+  timesRated: number,
+  timesTaken: number,
+  isVerified: boolean,
+  dateCreated: string,
+  __v: number
+}
+
+type AttachmentMCQProps = {
+  _id: string,
+  questionBody: string,
+  options: Array<AttachmentMCQOptionProps>,
+  author: string,
+  dateCreated: string,
+  __v: number
+  questionType: string
+}
+
+type AttachmentMCQOptionProps = {
+  answer: string,
+  isCorrect: boolean
+  _id: string
+}
+
+type AttachmentOEQProps = {
+  _id: string,
+  questionBody: string,
+  correctOptions: Array<string>,
+  author: string,
+  dateCreated: string,
+  __v: number
+  questionType: string
+}
+
 export type ForumProps = {
   id: string,
   title: string,
   topic: string,
   body: string,
   author: string,
-  replies: Array<ReplyProps> //to change to array of reply strings
-  attached: Array<{id:string, single: boolean}>
+  attached: Array<AttachmentProps>
 }
 
 export type ForumPropsDisplay = ForumProps & { goToInd: () => void};

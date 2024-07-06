@@ -1,16 +1,17 @@
-import * as React from 'react';
+import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ForumCard } from '@app/components/forumpostcard';
-import { useState } from 'react';
+import { ForumCard, ForumProps, ReplyProps } from '@app/components/forumpostcard';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import axios from 'axios';
 
 const { height, width } = Dimensions.get("window");
 
 type ForumStackNavigationParamList = {
   main: undefined,
-  individual: { postid: string } | undefined,
+  individual: { post: ForumProps } | undefined,
   create: undefined,
   report: { reportid: string, contenttype: string } | undefined
 }
@@ -42,16 +43,49 @@ export default function ForumScreen() {
 
 function MainForum({ navigation }: ForumScreenProps) {
 
-  const data = testData; //from database instead
+  const [posts, setPosts] = useState<Array<ForumProps>>([]);
+
+  // Loads 50 most recent forum posts
+  useFocusEffect(
+    React.useCallback(() => {
+      async function loadForumPosts() {
+        try {
+          // Fetches forum posts
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/forum/fetchAllPosts`);
+          const posts = response.data.posts;
+
+          // Maps into forum props
+          const data = posts.map(post => {
+            const id = post._id;
+            const title = post.postTitle;
+            const topic = post.postTopic;
+            const body = post.postBody;
+            const author = post.userId;
+            const attached = post.attachments;
+            return { id, title, topic, body, author, attached };
+          })
+
+          setPosts(data);
+        } catch (error) {
+          console.error('Error loading forum posts:', error);
+          alert('Error loading forum posts!');
+          setPosts([]);
+        }
+      }
+      loadForumPosts();
+    }, [])
+  );
+
+  // const data = testData; //from database instead
   return (
     <View style={{ flex: 1, paddingTop: height * 0.07 }}>
       <Button title="Create New Forum Discussion!" onPress={() => navigation.navigate("create")} />
       <View style={{ height: 25 }} />
       <ScrollView style={{ flex: 1 }}>
-        {data.map((item)=> <View style={{paddingTop:10}}>
+        {posts.map((item)=> <View style={{paddingTop:10}}>
           <ForumCard
             {...item}
-            goToInd={() => navigation.navigate("individual", { postid: item.id })} />
+            goToInd={() => navigation.navigate("individual", { post: item })} />
         </View>)}
       </ScrollView>
     </View>
@@ -59,12 +93,42 @@ function MainForum({ navigation }: ForumScreenProps) {
 }
 
 function Individual({ route, navigation }: IndividualProps) {
-  const [replyText, setReply] = useState("")
-  var temp: string
-  if (!(route.params.postid == undefined)) {
-    temp = route.params.postid;
+  const [replyText, setReply] = useState("");
+  const [replies, setReplies] = useState<Array<ReplyProps>>([]);
+  var temp: ForumProps;
+  if (!(route.params.post == undefined)) {
+    temp = route.params.post;
   }
-  const toDisplay = testData.find((item) => item.id === temp);
+  // const toDisplay = testData.find((item) => item.id === temp);
+  const toDisplay = temp;
+
+  // Loads 50 most recent forum replies
+  useFocusEffect(
+    React.useCallback(() => {
+      async function loadForumPosts() {
+        try {
+          // Fetches forum replies
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/forum/fetchPostReplies`, { params: { postId: toDisplay.id } });
+          const replies = response.data.replies;
+
+          // Maps into forum reply props
+          const data = replies.map(post => {
+            const id = post.replyId;
+            const author = post.user;
+            const body = post.replyBody;
+            return { id, author, body };
+          });
+
+          setReplies(data);
+        } catch (error) {
+          console.error('Error loading forum replies:', error);
+          alert('Error loading forum replies!');
+          setReplies([]);
+        }
+      }
+      loadForumPosts();
+    }, [])
+  );
 
   return (
     <SafeAreaView>
@@ -84,10 +148,11 @@ function Individual({ route, navigation }: IndividualProps) {
             <Text style={{ fontWeight: "bold" }}>Attachments: </Text>
             <FlatList
               data={toDisplay.attached}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
               renderItem={({ item }) => {
-                const obj = item.single ? mockqndatabase.find((ele) => item.id == ele.id) : mockqzdatabase.find((ele) => item.id === ele.id);
-                return (<Text style={styles.link} onPress={() => alert("Currently under development!")}>Save {item.single ? "Question" : "Quiz"}: {obj.title} </Text>)
+                // const obj = item.single ? mockqndatabase.find((ele) => item.id == ele.id) : mockqzdatabase.find((ele) => item.id === ele.id);
+                // return (<Text style={styles.link} onPress={() => alert("Currently under development!")}>Save {item.single ? "Question" : "Quiz"}: {obj.title} </Text>)
+                return (<Text style={styles.link} onPress={() => alert("Currently under development!")}>Save {item.attachmentType}: {item.attachmentName} </Text>)
               }} />
           </View>}
         <View style={{ height: 10 }} />
@@ -109,7 +174,7 @@ function Individual({ route, navigation }: IndividualProps) {
       </View>
       {/*instead of passing whole replies, should pass in only reply id string perhaps*/}
       <FlatList
-        data={toDisplay.replies}
+        data={replies}
         keyExtractor={item => item.id}
         renderItem={({ item }) =>
           <View style={{
@@ -173,8 +238,17 @@ function Report({ route, navigation }: ReportProps) {
       </View>
     </View>
   )
-
 }
+
+// function CreatePost({ navigation }: ForumScreenProps) {
+//   return (
+//     <View>
+//       <Text>
+//         Under construction!
+//       </Text>
+//     </View>
+//   )
+// }
 
 
 function CreatePost({ navigation }: ForumScreenProps) {
@@ -209,6 +283,7 @@ function CreatePost({ navigation }: ForumScreenProps) {
               const obj = item.single
                 ? mockqndatabase.find((ele) => ele.id === item.id)
                 : mockqzdatabase.find((ele) => ele.id === item.id);
+              
 
 
               if (!obj) {
@@ -336,44 +411,44 @@ const styles = StyleSheet.create({
   }
 })
 
-const testData = [
-  {
-    id: "dsdhsbdsjndskjds",
-    title: "Welcome to the Forum!",
-    topic: "Misc",
-    body: "This is a placeholder post to showcase the layout of the forum feature. Stay tuned for future developments!",
-    author: "enlighteNUS",
-    replies: [{
-      id: "fjnjdfnd",
-      author: "excitedUser1",
-      body: "Wow! I am so excited!"
-    }, {
-      id: "nfjk",
-      author: "skepticalUser2",
-      body: "Hopefully the UI gets better."
-    }],
-    attached: []
-  },
+// const testData = [
+//   {
+//     id: "dsdhsbdsjndskjds",
+//     title: "Welcome to the Forum!",
+//     topic: "Misc",
+//     body: "This is a placeholder post to showcase the layout of the forum feature. Stay tuned for future developments!",
+//     author: "enlighteNUS",
+//     replies: [{
+//       id: "fjnjdfnd",
+//       author: "excitedUser1",
+//       body: "Wow! I am so excited!"
+//     }, {
+//       id: "nfjk",
+//       author: "skepticalUser2",
+//       body: "Hopefully the UI gets better."
+//     }],
+//     attached: []
+//   },
 
-  {
-    id: "dsdhsbdsjndskfffjds",
-    title: "This post has attachments",
-    topic: "Misc",
-    body: "Questions and quizzes can be shared via the upcoming attachment feature for users to save and share!",
-    author: "enlighteNUS",
-    replies: [{
-      id: "fjnjdfnd",
-      author: "excitedUser1",
-      body: "Yay! I can't wait to share and save questions!"
-    }, {
-      id: "nfjk",
-      author: "excitedUser2",
-      body: "Yay!"
-    }],
-    attached: [{ id: "quizid1", single: false }]
-  },
+//   {
+//     id: "dsdhsbdsjndskfffjds",
+//     title: "This post has attachments",
+//     topic: "Misc",
+//     body: "Questions and quizzes can be shared via the upcoming attachment feature for users to save and share!",
+//     author: "enlighteNUS",
+//     replies: [{
+//       id: "fjnjdfnd",
+//       author: "excitedUser1",
+//       body: "Yay! I can't wait to share and save questions!"
+//     }, {
+//       id: "nfjk",
+//       author: "excitedUser2",
+//       body: "Yay!"
+//     }],
+//     attached: [{ id: "quizid1", single: false }]
+//   },
 
-];
+// ];
 
 const mockqndatabase = [{ id: "qnid1", title: "Question fun" }]
 const mockqzdatabase = [{ id: "quizid1", title: "Future Quiz" }, { id: "quizid2", title: "Quiz funner2" }]

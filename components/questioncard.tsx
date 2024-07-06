@@ -1,7 +1,10 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { QuestionPropsForHistory } from './historycard';
+import { returnUser } from '@app/context/AuthContext';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
 
 type QnProps = {
   id: string;
@@ -17,8 +20,6 @@ type QnProps = {
 export type QnPropsDisplay = QnProps & { editQn: () => void , deleteQn:() =>void, pushQn:()=>void, notpushed: boolean};
 
 export type QnPropsWithReport = QnProps & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , userAns: string, correct: boolean, saved: boolean};
-
-export type HistoryQnPropsWithReport = QuestionPropsForHistory & { saveQn: ()=> void, unsaveQn: ()=> void, reportQn: () => void , saved: boolean};
 
 export const QuestionCard = (question: QnPropsDisplay) => {
 
@@ -57,6 +58,8 @@ export const QuestionCard = (question: QnPropsDisplay) => {
 
 export function TallyCard(question: QnPropsWithReport) {
   const shorten = question.corrans.slice(0, 3);
+  const user = returnUser();
+  const [saved, setSaved] = useState(false);
 
   const renderCorrectAnswers = () => {
     return shorten.map((answer) => (
@@ -64,6 +67,38 @@ export function TallyCard(question: QnPropsWithReport) {
         {answer}
       </Text>
     ));
+  };
+
+  const reportQuestion = () => alert('Currently under development!');
+
+  const saveQuestion = async () => {
+    try {
+      const savedQuestion = {
+        username: user,
+        questionId: question.id,
+      }
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/saveQuestion`, savedQuestion);
+      console.log(`Question ID: ${question.id} saved by User ${user}`);
+      setSaved(true);
+    } catch (error) {
+      console.error('Error saving questions', error);
+      alert('Error saving questions');
+    }
+  };
+
+  const unsaveQuestion = async () => {
+    try {
+      const savedQuestion = {
+        username: user,
+        questionId: question.id,
+      }
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/unsaveQuestion`, savedQuestion);
+      console.log(`Question ID: ${question.id} unsaved by User ${user}`);
+      setSaved(false);
+    } catch (error) {
+      console.error('Error unsaving questions', error);
+      alert('Error unsaving questions');
+    }
   };
 
   return (
@@ -76,18 +111,35 @@ export function TallyCard(question: QnPropsWithReport) {
       <Text style={{color: question.correct ? 'green' : 'red',}}>Your answer: {question.userAns}</Text>
       <View style={styles.editIconContainer}>
         <Button title="Report" onPress={question.reportQn} />
-        {question.saved ? (
-          <Button color="red" title="Remove" onPress={question.unsaveQn} />
+        {saved ? (
+          <Button color="red" title="Remove" onPress={unsaveQuestion} />
         ) : (
-          <Button title="Save" onPress={question.saveQn} />
+          <Button title="Save" onPress={saveQuestion} />
         )}
       </View>
     </View>
   );
 }
 
-export function HistoryTallyCard(question: HistoryQnPropsWithReport) {
+export function HistoryTallyCard(question: QuestionPropsForHistory) {
   const shorten = question.corrans.slice(0, 3);
+  const user = returnUser();
+  const [saved, setSaved] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function getSaved() {
+        try {
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/checkSavedQuestion`, { params: { username: user, questionId: question.id } });
+          setSaved(response.data.saved);
+        } catch (error) {
+          console.error('Error fetching saved question:', error);
+          setSaved(false);
+        }
+      }
+      getSaved();
+    }, [])
+  );
 
   const renderCorrectAnswers = () => {
     return shorten.map((answer) => (
@@ -99,7 +151,39 @@ export function HistoryTallyCard(question: HistoryQnPropsWithReport) {
 
   const renderUserAnswers = () => {
     return '[' + question.responses.toString() + ']';
-  }
+  };
+
+  const reportQuestion = () => alert('Currently under development!');
+
+  const saveQuestion = async () => {
+    try {
+      const savedQuestion = {
+        username: user,
+        questionId: question.id,
+      }
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/saveQuestion`, savedQuestion);
+      console.log(`Question ID: ${question.id} saved by User ${user}`);
+      setSaved(true);
+    } catch (error) {
+      console.error('Error saving questions', error);
+      alert('Error saving questions');
+    }
+  };
+
+  const unsaveQuestion = async () => {
+    try {
+      const savedQuestion = {
+        username: user,
+        questionId: question.id,
+      }
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/unsaveQuestion`, savedQuestion);
+      console.log(`Question ID: ${question.id} unsaved by User ${user}`);
+      setSaved(false);
+    } catch (error) {
+      console.error('Error unsaving questions', error);
+      alert('Error unsaving questions');
+    }
+  };
 
   return (
     <View style={{ gap: 10, borderRadius: 10, backgroundColor: '#cdefff', borderWidth: 3 }}>
@@ -110,11 +194,11 @@ export function HistoryTallyCard(question: HistoryQnPropsWithReport) {
       {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
       <Text style={{color: question.isCorrect ? 'green' : 'red',}}>Your answer(s): {renderUserAnswers()}</Text>
       <View style={styles.editIconContainer}>
-        <Button title="Report" onPress={question.reportQn} />
-        {question.saved ? (
-          <Button color="red" title="Remove" onPress={question.unsaveQn} />
+        <Button title="Report" onPress={reportQuestion} />
+        {saved ? (
+          <Button color="red" title="Remove" onPress={unsaveQuestion} />
         ) : (
-          <Button title="Save" onPress={question.saveQn} />
+          <Button title="Save" onPress={saveQuestion} />
         )}
       </View>
     </View>

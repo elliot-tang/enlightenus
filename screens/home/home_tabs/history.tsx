@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { LineChart, PieChart } from 'react-native-chart-kit'
-import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView } from 'react-native';
-import { styles } from '@app/App';
+import { Button, Text, View, ScrollView } from 'react-native';
 import { Dimensions } from "react-native";
 import CustomPicker from '@app/components/mypicker';
 import HistoryCard, { HistoryProps, QuestionPropsForHistory } from '@app/components/historycard';
@@ -24,11 +22,6 @@ interface HistoryScreenProps extends NativeStackScreenProps<HistoryStackNavigati
 
 type IndividualProps = NativeStackScreenProps<HistoryStackNavigationParamList, "individual">
 
-function capitalizeFLetter(tochange: string) {
-  return (tochange[0].toUpperCase() +
-    tochange.slice(1));
-}
-
 
 export default function PlayHist() {
   return (
@@ -44,14 +37,13 @@ function MainHistory({ navigation }: HistoryScreenProps) {
   const [quizStats, setQuizStats] = useState([]);
   const user = returnUser();
 
-  // Loads 20 most recently taken quizzes into graph
+  // Loads 50 most recently taken quizzes into graph
   useFocusEffect(
     React.useCallback(() => {
       async function loadQuizzes() {
         try {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
           const quizzes = response.data.quizzes;
-          console.log(quizzes);
           const data = quizzes.map(quiz => {
             const id = quiz._id;
             const title = quiz.title;
@@ -113,20 +105,17 @@ function MainHistory({ navigation }: HistoryScreenProps) {
 
 function Individual({ route, navigation }: IndividualProps) {
   const toShowProps = (route.params === undefined) ? { id: "", title: "", topic: "", questions: Array<QuestionPropsForHistory>(), score: 0 } : route.params.indivProps
-  const toShow = toShowProps.questions
+  const toShow = toShowProps.questions;
+  const user = returnUser();
   return (
     <View style={{ flex: 1 }}>
       <View style={{ height: height * 0.07 }} />
-      <Text style={{ fontSize: 21, fontWeight: "bold" }}>{capitalizeFLetter(toShowProps.topic)} : {toShowProps.title}</Text>
+      <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShowProps.topic} : {toShowProps.title}</Text>
       <View style={{ height: 0.05 * height, flexDirection: "row" }} />
       <ScrollView style={{ height: height * 0.67, gap: 10 }}>
         {toShow.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryTallyCard
             {...item}
-            saved={true}
-            reportQn={() => alert('Currently under development!')}
-            saveQn={() => alert('Currently under development!')}
-            unsaveQn={() => alert('Currently under development!')}
           />
         </View>)}
       </ScrollView>
