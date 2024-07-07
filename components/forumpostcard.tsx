@@ -6,11 +6,11 @@ export type ReplyProps = {
   body: string,
 }
 
-type AttachmentProps = {
-  _id: string,
+export type AttachmentProps = {
+  _id?: string,
   attachmentType: string,
   attachmentName: string,
-  attachmentId: AttachmentQuizProps | AttachmentMCQProps | AttachmentOEQProps
+  attachmentId: AttachmentQuizProps | AttachmentQuestionProps
 }
 
 type AttachmentQuizQuestionProps = {
@@ -35,15 +35,16 @@ type AttachmentQuizProps = {
   rating: number,
   timesRated: number,
   timesTaken: number,
-  isVerified: boolean,
+  isVerified?: boolean,
   dateCreated: string,
   __v: number
 }
 
-type AttachmentMCQProps = {
+type AttachmentQuestionProps = {
   _id: string,
   questionBody: string,
-  options: Array<AttachmentMCQOptionProps>,
+  options?: Array<AttachmentMCQOptionProps>,
+  correctOptions?: Array<string>,
   author: string,
   dateCreated: string,
   __v: number
@@ -52,18 +53,8 @@ type AttachmentMCQProps = {
 
 type AttachmentMCQOptionProps = {
   answer: string,
-  isCorrect: boolean
-  _id: string
-}
-
-type AttachmentOEQProps = {
-  _id: string,
-  questionBody: string,
-  correctOptions: Array<string>,
-  author: string,
-  dateCreated: string,
-  __v: number
-  questionType: string
+  isCorrect?: boolean
+  _id?: string
 }
 
 export type ForumProps = {

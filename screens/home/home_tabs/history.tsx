@@ -45,6 +45,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
           const quizzes = response.data.quizzes;
           const data = quizzes.map(quiz => {
+            const takenId = quiz.takenId;
             const id = quiz._id;
             const title = quiz.title;
             const topic = quiz.topic;
@@ -64,7 +65,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
               const noAttempts = qn.noAttempts;
               return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts };
             });
-            return { id, title, topic, hasSaved, questions, score };
+            return { takenId, id, title, topic, hasSaved, questions, score };
           });
           setQuizStats(data);
         } catch (error) {
@@ -94,7 +95,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
       <ScrollView style={{ flex: 1 }}>
         {toShowData.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard
-            key={item.id}
+            key={item.takenId}
             {...item}
             goToInd={() => navigation.navigate("individual", { indivProps: item })} />
         </View>)}

@@ -992,6 +992,7 @@ router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
     const quizzes = fetched.map(doc => {
       const quiz = doc.quizId.toObject();
       quiz.score = doc.score;
+      quiz.takenId = doc._id;
       const mappedQuestions = quiz.questions.map(question => {
         var toObj = question.questionId;
         toObj.author = toObj.author.username;

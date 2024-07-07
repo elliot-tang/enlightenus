@@ -57,7 +57,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
               topic: topic,
             }
           });
-          setQuizStats(data.reverse().slice(0, 10));
+          setQuizStats(data.slice(0, 10).reverse());
         } catch (error) {
           console.error('Error loading quizzes:', error);
           alert('Error loading quizzes!');
