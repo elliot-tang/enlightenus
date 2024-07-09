@@ -255,21 +255,19 @@ const Create = ({ route, navigation }: CreateProps) => {
                 setExp(item.explainText);
                 const temp = deleteQuestion(questions, item.id);
                 setQuestions(temp);
-                if (!newQnsLocalID.includes(item.id)) {
-                  const temp = Array.from(oldQnsmongoIDs).filter((ele) => ele.localID !== item.id)
-                  setMongo(temp);
-                }
+                const temp2 = Array.from(oldQnsmongoIDs).filter((ele) => ele.localID !== item.id)
+                setMongo(temp2);
+                const tempnew = newQnsLocalID.filter((localid) => localid !== item.id);
+                setNew(tempnew);
                 setRender(1.5);
               }}
               deleteQn={() => {
                 const temp = deleteQuestion(questions, item.id);
                 setQuestions(temp);
+                const temp2 = Array.from(oldQnsmongoIDs).filter((ele) => ele.localID !== item.id)
+                setMongo(temp2);
                 const tempnew = newQnsLocalID.filter((localid) => localid !== item.id);
                 setNew(tempnew);
-                if (!newQnsLocalID.includes(item.id)) {
-                  const temp = Array.from(oldQnsmongoIDs).filter((ele) => ele.localID !== item.id)
-                  setMongo(temp);
-                }
               }}
               notpushed={newQnsLocalID.includes(item.id)}
               pushQn={async () => {

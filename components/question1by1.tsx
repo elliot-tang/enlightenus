@@ -1,5 +1,5 @@
 import React, { useState, } from 'react';
-import { Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, Alert, Dimensions } from 'react-native';
+import { Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, Alert, Dimensions, StyleSheet } from 'react-native';
 import { TallyCard } from './questioncard';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
@@ -103,8 +103,8 @@ export function Qn1b1(props: QnPropsFunc) {
             <Text style={{ fontWeight: "bold" }} >Explanation: {props.explainText}
             </Text>
             <Button title="Next Question"
-              onPress={() => { 
-                props.nextPage(); 
+              onPress={() => {
+                props.nextPage();
                 props.toAppendAnswer(ansState);
                 props.toAddCorrect(false);
                 props.toAddNoOfAttempts(attemptState);
@@ -126,9 +126,9 @@ export function Qn1b1(props: QnPropsFunc) {
             {props.explainText && <Text style={{ fontWeight: "bold" }}>Explanation: {props.explainText}
             </Text>}
             <Button title="Next Question"
-              onPress={() => { 
-                props.nextPage(); 
-                props.toAppendAnswer(ansState); 
+              onPress={() => {
+                props.nextPage();
+                props.toAppendAnswer(ansState);
                 props.addPoint();
                 props.toAddCorrect(true);
                 props.toAddNoOfAttempts(attemptState);
@@ -216,8 +216,8 @@ export function Qn1b1(props: QnPropsFunc) {
               <Text style={{ fontWeight: "bold" }} >Explanation: {props.explainText}
               </Text>
               <Button title="Next Question"
-                onPress={() => { 
-                  props.nextPage(); 
+                onPress={() => {
+                  props.nextPage();
                   props.toAppendAnswer(ansState);
                   props.toAddCorrect(false);
                   props.toAddNoOfAttempts(attemptState);
@@ -267,9 +267,9 @@ export function Qn1b1(props: QnPropsFunc) {
             </Text>
           </View>
           <Button title="Next Question"
-            onPress={() => { 
-              props.nextPage(); 
-              props.toAppendAnswer(ansState); 
+            onPress={() => {
+              props.nextPage();
+              props.toAppendAnswer(ansState);
               props.addPoint()
               props.toAddCorrect(true);
               props.toAddNoOfAttempts(attemptState);
@@ -313,7 +313,7 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
   const [currentReportQn, setCurrentQ] = useState("");
   const [currentReportid, setCurrentI] = useState("");
   const [isCorrects, setIsCorrects] = useState(Array<boolean>());
-  const [noAttempts, setNoAttempts] = useState(Array<number>()); 
+  const [noAttempts, setNoAttempts] = useState(Array<number>());
   const user = returnUser();
 
   // function callbacks
@@ -360,16 +360,60 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
     </View>
   );
 
+  const saveQuiz: () => Promise<string> = async () => {
+    try {
+      const savedQuiz = {
+        username: user,
+        quizId: quizId,
+      }
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/saveQuiz`, savedQuiz);
+      console.log(`Question ID: ${quizId} saved by User ${user}`);
+      return response.data.savedQuizId;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  };
+
+  const reportQuestion: () => Promise<string> = async () => {
+    try {
+      if (reportstring.trim() === '') {
+        alert('Please provide a report reason!');
+        setReportstring('');
+      } else {
+        const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/report/reportQuestion`, { username: user, questionId: currentReportid, reportReason: reportstring });
+        return response.data.reportId;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  };
+
   if (pageNo === questions.length) {
     const toShow = Array.from({ length: questions.length }, (_, i) => [questions[i], tally[i], qAnswers[i]])
     return (
-      <View style={{ flex: 1 }}>
-        <View style={{height: height*0.07}}>
+      <View style={styles.container}>
+        <View style={{ height: height * 0.07 }}>
           <Text style={{ fontSize: 18 }}>Your score is {point}/{questions.length}. Listed below is a breakdown.</Text>
         </View>
-        <View style={{height: height*0.69}}>
+        <View style={{ height: height * 0.69 }}>
           <ScrollView>
-            {toShow.map((item) => <View style={{paddingBottom:10}}>
+            {toShow.map((item) => <View style={{ paddingBottom: 10 }}>
               <TallyCard
                 key={item[0].id}
                 {...item[0]}
@@ -377,29 +421,16 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
                 correct={item[1]}
                 userAns={item[2]}
                 reportQn={() => {
-                  // TODO: Report question
-                  alert('Currently under development!');
                   setCurrentI(item[0].id);
-                  setCurrentQ(item[0].quizstmt)
+                  setCurrentQ(item[0].quizstmt);
                   setPage(-1);
                 }}
-                saveQn={() => {
-                  // TODO: Save question
-                  alert('Currently under development!');
-                  var temp = Array.from(save);
-                  temp.push(item[0].id);
-                  setSave(temp)
-                }}
-                unsaveQn={() => {
-                  var temp = save.filter(ele => ele != item[0].id)
-                  setSave(temp)
-                }}
               />
-              </View>)}
+            </View>)}
           </ScrollView>
         </View>
-        <View style={{height: height*0.07, gap:10 }}>
-          <Button title="Return to Home" onPress={ async () => {
+        <View style={{ height: height * 0.07, gap: 10 }}>
+          <Button title="Return to Home" onPress={async () => {
             try {
               // Saves the taken quiz and user response into the database
               var breakdown: Array<TakenQuestionProps> = [];
@@ -442,7 +473,12 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
               exitScreen();
             }
           }} />
-          <Button title= "Save quiz" onPress={()=> alert("Currently Under Development")}/>
+          <Button title="Save quiz" onPress={async () => {
+            const response = await saveQuiz();
+            if (response) {
+              alert("Quiz successfully saved!");
+            }
+          }} />
         </View>
       </View>
     );
@@ -450,7 +486,7 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
 
   if (pageNo === -1) {
     return (
-      <View style={{ gap: 5, paddingTop: 20 }}>
+      <View style={{ gap: 5, paddingTop: 30 }}>
         <Text style={{ textAlign: "left" }}>Report Question: {currentReportQn} </Text>
         <TextInput
           style={{
@@ -466,12 +502,27 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
           value={reportstring}
         />
         <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
-          <Button title="Submit" onPress={() => { alert("Currently under development!"); setPage(questions.length) }} />
+          <Button title="Submit" onPress={async () => {
+            const response = await reportQuestion();
+            if (response) {
+              alert(`Question successfully reported! Report ID: ${response}`);
+              setReportstring('');
+              setCurrentQ('');
+              setCurrentI('');
+              setPage(questions.length);
+            }
+          }} />
         </View>
         <View style={{ height: 10 }} />
         <View>
           <Text> Note for reports, please follow the general guidelines for what is reportable content.</Text>
         </View>
+        <Button title="Go back" onPress={() => {
+          setReportstring('');
+          setCurrentQ('');
+          setCurrentI('');
+          setPage(questions.length);
+        }}></Button>
       </View>
     )
   }
@@ -479,3 +530,13 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
     return renderQuestion(questions[pageNo]);
   }
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 30,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    gap: 15,
+  },
+})
