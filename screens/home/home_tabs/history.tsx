@@ -35,6 +35,7 @@ export default function PlayHist() {
 function MainHistory({ navigation }: HistoryScreenProps) {
   const [topic, setTopic] = useState("Uncategorised");
   const [quizStats, setQuizStats] = useState([]);
+  const [topics, setTopics] = useState([]);
   const user = returnUser();
 
   // Loads 50 most recently taken quizzes into graph
@@ -71,6 +72,15 @@ function MainHistory({ navigation }: HistoryScreenProps) {
             return { takenId, id, title, topic, hasSaved, questions, score };
           });
           setQuizStats(data);
+
+          const quizTopics = new Set(quizzes.map(quiz => quiz.topic));
+          const dropdownTopics = Array.from(quizTopics).map(topic => { 
+            return { 
+              value: topic,
+              label: topic,
+            }
+          });
+          setTopics(dropdownTopics);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const errorMessage: string = error.response?.data.message;
@@ -89,6 +99,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
   );
 
   const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);
+
   return (
     <View style={{ flex: 1 }}>
       <View style={{ height: height * 0.07 }} />
@@ -97,7 +108,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
       </Text>
       <View style={{ zIndex: 1 }}>
         <CustomPicker
-          options={options}
+          options={topics}
           selectedValue={topic}
           onValueChange={setTopic}
           label="Topic:"
