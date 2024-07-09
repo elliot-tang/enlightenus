@@ -90,8 +90,6 @@ function AnswerEdittorBox(props: {
   );
 }
 
-// the search feature fetches an array of datatype jasons
-
 //note the id created here is a local id, it SHOULD NOT be passed into mongobongo in page 4
 
 //the newqnlocal determines which of the created questions need to be pushed to database, which are pre-fetched so no need to push. it stores the corresponding local id.
@@ -103,7 +101,7 @@ const deleteQuestion = (questionProps: Array<QnProps>, questionId: string) => {
 
 const Create = ({ route, navigation }: CreateProps) => {
   const passedunfinished = React.useContext(UnfinishedQuizCreationData)
-  const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised" || route.params.topic === "")) ? "Uncategorised" : route.params.topic;
+  const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised" || route.params.topic === "")) ? "uncategorised" : route.params.topic;
   const [renderstate, setRender] = useState(0);
   const [questions, setQuestions] = useState(passedunfinished.data);
   const [quiztitle, setTitle] = useState("");
@@ -111,7 +109,8 @@ const Create = ({ route, navigation }: CreateProps) => {
   const [searchText, setSearchText] = useState("");
   const [newQnsLocalID, setNew] = useState(passedunfinished.save);
   const [selectionRender, setSelection] = useState<FetchedQuestion[]>([]);
-  const [oldQnsmongoIDs, setMongo] = useState(passedunfinished.mongo)
+  const [oldQnsmongoIDs, setMongo] = useState(passedunfinished.mongo);
+  const [customTopic, setCustomTopic] = useState("");
 
   //pingpong bad design
 
@@ -638,7 +637,17 @@ const Create = ({ route, navigation }: CreateProps) => {
           <Text style={{ fontWeight: "bold", fontSize: 22 }}>Finalise and Publish Quiz</Text>
           <View style={{ flexDirection: 'row', gap: 10 }}>
           </View>
-          <Text>Give your ({topic}) quiz a title</Text>
+          {topic !== "Custom" ? <Text>Give your {topic} quiz a title.</Text> :
+            <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Text>Give your </Text>
+              <TextInput
+                value={customTopic}
+                onChangeText={setCustomTopic}
+                placeholder={"Custom"}
+                style={{ color: 'green' }}
+              />
+              <Text> quiz a title.</Text>
+            </View>}
           <TextInput
             style={styles.input}
             placeholder="Your Quiz will be searchable by its title"
@@ -696,7 +705,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
               const quizId = await pushQuiz({
                 title: quiztitle,
-                topic: topic,
+                topic: ((topic !== "Custom")? topic.toLowerCase(): customTopic.toLowerCase()),
                 questions: toPush,
                 author: user
               });

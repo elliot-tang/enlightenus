@@ -26,6 +26,7 @@ export type HomeStackParamList = {
   HomeTabs: undefined;
   Create: { topic: string };
   Play: { topic: string };
+  Analytics: { topic : string };
   DisplayPlay: { qzprop: QuizProps };
   ScrollScreen: { qzprop: QuizProps };
   OneScreen: { qzprop: QuizProps };
