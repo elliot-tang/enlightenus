@@ -1,4 +1,4 @@
-import React, { createContext, useState }from 'react';
+import React, { createContext, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -51,14 +51,6 @@ export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
   setMongo: (newMongo) => {},
 });
 
-type BottomTabNavigationParamList = {
-  Leaderboard: undefined;
-  Forum: undefined;
-  Home: undefined;
-  History: undefined
-};
-
-const Tab = createBottomTabNavigator<BottomTabNavigationParamList>(); 
 export const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 const AuthStackNav = createNativeStackNavigator<AuthStackParamList>();
@@ -77,10 +69,10 @@ const HomeStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }}/>
     <Stack.Screen name="Create" component={CreateScreen} options={{ headerShown: false}}/>
-    <Stack.Screen name="Play" component={PlayScreen} />
-    <Stack.Screen name="DisplayPlay" component={QuizScreen} />
-    <Stack.Screen name="ScrollScreen" component={ScrollScreen} />
-    <Stack.Screen name="OneScreen" component={OneScreen} />
+    <Stack.Screen name="Play" component={PlayScreen} options={{ headerShown: false}}/>
+    <Stack.Screen name="DisplayPlay" component={QuizScreen} options={{ headerShown: false}}/>
+    <Stack.Screen name="ScrollScreen" component={ScrollScreen} options={{ headerShown: false}}/>
+    <Stack.Screen name="OneScreen" component={OneScreen} options={{ headerShown: false}}/>
   </Stack.Navigator>
 )
 
