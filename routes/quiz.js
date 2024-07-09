@@ -796,9 +796,6 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
     const { title, topic, isVerified } = req.query;
 
     var query = {};
-    const { title, topic, isVerified } = req.query;
-
-    var query = {};
 
     // Checks validity of title and adds it to query
     if (title) {

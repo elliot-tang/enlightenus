@@ -5,8 +5,6 @@ const User = require('../schema/user');
 const { ReportedPost, ReportedReply, ReportedQuestion } = require('../schema/reported');
 const ForumPost = require('../schema/forumpost');
 const ForumReply = require('../schema/forumreply');
-const ForumPost = require('../schema/forumpost');
-const ForumReply = require('../schema/forumreply');
 
 const router = express.Router();
 

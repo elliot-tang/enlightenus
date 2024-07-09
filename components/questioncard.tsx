@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import React, { useState } from 'react';
 import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { QuestionPropsForHistory } from './historycard';
@@ -140,10 +139,7 @@ export function TallyCard(question: QnPropsWithReport) {
         <Button title="Report" onPress={question.reportQn} />
         {saved ? (
           <Button color="red" title="Remove" onPress={unsaveQuestion} />
-        {saved ? (
-          <Button color="red" title="Remove" onPress={unsaveQuestion} />
         ) : (
-          <Button title="Save" onPress={saveQuestion} />
           <Button title="Save" onPress={saveQuestion} />
         )}
       </View>
@@ -242,7 +238,6 @@ export function HistoryTallyCard(question: HistoryTallyCardProps) {
         {saved ? (
           <Button color="red" title="Remove" onPress={unsaveQuestion} />
         ) : (
-          <Button title="Save" onPress={saveQuestion} />
           <Button title="Save" onPress={saveQuestion} />
         )}
       </View>
