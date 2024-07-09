@@ -5,6 +5,8 @@ const User = require('../schema/user');
 const { ReportedPost, ReportedReply, ReportedQuestion } = require('../schema/reported');
 const ForumPost = require('../schema/forumpost');
 const ForumReply = require('../schema/forumreply');
+const ForumPost = require('../schema/forumpost');
+const ForumReply = require('../schema/forumreply');
 
 const router = express.Router();
 
@@ -212,7 +214,66 @@ router.get('/report/fetchReportedQuestions', async (req, res) => {
     res.status(500).json({ message: 'Error fetching reported questions', error });
   }
 });
+router.get('/report/fetchReportedQuestions', async (req, res) => {
+  try {
+    const fetched = await ReportedQuestion.find()
+                                          .sort({ dateCreated: -1 })
+                                          .limit(50)
+                                          .populate({
+                                            path: 'question.questionId',
+                                            populate: {
+                                              path: 'author',
+                                            }
+                                          })
+                                          .populate('reporter')
+                                          .exec();
+    
+    const mappedQuestions = fetched.map(doc => {
+      const toObj = doc.toObject();
+      toObj.question.questionId.questionType = toObj.question.questionType;
+      toObj.question.questionId.author = toObj.question.questionId.author.username;
+      toObj.question = toObj.question.questionId;
+      toObj.reporter = toObj.reporter.username;
+      return toObj;
+    });
+    console.log('Reported questions fetched successfully!');
+    res.status(200).json({ questions: mappedQuestions });
+  } catch (error) {
+    console.log('Unable to fetch reported questions');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching reported questions', error });
+  }
+});
 
+// fetch all reported forum posts (doesn't populate attachments)
+router.get('/report/fetchReportedPosts', async (req, res) => {
+  try {
+    const fetched = await ReportedPost.find()
+                                      .sort({ dateCreated: -1 })
+                                      .limit(50)
+                                      .populate('reporter')
+                                      .populate({
+                                        path: 'postId',
+                                        populate: {
+                                          path: 'userId',
+                                        }
+                                      })
+                                      .exec();
+    
+    const mappedPosts = fetched.map(doc => {
+      const toObj = doc.toObject();
+      toObj.reporter = toObj.reporter.username;
+      toObj.postId.userId = toObj.postId.userId.username;
+      return toObj;
+    });
+    console.log('Reported posts fetched successfully!');
+    res.status(200).json({ questions: mappedPosts });
+  } catch (error) {
+    console.log('Unable to fetch reported posts');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching reported posts', error });
+  }
+});
 // fetch all reported forum posts (doesn't populate attachments)
 router.get('/report/fetchReportedPosts', async (req, res) => {
   try {

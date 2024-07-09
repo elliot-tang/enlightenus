@@ -251,6 +251,9 @@ router.post('/quiz/createQuiz', async (req, res) => {
     // Ensures correct capitalisation of topic
     topic = topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase();
 
+    // Ensures correct capitalisation of topic
+    topic = topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase();
+
     // Ensures quiz has at least 1 question
     if (!questions || questions.length === 0) {
       return res.status(400).json({ message: 'You must have at least one question!' });
@@ -700,6 +703,7 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
 });
 
 // fetch quizzes created by user, limited to 50 for now
+// fetch quizzes created by user, limited to 50 for now
 router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
   try {
     const username = req.query.username;
@@ -749,6 +753,7 @@ router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
 });
 
 // fetch all quizzes in the database, limited to 50 for now
+// fetch all quizzes in the database, limited to 50 for now
 router.get('/quiz/fetchAllQuizzes', async (req, res) => {
   try {
     const fetched = await Quiz.find({})
@@ -788,6 +793,9 @@ router.get('/quiz/fetchAllQuizzes', async (req, res) => {
 // fetch all quiz matching criteria, limited to 20 for now
 router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
   try {
+    const { title, topic, isVerified } = req.query;
+
+    var query = {};
     const { title, topic, isVerified } = req.query;
 
     var query = {};
@@ -842,6 +850,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
       return quizObject;
     });
     console.log('Quizzes fetched successfully!');
+    res.status(200).json({ quizzes: quizzes });
     res.status(200).json({ quizzes: quizzes });
   } catch (error) {
     console.log('Unable to fetch quizzes');
@@ -898,7 +907,7 @@ router.post('/quiz/checkSavedQuizzes', async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Error checking saved quizzes', error });
   }
-})
+});
 
 // rate quiz
 router.post('/quiz/rateQuiz', async (req, res) => {
