@@ -378,7 +378,7 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
                 userAns={item[2]}
                 reportQn={() => {
                   // TODO: Report question
-                  alert('Currently under development!');
+                  // alert('Currently under development!');
                   setCurrentI(item[0].id);
                   setCurrentQ(item[0].quizstmt)
                   setPage(-1);

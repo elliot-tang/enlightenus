@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { LineChart, PieChart } from 'react-native-chart-kit'
-import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView } from 'react-native';
-import { styles } from '@app/App';
+import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { Button, Text, View, ScrollView } from 'react-native';
 import { Dimensions } from "react-native";
 import CustomPicker from '@app/components/mypicker';
 import HistoryCard, { HistoryProps, QuestionPropsForHistory } from '@app/components/historycard';
@@ -23,11 +22,6 @@ interface HistoryScreenProps extends NativeStackScreenProps<HistoryStackNavigati
 
 type IndividualProps = NativeStackScreenProps<HistoryStackNavigationParamList, "individual">
 
-function capitalizeFLetter(tochange: string) {
-  return (tochange[0].toUpperCase() +
-    tochange.slice(1));
-}
-
 
 export default function PlayHist() {
   return (
@@ -43,39 +37,45 @@ function MainHistory({ navigation }: HistoryScreenProps) {
   const [quizStats, setQuizStats] = useState([]);
   const user = returnUser();
 
-  // Loads 20 most recently taken quizzes into graph
-  useEffect(() => {
-    async function loadQuizzes() {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
-      const quizzes = response.data.quizzes;
-      console.log(quizzes);
-      const data = quizzes.map(quiz => {
-        const id = quiz._id;
-        const title = quiz.title;
-        const topic = quiz.topic;
-        const hasSaved = false; // TODO: Fetch, set as default for now
-        const score = quiz.score;
-        const questions = quiz.questions.map(qn => {
-          const id = qn._id;
-          const mcq = qn.questionType === 'MCQ';
-          const maxAttempt = qn.questionAttempts;
-          const quizstmt = qn.questionBody;
-          const corrans = mcq ? qn.options.filter(option => option.isCorrect).map(option => option.answer) : qn.correctOptions;
-          const wrongs = mcq ? qn.options.filter(option => !option.isCorrect).map(option => option.answer) : [];
-          const noOption = qn.noOptions;
-          const explainText = qn.explainText;
-          const responses = qn.responses;
-          const isCorrect = qn.isCorrect;
-          const noAttempts = qn.noAttempts;
-          return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts };
-        });
-        return { id, title, topic, hasSaved, questions, score };
-      });
-      console.log(data);
-      setQuizStats(data);
-    }
-    loadQuizzes();
-  }, []);
+  // Loads 50 most recently taken quizzes into graph
+  useFocusEffect(
+    React.useCallback(() => {
+      async function loadQuizzes() {
+        try {
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
+          const quizzes = response.data.quizzes;
+          const data = quizzes.map(quiz => {
+            const takenId = quiz.takenId;
+            const id = quiz._id;
+            const title = quiz.title;
+            const topic = quiz.topic;
+            const hasSaved = false; // TODO: Fetch, set as default for now
+            const score = quiz.score;
+            const questions = quiz.questions.map(qn => {
+              const id = qn._id;
+              const mcq = qn.questionType === 'MCQ';
+              const maxAttempt = qn.questionAttempts;
+              const quizstmt = qn.questionBody;
+              const corrans = mcq ? qn.options.filter(option => option.isCorrect).map(option => option.answer) : qn.correctOptions;
+              const wrongs = mcq ? qn.options.filter(option => !option.isCorrect).map(option => option.answer) : [];
+              const noOption = qn.noOptions;
+              const explainText = qn.explainText;
+              const responses = qn.responses;
+              const isCorrect = qn.isCorrect;
+              const noAttempts = qn.noAttempts;
+              return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts };
+            });
+            return { takenId, id, title, topic, hasSaved, questions, score };
+          });
+          setQuizStats(data);
+        } catch (error) {
+          console.error('Error loading quizzes:', error);
+          setQuizStats([]);
+        }
+      }
+      loadQuizzes();
+    }, [])
+  );
 
   const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);
   return (
@@ -93,9 +93,9 @@ function MainHistory({ navigation }: HistoryScreenProps) {
         />
       </View>
       <ScrollView style={{ flex: 1 }}>
-        {toShowData.map((item) => <View style={{paddingTop:10}}>
+        {toShowData.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard
-            key={item.id}
+            key={item.takenId}
             {...item}
             goToInd={() => navigation.navigate("individual", { indivProps: item })} />
         </View>)}
@@ -106,22 +106,19 @@ function MainHistory({ navigation }: HistoryScreenProps) {
 
 function Individual({ route, navigation }: IndividualProps) {
   const toShowProps = (route.params === undefined) ? { id: "", title: "", topic: "", questions: Array<QuestionPropsForHistory>(), score: 0 } : route.params.indivProps
-  const toShow = toShowProps.questions
+  const toShow = toShowProps.questions;
+  const user = returnUser();
   return (
     <View style={{ flex: 1 }}>
       <View style={{ height: height * 0.07 }} />
-      <Text style={{ fontSize: 21, fontWeight: "bold" }}>{capitalizeFLetter(toShowProps.topic)} : {toShowProps.title}</Text>
+      <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShowProps.topic} : {toShowProps.title}</Text>
       <View style={{ height: 0.05 * height, flexDirection: "row" }} />
       <ScrollView style={{ height: height * 0.67, gap: 10 }}>
-        {toShow.map((item) => <View style={{paddingTop:10}}>
+        {toShow.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryTallyCard
             {...item}
-            saved={true}
-            reportQn={() => alert('Currently under development!')}
-            saveQn={() => alert('Currently under development!')}
-            unsaveQn={() => alert('Currently under development!')}
           />
-          </View>)}
+        </View>)}
       </ScrollView>
       <Button title="Go Back" onPress={() => navigation.goBack()} />
     </View>
