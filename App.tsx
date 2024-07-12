@@ -15,6 +15,7 @@ import QuizScreen, { OneScreen, ScrollScreen } from './screens/home/quizscreen';
 import { QnProps } from './components/question1by1';
 import { QuizProps } from './components/quizcardonsearch';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ProfileScreen } from './screens/home/profile';
 
 // Defines type parameters for route params
 export type AuthStackParamList = {
@@ -26,7 +27,7 @@ export type HomeStackParamList = {
   HomeTabs: undefined;
   Create: { topic: string };
   Play: { topic: string };
-  Analytics: { topic : string };
+  Profile: undefined;
   DisplayPlay: { qzprop: QuizProps };
   ScrollScreen: { qzprop: QuizProps };
   OneScreen: { qzprop: QuizProps };
@@ -78,6 +79,7 @@ const HomeStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }}/>
     <Stack.Screen name="Create" component={CreateScreen} options={{ headerShown: false}}/>
+    <Stack.Screen name="Profile" component={ProfileScreen}/>
     <Stack.Screen name="Play" component={PlayScreen} />
     <Stack.Screen name="DisplayPlay" component={QuizScreen} />
     <Stack.Screen name="ScrollScreen" component={ScrollScreen} />

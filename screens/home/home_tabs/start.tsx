@@ -167,7 +167,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
           <MaterialIcons name="add" size={74} color="black" />
           <Text> Add </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Analytics", { topic: topic })}>
+        <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Profile")}>
           <MaterialIcons name="delete" size={74} color="black" />
           <Text> Profile </Text>
         </TouchableOpacity>
