@@ -27,10 +27,16 @@ export type HomeStackParamList = {
   HomeTabs: undefined;
   Create: { topic: string };
   Play: { topic: string };
-  Profile: undefined;
   DisplayPlay: { qzprop: QuizProps };
   ScrollScreen: { qzprop: QuizProps };
   OneScreen: { qzprop: QuizProps };
+  Profile: undefined;
+  Pquizcreated: { fetchLimit: number },
+  Pquizplayed: { fetchLimit: number }
+  Pquizsaved: undefined,
+  Pquestioncreated: { quiz_id: string },
+  Pquestionplayed: { quiz_id: string },
+  Pquestionsaved: undefined,
 }
 
 export interface HomeScreenProps extends NativeStackScreenProps<HomeStackParamList>{}
@@ -77,13 +83,27 @@ const AuthStack = () => (
 
 const HomeStack = () => (
   <Stack.Navigator>
-    <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }}/>
-    <Stack.Screen name="Create" component={CreateScreen} options={{ headerShown: false}}/>
-    <Stack.Screen name="Profile" component={ProfileScreen}/>
-    <Stack.Screen name="Play" component={PlayScreen} />
-    <Stack.Screen name="DisplayPlay" component={QuizScreen} />
-    <Stack.Screen name="ScrollScreen" component={ScrollScreen} />
-    <Stack.Screen name="OneScreen" component={OneScreen} />
+    <Stack.Group screenOptions={{headerShown:false}}>
+      <Stack.Screen name="HomeTabs" component={HomeTabs}/>
+      <Stack.Screen name="Create" component={CreateScreen}/>
+    </Stack.Group>
+    <Stack.Group>
+      <Stack.Screen name="Play" component={PlayScreen} />
+      <Stack.Screen name="DisplayPlay" component={QuizScreen} />
+      <Stack.Screen name="ScrollScreen" component={ScrollScreen} />
+      <Stack.Screen name="OneScreen" component={OneScreen} />
+    </Stack.Group>
+    <Stack.Group screenOptions={{headerShown:false}}>
+      <Stack.Screen name="Profile" component={ProfileScreen}/>
+      <Stack.Screen name="Pquizcreated" component={QuizCreateScreen} />
+      <Stack.Screen name="Pquestioncreated" component={IndivCreateScreen} />
+      <Stack.Screen name="Pquizplayed" component={QuizPlayedScreen} />
+      <Stack.Screen name="Pquestionplayed" component={IndivPlayedScreen} />
+      <Stack.Screen name="Pquizsaved" component={SavedQuizScreen} />
+      <Stack.Screen name="Pquestionsaved" component={QuestionSavedScreen} />
+    </Stack.Group>
+    
+    
   </Stack.Navigator>
 )
 

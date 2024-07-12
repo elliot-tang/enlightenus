@@ -178,7 +178,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
       {toShowdata.length > 0 ? (
         <>
           <Text style={{ textAlign: "left", fontSize: 19 }}>
-            Your recent performance in {topic === "Uncategorised" || topic === "" ? "everything" : topic}
+            Your recent performance in {["Uncategorised", "","Custom"].includes(topic) ? "everything" : topic}
           </Text>
           <View style={{ height: 0.01 * height }} />
           <View>

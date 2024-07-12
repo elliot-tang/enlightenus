@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { QnProps } from './question1by1';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import React from 'react';
 
 export type QuestionPropsForHistory = {
   id: string,
