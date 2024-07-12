@@ -373,7 +373,6 @@ function Report({ route, navigation }: ReportProps) {
       />
       <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
         <Button title="Submit" onPress={async () => {
-          // TODO: Report forum post
           const response = await reportForumContent();
           const type = temptype.charAt(0).toUpperCase() + temptype.slice(1);
           if (response) {
