@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Text, View, ScrollView } from 'react-native';
+import { Button, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Dimensions } from "react-native";
 import CustomPicker from '@app/components/mypicker';
 import HistoryCard, { HistoryProps, QuestionPropsForHistory } from '@app/components/historycard';
@@ -8,6 +8,7 @@ import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navig
 import { HistoryTallyCard } from '@app/components/questioncard';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const { height, width } = Dimensions.get("window");
 
@@ -79,19 +80,23 @@ function MainHistory({ navigation }: HistoryScreenProps) {
 
   const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, gap: 10 }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={{ fontSize: 23, fontWeight: "bold" }}>
         View Previous Quizzes Here
       </Text>
-      <View style={{ zIndex: 1 }}>
-        <CustomPicker
-          options={options}
-          selectedValue={topic}
-          onValueChange={setTopic}
-          label="Topic:"
-        />
-      </View>
+      <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
+          <TextInput
+            style={{ flex: 5 }}
+            placeholder="Search by topic..."
+            onChangeText={setTopic}
+            value={topic}
+          />
+          <TouchableOpacity
+            style={{ justifyContent: "center", flex: 1 }}>
+            <MaterialIcons name="search" size={24} color="gray" />
+          </TouchableOpacity>
+        </View>
       <ScrollView style={{ flex: 1 }}>
         {toShowData.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard

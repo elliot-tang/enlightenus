@@ -126,7 +126,7 @@ function BarCard(props: BarCardProps) {
       {toDisplayList.map( (item)=> (
         <View style={{flexDirection:"row", alignItems:"center"}} key={item[0]}>
           <View style={{height: 10, width: 10, backgroundColor: colors[toDisplayList.indexOf(item)]}}/>
-          <Text> : {item[0].charAt(0).toUpperCase() + truncateString(item[0],9).slice(1)}</Text>
+          <Text> :{item[0].charAt(0).toUpperCase() + truncateString(item[0],9).slice(1)}</Text>
         </View>
       )
       )}
@@ -134,7 +134,7 @@ function BarCard(props: BarCardProps) {
   </TouchableOpacity>)
 }
 
-export const ProfileScreen = () => {
+export const ProfileScreen = ({navigation}: ProfileProps) => {
   const [fetchLimit, setFetchLimit] = useState(50);
   const [quizStatsCreate, setQuizStatsCreate] = useState([]);
   const user = returnUser();
@@ -178,13 +178,21 @@ export const ProfileScreen = () => {
       loadQuizzes();
     }, [])
   );
+  //dummy to stop red underline temporarily
+
+  const quizStatsPlayed = quizStatsCreate;
+  const quizStatsSaved=quizStatsCreate;
+
+  //fetch actual stuff
+
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ height: height * 0.07 }} />
+    <ScrollView style={{ flex: 1}}>
+      <View style={{ height: 15 }} />
       <Text style={{ fontSize: 13, fontWeight: "bold" }}>
         Number of items to show
       </Text>
+      <View style={{ height: 15 }} />
       <View style={{ zIndex: 1 }}>
         <CustomPicker
           options={options}
@@ -193,20 +201,27 @@ export const ProfileScreen = () => {
           label="Limit to:"
         />
       </View>
-      <BarCard data={quizStatsCreate} onPress={()=>1} displayString={"Number of Quizzes Created"}/>
-      <View style={{ height: 10 }} />
-      <BarCard data={quizStatsCreate} onPress={()=>1} displayString={"Number of Quizzes Played"}/>
-      <View style={{ height: 10 }} />
-      <BarCard data={quizStatsCreate} onPress={()=>1} displayString={"Number of Quizzes Saved"}/>
-      <View style={{ height: 10 }} />
+      <View style={{ height: 15 }} />
+      <BarCard data={quizStatsCreate} onPress={()=>navigation.navigate("Pquizcreated", {fetchedQz: quizStatsCreate})} displayString={"Number of Quizzes Created"}/>
+      <View style={{ height: 15 }} />
+      <BarCard data={quizStatsPlayed} onPress={()=>navigation.navigate("HomeTabs",{screen:"QuizHistory"})} displayString={"Number of Quizzes Played"}/>
+      <View style={{ height: 15 }} />
+      <BarCard data={quizStatsSaved} onPress={()=>navigation.navigate("Pquizsaved", {fetchedQz:quizStatsSaved})} displayString={"Number of Quizzes Saved"}/>
+      <View style={{ height: 30 }} />
       <Text>Some statistics at a glance</Text>
-      <Text>Your best performing topic is xxx with a score of xxx</Text>
-      <Text>Your worst performing topic is xxx with a score of xxx</Text>
-      <Text>On average, you scored </Text>
-      <Text>On average, others scored xxx on quizzes you made</Text>
-    </View>
+      <View style={{justifyContent:"center", alignItems:"center", gap:5}}>
+        <View style={{height:15}}/>
+        <Text>Your best performing topic is xxx with a score of xxx</Text>
+        <Text>Your worst performing topic is xxx with a score of xxx</Text>
+        <Text>On average, you scored </Text>
+        <Text>On average, others scored xxx on quizzes you made</Text>
+      </View>
+      <View style={{height:15}}/>
+      <Button onPress={()=>navigation.navigate("HomeTabs")} title={"Back Home"}/>
+    </ScrollView>
   )
 }
+
 const styles = StyleSheet.create({
 
   touchable: {
