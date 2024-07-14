@@ -207,7 +207,7 @@ export function HistoryTallyCard(question: QuestionPropsForHistory) {
   );
 }
 
-type QuestionPropsForTaken= QnProps&{mostCommonWrong: string, percentageRight: number}
+type QuestionPropsForTaken= QuestionPropsForHistory &{mostCommonWrong: string, percentageRight: number}
 
 export function HistoryTallyCard2(question: QuestionPropsForTaken) {
   return(

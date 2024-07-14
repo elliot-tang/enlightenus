@@ -15,9 +15,8 @@ const { height, width } = Dimensions.get("window");
 type ProfileQzCProps = NativeStackScreenProps<HomeStackParamList, "Pquestioncreated">
 
 export const IndivCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
-    const quizId = route.params.quiz_id;
-    //somehow axios will need to take the topic, title, questions based on just the id
-    const toShow = {topic:"placeholder", title: "placeholder", questions: []}
+    const quizprops = route.params.quizprops;
+    const toShow = { topic: quizprops.topic, title: quizprops.title, questions: quizprops.questions }
     return (
         <View style={{ flex: 1 }}>
             <View style={{ height: height * 0.07 }} />
@@ -26,12 +25,13 @@ export const IndivCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
             <ScrollView style={{ height: height * 0.67, gap: 10 }}>
                 {toShow.questions.map((item) => <View style={{ paddingTop: 10 }}>
                     <HistoryTallyCard2
-                        {...item}
-                    />
+                        {...item} percentageRight={0} mostCommonWrong={''} //to do: fetch this elliot
+                        />
                 </View>)}
             </ScrollView>
             <Button title="Go Back" onPress={() => navigation.goBack()} />
-            <Button title="Delete this Quiz" onPress={() => alert("Elliot helps")} />
+            <Button title="Delete this Quiz" onPress={() => {alert("To do: elliot delete"); navigation.navigate("Profile")} /*
+            it is important to navigate all the way back to the start screen so that the list of created questions can be refetched and updated */} />
         </View>
     )
 }

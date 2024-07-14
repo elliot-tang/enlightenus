@@ -17,7 +17,19 @@ export type QuestionPropsForHistory = {
   noAttempts: number
 }
 
-type QnPropswSaved = QnProps & {hasSaved: boolean, unsave:()=>void}
+interface FetchedQuestionForQuiz {
+  _id: string;
+  questionBody: string;
+  __v: number;
+  correctOptions?: string[];
+  author: string;
+  explainText?: string;
+  dateCreated: string;
+  questionType: string;
+  questionAttempts: number;
+  noOptions: number;
+  options?: { answer: string, isCorrect?: boolean, _id?: string }[];
+}
 
 export type HistoryProps = {
   id: string,
@@ -46,7 +58,7 @@ export type HistoryProps3 = {
   id: string,
   title: string,
   topic: string,
-  questions: Array<QnPropswSaved>,
+  questions: Array<QuestionPropsForHistory>,
   hasSaved: boolean
 } 
 
@@ -74,7 +86,6 @@ export function HistoryCard2(hprops: HistoryPropswFunc2) {
 export function HistoryCard3(hprops: HistoryPropswFunc3) {
   return(<TouchableOpacity style = {styles2.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
-    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Has {hprops.questions.length.toString()} questions, of which {hprops.questions.filter((ele)=> ele.hasSaved==true).length.toString()} are saved.</Text>
   </TouchableOpacity>)
 }
 

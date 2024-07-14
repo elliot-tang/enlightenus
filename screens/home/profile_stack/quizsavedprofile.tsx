@@ -38,11 +38,12 @@ export const QuizSavedScreen = ({route,navigation}: ProfileQzSProps) => {
         </View>
         <ScrollView style={{ flex: 1 }}>
           {toDisplayQuizzes.map((item) => <View style={{ paddingTop: 10 }}>
-            <HistoryCard3
-              key={item.takenId}
-              {...item.hprop} 
-              goToInd={() => navigation.navigate("Pquestionsaved", { quiz_id: item.id })} />
-          </View>)}
+          <HistoryCard3
+              hasSaved={false} key={item._id}
+              {...item}
+              id={item._id}
+              goToInd={() => navigation.navigate("Pquestionsaved", { quizprops: item})} />
+        </View>)}
         </ScrollView>
         <Button title="Go Back" onPress={() => navigation.goBack()} />
       </View>

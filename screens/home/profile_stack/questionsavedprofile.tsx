@@ -15,7 +15,7 @@ const { height, width } = Dimensions.get("window");
 type ProfileQzCProps = NativeStackScreenProps<HomeStackParamList, "Pquestioncreated">
 
 export const IndivSavedScreen = ({ route, navigation }: ProfileQzCProps) => {
-    const quizId = route.params.quiz_id;
+    const quizprops = route.params.quizprops;
     //somehow axios will need to take the topic, title, questions based on just the id
     const toShow = {topic:"placeholder", title: "placeholder", questions: []}
     return (
@@ -31,7 +31,8 @@ export const IndivSavedScreen = ({ route, navigation }: ProfileQzCProps) => {
                 </View>)}
             </ScrollView>
             <Button title="Go Back" onPress={() => navigation.goBack()} />
-            <Button title="Unsave this Quiz" onPress={() => alert("Elliot helps")} />
+            <Button title="Unsave this Quiz" onPress={() => {alert("To do: elliot unsave"); navigation.navigate("Profile")} /*
+            it is important to navigate all the way back to the start screen so that the list of created questions can be refetched and updated */} />
         </View>
     )
 }

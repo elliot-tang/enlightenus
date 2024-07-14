@@ -16,7 +16,7 @@ import QuizScreen, { OneScreen, ScrollScreen } from './screens/home/quizscreen';
 import { QnProps } from './components/question1by1';
 import { QuizProps } from './components/quizcardonsearch';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ProfileScreen } from './screens/home/profile_stack/profile';
+import { FetchedQuizPropsProfile, ProfileScreen } from './screens/home/profile_stack/profile';
 import { QuizCreateScreen } from './screens/home/profile_stack/quizcreatedprofile';
 import { IndivCreateScreen } from './screens/home/profile_stack/questioncreatedprofile';
 import { QuizSavedScreen } from './screens/home/profile_stack/quizsavedprofile';
@@ -37,10 +37,10 @@ export type HomeStackParamList = {
   ScrollScreen: { qzprop: QuizProps };
   OneScreen: { qzprop: QuizProps };
   Profile: undefined;
-  Pquizcreated: { fetchedQz: any[] };
-  Pquizsaved: { fetchedQz: any[] };
-  Pquestioncreated: { quiz_id: string };
-  Pquestionsaved: { quiz_id: string };
+  Pquizcreated: { fetchedQz: FetchedQuizPropsProfile[] };
+  Pquizsaved: { fetchedQz: FetchedQuizPropsProfile[] };
+  Pquestioncreated: { quizprops: FetchedQuizPropsProfile }; //to pass in questions, title and topic
+  Pquestionsaved: { quizprops: FetchedQuizPropsProfile }; //to pass in questions, title and topic
 }
 
 export interface HomeScreenProps extends NativeStackScreenProps<HomeStackParamList> { }

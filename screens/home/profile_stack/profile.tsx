@@ -7,14 +7,15 @@ import CustomPicker from '@app/components/mypicker';
 import { StackedBarChart } from 'react-native-svg-charts';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
+import { QuestionPropsForHistory } from '@app/components/historycard';
 
 const { height, width } = Dimensions.get("window");
 
 const options = [
-  { value: 50, label: '50' },
-  { value: 20, label: '20' },
-  { value: 100, label: '100' },
-  { value: 9999, label: 'All' },
+  { value: 5, label: '5' },
+  { value: 10, label: '10' },
+  { value: 25, label: '25' },
+  { value: 50, label: 'All' },
 ]
 
 type ProfileProps = NativeStackScreenProps<HomeStackParamList, "Profile">
@@ -40,11 +41,11 @@ interface FetchedQuestionForQuiz {
   options?: { answer: string, isCorrect?: boolean, _id?: string }[];
 }
 
-type FetchedQuizProps = {
+export type FetchedQuizPropsProfile = {
   _id: string,
   title: string,
   topic: string,
-  questions: Array<FetchedQuestionForQuiz>,
+  questions: Array<QuestionPropsForHistory>,
   author: string,
   rating: number,
   timesRated: number,
@@ -55,7 +56,7 @@ type FetchedQuizProps = {
 }
 
 type BarCardProps = {
-  data: Array<FetchedQuizProps>,
+  data: Array<FetchedQuizPropsProfile>,
   onPress: () => void
   displayString: string
 }
@@ -137,6 +138,8 @@ function BarCard(props: BarCardProps) {
 export const ProfileScreen = ({navigation}: ProfileProps) => {
   const [fetchLimit, setFetchLimit] = useState(50);
   const [quizStatsCreate, setQuizStatsCreate] = useState([]);
+  const [quizStatsPlayed, setQuizStatsPlayed] = useState([]);
+  const [quizStatsSaved , setQuizStatsSaved] = useState([]);
   const user = returnUser();
 
   // Loads 50 most recently taken quizzes into graph
@@ -178,12 +181,8 @@ export const ProfileScreen = ({navigation}: ProfileProps) => {
       loadQuizzes();
     }, [])
   );
-  //dummy to stop red underline temporarily
 
-  const quizStatsPlayed = quizStatsCreate;
-  const quizStatsSaved=quizStatsCreate;
-
-  //fetch actual stuff
+  //TO DO ELLIOT: fetch actual quiz saved and quiz played
 
 
   return (
@@ -202,11 +201,11 @@ export const ProfileScreen = ({navigation}: ProfileProps) => {
         />
       </View>
       <View style={{ height: 15 }} />
-      <BarCard data={quizStatsCreate} onPress={()=>navigation.navigate("Pquizcreated", {fetchedQz: quizStatsCreate})} displayString={"Number of Quizzes Created"}/>
+      <BarCard data={quizStatsCreate.slice(0,fetchLimit)} onPress={()=>navigation.navigate("Pquizcreated", {fetchedQz: quizStatsCreate.slice(0,fetchLimit)})} displayString={"Number of Quizzes Created"}/>
       <View style={{ height: 15 }} />
-      <BarCard data={quizStatsPlayed} onPress={()=>navigation.navigate("HomeTabs",{screen:"QuizHistory"})} displayString={"Number of Quizzes Played"}/>
+      <BarCard data={quizStatsPlayed.slice(0,fetchLimit)} onPress={()=>navigation.navigate("HomeTabs",{screen:"QuizHistory"})} displayString={"Number of Quizzes Played"}/>
       <View style={{ height: 15 }} />
-      <BarCard data={quizStatsSaved} onPress={()=>navigation.navigate("Pquizsaved", {fetchedQz:quizStatsSaved})} displayString={"Number of Quizzes Saved"}/>
+      <BarCard data={quizStatsSaved.slice(0,fetchLimit)} onPress={()=>navigation.navigate("Pquizsaved", {fetchedQz:quizStatsSaved.slice(0,fetchLimit)})} displayString={"Number of Quizzes Saved"}/>
       <View style={{ height: 30 }} />
       <Text>Some statistics at a glance</Text>
       <View style={{justifyContent:"center", alignItems:"center", gap:5}}>
@@ -219,6 +218,7 @@ export const ProfileScreen = ({navigation}: ProfileProps) => {
       <View style={{height:15}}/>
       <Button onPress={()=>navigation.navigate("HomeTabs")} title={"Back Home"}/>
     </ScrollView>
+    //TO DO ELLIOT: fetch actual stuff and put into data
   )
 }
 
