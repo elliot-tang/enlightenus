@@ -195,6 +195,7 @@ export function HistoryTallyCard(question: QuestionPropsForHistory) {
       {renderCorrectAnswers()}
       {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
       <Text style={{color: question.isCorrect ? 'green' : 'red',}}>Your answer(s): {renderUserAnswers()}</Text>
+      {question.explainText != undefined && <Text>Explanation: {question.explainText}</Text>}
       <View style={styles.editIconContainer}>
         <Button title="Report" onPress={reportQuestion} />
         {saved ? (
