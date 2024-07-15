@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { QnProps } from './question1by1';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import React from 'react';
 
 export type QuestionPropsForHistory = {
   id: string,
@@ -14,6 +15,20 @@ export type QuestionPropsForHistory = {
   responses: Array<string>
   isCorrect: boolean,
   noAttempts: number
+}
+
+interface FetchedQuestionForQuiz {
+  _id: string;
+  questionBody: string;
+  __v: number;
+  correctOptions?: string[];
+  author: string;
+  explainText?: string;
+  dateCreated: string;
+  questionType: string;
+  questionAttempts: number;
+  noOptions: number;
+  options?: { answer: string, isCorrect?: boolean, _id?: string }[];
 }
 
 export type HistoryProps = {
@@ -30,21 +45,63 @@ export type HistoryProps = {
 
 type HistoryPropswFunc = HistoryProps & { goToInd: () => void};
 
+export type HistoryProps2 = {
+  id: string,
+  title: string,
+  topic: string,
+  questions: Array<QuestionPropsForHistory>,
+  avescore: number,
+  numberplays: number
+} 
+
+export type HistoryProps3 = {
+  id: string,
+  title: string,
+  topic: string,
+  questions: Array<QuestionPropsForHistory>,
+  hasSaved: boolean
+} 
+
+type HistoryPropswFunc2 = HistoryProps2 & { goToInd: () => void};
+type HistoryPropswFunc3 = HistoryProps3 & { goToInd: () => void};
+
 export default function HistoryCard(hprops: HistoryPropswFunc) {
   return(<TouchableOpacity style = {styles.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
     <Text style={{ fontWeight: 'bold', fontSize: 14 }}>{hprops.score}/{hprops.questions.length} </Text>
     <View style={{flexDirection:"row-reverse"}}>
-    <MaterialIcons name="save" size={22} color= {(hprops.hasSaved? "green":"red")}/>
+      <MaterialIcons name="save" size={22} color= {(hprops.hasSaved? "green":"red")}/>
     </View>
   </TouchableOpacity>)
 }
 
+export function HistoryCard2(hprops: HistoryPropswFunc2) {
+  return(<TouchableOpacity style = {styles2.touchable} onPress={hprops.goToInd}>
+    <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Average Score: {hprops.avescore} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Times Played: {hprops.numberplays} </Text>
+  </TouchableOpacity>)
+}
+
+export function HistoryCard3(hprops: HistoryPropswFunc3) {
+  return(<TouchableOpacity style = {styles2.touchable} onPress={hprops.goToInd}>
+    <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
+  </TouchableOpacity>)
+}
 
 const styles = StyleSheet.create({
 
   touchable: {
     backgroundColor: '#cdefff',
+    padding: 15,
+    borderRadius: 10,
+  },
+});
+
+const styles2 = StyleSheet.create({
+
+  touchable: {
+    backgroundColor: '#99ff99',
     padding: 15,
     borderRadius: 10,
   },

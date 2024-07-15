@@ -109,12 +109,13 @@ function StartScreen({ navigation }: HomeScreenProps) {
 
       <View style={{ flexDirection: "row", width: 0.73 * width, height: 0.15 * height }}>
         <ScrollView horizontal={true} persistentScrollbar={true}>
-          <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Uncategorised")}>
-            <Image source={require("@app/assets/traffic-signal.png")} style={styles.image} />
-            <View style={styles.textContainer}>
-              <Text style={{ color: "white" }}>All</Text>
-            </View>
-          </TouchableOpacity>
+
+        <TouchableOpacity style={styles.imageContainer} onPress={()=>setTopic("Custom")}>
+          <Image source={require("./creativity.png")} style={styles.image} />
+          <View style={styles.textContainer}>
+            <Text style={{color :"white"}}>Custom Topic</Text>
+          </View>
+        </TouchableOpacity>
 
           <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("NUS Modules")}>
             <Image source={require("@app/assets/nuslogo.jpeg")} style={styles.image} />
@@ -144,6 +145,14 @@ function StartScreen({ navigation }: HomeScreenProps) {
             </View>
           </TouchableOpacity>
 
+          <TouchableOpacity style={styles.imageContainer} onPress={() => setTopic("Uncategorised")}>
+            <Image source={require("@app/assets/traffic-signal.png")} style={styles.image} />
+            <View style={styles.textContainer}>
+              <Text style={{ color: "white" }}>All</Text>
+            </View>
+          </TouchableOpacity>
+
+
         </ScrollView>
       </View>
 
@@ -158,9 +167,9 @@ function StartScreen({ navigation }: HomeScreenProps) {
           <MaterialIcons name="add" size={74} color="black" />
           <Text> Add </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Create", { topic: topic })}>
+        <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Profile")}>
           <MaterialIcons name="delete" size={74} color="black" />
-          <Text> Delete </Text>
+          <Text> Profile </Text>
         </TouchableOpacity>
       </View>
 
@@ -169,7 +178,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
       {toShowdata.length > 0 ? (
         <>
           <Text style={{ textAlign: "left", fontSize: 19 }}>
-            Your recent performance in {topic === "Uncategorised" || topic === "" ? "everything" : topic}
+            Your recent performance in {["Uncategorised", "","Custom"].includes(topic) ? "everything" : topic}
           </Text>
           <View style={{ height: 0.01 * height }} />
           <View>

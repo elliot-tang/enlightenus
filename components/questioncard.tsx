@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Dimensions } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { QuestionPropsForHistory } from './historycard';
 import { returnUser } from '@app/context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
+
+const {height,width}= Dimensions.get("window")
 
 type QnProps = {
   id: string;
@@ -203,6 +205,24 @@ export function HistoryTallyCard(question: QuestionPropsForHistory) {
       </View>
     </View>
   );
+}
+
+type QuestionPropsForTaken= QuestionPropsForHistory &{mostCommonWrong: string, percentageRight: number}
+
+export function HistoryTallyCard2(question: QuestionPropsForTaken) {
+  return(
+    <View style={{ gap: 10, borderRadius: 10, backgroundColor: '#99ff99', borderWidth: 3 }}>
+      <Text style={styles.questionStatement}>
+        {question.mcq ? 'MCQ' : 'Open'}: {question.quizstmt}
+      </Text>
+      {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
+      <Text style={{color: "red"}}>The most common wrong answer was: {question.mostCommonWrong}</Text>
+      <View style={{flexDirection:"row",justifyContent:"center"}}>
+        <View style={{borderBottomLeftRadius:3, borderTopLeftRadius:3, height: 10, width: width*0.5*question.percentageRight, backgroundColor:"#52CA05"}}/>
+        <Text>{question.percentageRight}% correct</Text> 
+      </View>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({

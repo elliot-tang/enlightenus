@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { QnProps } from './question1by1';
+import React from 'react';
 
 export type QuizProps = {
   id: string
