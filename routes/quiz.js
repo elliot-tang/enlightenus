@@ -14,7 +14,7 @@ router.post('/quiz/createMCQ', async (req, res) => {
     const { questionBody, options, author, explainText } = req.body;
 
     // Ensures question body is not empty
-    if (questionBody.trim() === "") {
+    if (!questionBody || questionBody.trim() === "") {
       return res.status(400).json({ message: 'Please do not input an empty question body!' });
     }
 
@@ -32,6 +32,11 @@ router.post('/quiz/createMCQ', async (req, res) => {
     // Checks for at least one correct answer
     if (!options.some(option => option.isCorrect === true)) {
       return res.status(400).json({ message: 'You must have at least one correct answer!' });
+    }
+    
+    // Checks for missing author
+    if (!author) {
+      return res.status(400).json({ message: 'User not provided' });
     }
 
     // Checks for valid author
@@ -76,6 +81,11 @@ router.post('/quiz/createOEQ', async (req, res) => {
     // Checks if at least one correct answer option 
     if (!correctOptions || correctOptions.length === 0) {
       return res.status(400).json({ message: 'You must have at least one answer option!' });
+    }
+
+    // Checks for missing author
+    if (!author) {
+      return res.status(400).json({ message: 'User not provided' });
     }
 
     // Checks for valid author
@@ -231,6 +241,10 @@ router.get('/quiz/fetchAllQuestions', async (req, res) => {
 router.post('/quiz/createQuiz', async (req, res) => {
   try {
     var { title, topic, questions, author, isVerified } = req.body;
+
+    if (!author) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
 
     // Checks for valid author
     const user = await User.findOne({ username: author }).exec();
@@ -433,6 +447,10 @@ router.post('/quiz/saveQuestion', async (req, res) => {
   try {
     const { username, questionId } = req.body;
 
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
     // checks for valid questionId
     if (!mongoose.Types.ObjectId.isValid(questionId)) {
       return res.status(400).json({ message: 'Invalid questionId' });
@@ -569,6 +587,10 @@ router.post('/quiz/unsaveQuestion', async (req, res) => {
 router.post('/quiz/saveQuiz', async (req, res) => {
   try {
     const { username, quizId } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
 
     // checks for valid quizId
     if (!mongoose.Types.ObjectId.isValid(quizId)) {
