@@ -233,7 +233,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
   if (renderstate == 0) {
     return (
-      <ScrollView>
+      <ScrollView style={{backgroundColor:"white"}}>
         <View style={{ height: height * 0.1 }} />
         <Text style={styles.header}>Create New Quiz ({topic})</Text>
 
@@ -319,7 +319,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
     return (
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} style={styles.buttonContainer}>
-        <SafeAreaView>
+        <SafeAreaView style={{backgroundColor:"white"}}>
           <KeyboardAwareScrollView>
             <View style={{ height: height * 0.04 }} />
             {renderstate == 1 ? <Text style={styles.header}>Create a new question</Text> : <Text style={styles.header}>Edit Question</Text>}
@@ -528,7 +528,7 @@ const Create = ({ route, navigation }: CreateProps) => {
   /*questions retrieved from database wouldnt have a new flag, so append to questions but not to newLocalID*/
   if (renderstate == 3) {
     return (
-      <SafeAreaView style={{ gap: 15, flex: 1 }}>
+      <SafeAreaView style={{ gap: 15, flex: 1, backgroundColor:"white" }}>
         <View style={{ height: height * 0.04 }} />
         <Text style={{ fontSize: 24 }}> Search questions from? </Text>
         <View style={{ flexDirection: "row" }}>

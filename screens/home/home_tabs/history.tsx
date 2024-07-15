@@ -12,7 +12,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const { height, width } = Dimensions.get("window");
 
-type HistoryStackNavigationParamList = {
+export type HistoryStackNavigationParamList = {
   main: undefined,
   individual: { indivProps: HistoryProps } | undefined,
 }
@@ -80,7 +80,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
 
   const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);
   return (
-    <View style={{ flex: 1, gap: 10 }}>
+    <View style={{ flex: 1, gap: 10, backgroundColor:"white" }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={{ fontSize: 23, fontWeight: "bold" }}>
         View Previous Quizzes Here
@@ -114,7 +114,7 @@ function Individual({ route, navigation }: IndividualProps) {
   const toShow = toShowProps.questions;
   const user = returnUser();
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor:"white" }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShowProps.topic} : {toShowProps.title}</Text>
       <View style={{ height: 0.05 * height, flexDirection: "row" }} />

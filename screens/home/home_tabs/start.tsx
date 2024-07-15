@@ -111,7 +111,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
         <ScrollView horizontal={true} persistentScrollbar={true}>
 
         <TouchableOpacity style={styles.imageContainer} onPress={()=>setTopic("Custom")}>
-          <Image source={require("./creativity.png")} style={styles.image} />
+          <Image source={require("@app/assets/creativity.png")} style={styles.image} />
           <View style={styles.textContainer}>
             <Text style={{color :"white"}}>Custom Topic</Text>
           </View>
@@ -168,7 +168,7 @@ function StartScreen({ navigation }: HomeScreenProps) {
           <Text> Add </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.icon} onPress={() => navigation.navigate("Profile")}>
-          <MaterialIcons name="delete" size={74} color="black" />
+          <MaterialIcons name="account-box" size={74} color="black" />
           <Text> Profile </Text>
         </TouchableOpacity>
       </View>

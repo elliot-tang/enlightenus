@@ -363,7 +363,7 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
   if (pageNo === questions.length) {
     const toShow = Array.from({ length: questions.length }, (_, i) => [questions[i], tally[i], qAnswers[i]])
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor:"white" }}>
         <View style={{height: height*0.07}}>
           <Text style={{ fontSize: 18 }}>Your score is {point}/{questions.length}. Listed below is a breakdown.</Text>
         </View>

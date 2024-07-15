@@ -18,20 +18,21 @@ export const IndivCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
     const quizprops = route.params.quizprops;
     const toShow = { topic: quizprops.topic, title: quizprops.title, questions: quizprops.questions }
     return (
-        <View style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1,  backgroundColor:"white" }}>
             <View style={{ height: height * 0.07 }} />
             <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShow.topic} : {toShow.title}</Text>
-            <View style={{ height: 0.05 * height, flexDirection: "row" }} />
+            <View style={{ height: 0.02 * height, flexDirection: "row" }} />
             <ScrollView style={{ height: height * 0.67, gap: 10 }}>
                 {toShow.questions.map((item) => <View style={{ paddingTop: 10 }}>
                     <HistoryTallyCard2
+                        key={item.id}
                         {...item} percentageRight={0} mostCommonWrong={''} //to do: fetch this elliot
                         />
                 </View>)}
             </ScrollView>
             <Button title="Go Back" onPress={() => navigation.goBack()} />
             <Button title="Delete this Quiz" onPress={() => {alert("To do: elliot delete"); navigation.navigate("Profile")} /*
-            it is important to navigate all the way back to the start screen so that the list of created questions can be refetched and updated */} />
-        </View>
+            it is important to navigate all the way back to the profile entry screen so that the list of created questions can be refetched and updated */} />
+        </SafeAreaView>
     )
 }

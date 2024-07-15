@@ -18,7 +18,7 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
   const [toDisplayQuizzes, setToDisplay] = useState(route.params.fetchedQz)
   const [topic, setTopic] = useState("Uncategorised")
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1,  backgroundColor:"white" }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={{ fontSize: 23, fontWeight: "bold" }}>
         View Created Quizzes Here
@@ -46,6 +46,6 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
         </View>)}
       </ScrollView>
       <Button title="Go Back" onPress={() => navigation.goBack()} />
-    </View>
+    </SafeAreaView>
   )
 }

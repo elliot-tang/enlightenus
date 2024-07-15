@@ -94,7 +94,7 @@ function BarCard(props: BarCardProps) {
       return str; // String is already within the limit, return it as is
     }
   
-    return str.slice(0, maxLength - 3) + "..."; // Truncate the string and add ellipses
+    return str.slice(0, maxLength) + "..."; // Truncate the string and add ellipses
   }
 
   function Bar(props: {ratio:number,color:string}){
@@ -187,7 +187,7 @@ export const ProfileScreen = ({navigation}: ProfileProps) => {
 
   return (
     <ScrollView style={{ flex: 1}}>
-      <View style={{ height: 15 }} />
+      <View style={{ height: 15 , backgroundColor:"white"}} />
       <Text style={{ fontSize: 13, fontWeight: "bold" }}>
         Number of items to show
       </Text>

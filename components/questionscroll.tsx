@@ -174,7 +174,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
   if (pageNo === 0) {
     if (subState == false || qAnswers.includes(undefined)) {
-      return (<ScrollView>
+      return (<ScrollView style={{backgroundColor:"white"}}>
         <FlatList
           ItemSeparatorComponent={
             (() => (
@@ -262,7 +262,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
       /*here we display the score, and tally up which qn is correct or wrong*/
       return (
-        <SafeAreaView style={{ flex: 1, gap: 10 }}>
+        <SafeAreaView style={{ flex: 1, gap: 10, backgroundColor:"white" }}>
           <View>
             <Text style={{ fontSize: 18 }}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
           </View>

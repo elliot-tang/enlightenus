@@ -98,7 +98,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
   }
 
   return (
-    <View style={{ gap: 15 }}>
+    <View style={{ gap: 15, backgroundColor:"white" }}>
       {<View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
         <Text style={{ fontSize: 22 }}>Search quizzes in </Text>
         <TextInput

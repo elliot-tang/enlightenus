@@ -19,20 +19,21 @@ export const IndivSavedScreen = ({ route, navigation }: ProfileQzCProps) => {
     //somehow axios will need to take the topic, title, questions based on just the id
     const toShow = {topic:"placeholder", title: "placeholder", questions: []}
     return (
-        <View style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1,  backgroundColor:"white" }}>
             <View style={{ height: height * 0.07 }} />
             <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShow.topic} : {toShow.title}</Text>
-            <View style={{ height: 0.05 * height, flexDirection: "row" }} />
+            <View style={{ height: 0.02 * height, flexDirection: "row" }} />
             <ScrollView style={{ height: height * 0.67, gap: 10 }}>
                 {toShow.questions.map((item) => <View style={{ paddingTop: 10 }}>
                     <HistoryTallyCard
+                        key={item.id}
                         {...item}
                     />
                 </View>)}
             </ScrollView>
             <Button title="Go Back" onPress={() => navigation.goBack()} />
             <Button title="Unsave this Quiz" onPress={() => {alert("To do: elliot unsave"); navigation.navigate("Profile")} /*
-            it is important to navigate all the way back to the start screen so that the list of created questions can be refetched and updated */} />
-        </View>
+            it is important to navigate all the way back to the profile entry screen so that the list of created questions can be refetched and updated */} />
+        </SafeAreaView>
     )
 }
