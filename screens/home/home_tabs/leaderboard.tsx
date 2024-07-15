@@ -1,6 +1,7 @@
 import { StyleSheet, View, Text } from "react-native";
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { HomeTabParamList } from './home_navigator';
+import React from "react";
 
 type Props = BottomTabScreenProps<HomeTabParamList, 'Leaderboard'>;
 

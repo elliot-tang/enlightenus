@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Text, View, Switch, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { Button, Text, View, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ForumCard, ForumProps, ReplyProps } from '@app/components/forumpostcard';
@@ -113,7 +113,7 @@ function MainForum({ navigation }: ForumScreenProps) {
   );
 
   return (
-    <View style={{ flex: 1, paddingTop: height * 0.07 }}>
+    <View style={{ flex: 1, paddingTop: height * 0.07 , backgroundColor:"white"}}>
       <Button title="Create New Forum Discussion!" onPress={() => navigation.navigate("create")} />
       <View style={{ height: 25 }} />
       <ScrollView style={{ flex: 1 }}>
@@ -229,7 +229,7 @@ function Individual({ route, navigation }: IndividualProps) {
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{backgroundColor:"white"}}>
       <View style={{ height: height * 0.07 }} />
       <View style={{
         backgroundColor: 'cdefff', borderColor: 'black', borderWidth: 2.5, borderRadius: 10,
@@ -361,7 +361,7 @@ function Report({ route, navigation }: ReportProps) {
     }
   }
   return (
-    <View style={{ gap: 5 }}>
+    <View style={{ gap: 5, backgroundColor:"white" }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={styles.headerText}>Report a {temptype} </Text>
       <TextInput
@@ -568,7 +568,7 @@ function CreatePost({ navigation }: ForumScreenProps) {
 
   if (render === 0) {
     return (
-      <View style={{ padding: 20, flex: 1, gap: 10 }}>
+      <View style={{ padding: 20, flex: 1, gap: 10 , backgroundColor:"white"}}>
         <View style={{ height: height * 0.07 }} />
         <Text style={styles.headerText}>Add a new post!</Text>
         <TextInput style={styles.input}

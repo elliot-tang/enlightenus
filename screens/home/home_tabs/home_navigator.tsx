@@ -8,6 +8,7 @@ import ForumScreen from './forum';
 import QuizHistoryScreen from './history';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeTabs'>;
 
 export type HomeTabParamList = {

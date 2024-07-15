@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Text, View, ScrollView, TextInput } from 'react-native';
+import { Button, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Dimensions } from "react-native";
 import CustomPicker from '@app/components/mypicker';
 import HistoryCard, { HistoryProps, QuestionPropsForHistory } from '@app/components/historycard';
@@ -8,10 +8,11 @@ import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navig
 import { HistoryTallyCard } from '@app/components/questioncard';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const { height, width } = Dimensions.get("window");
 
-type HistoryStackNavigationParamList = {
+export type HistoryStackNavigationParamList = {
   main: undefined,
   individual: { indivProps: HistoryProps } | undefined,
 }
@@ -101,7 +102,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
   const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, gap: 10, backgroundColor:"white" }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={{ fontSize: 23, fontWeight: "bold" }}>
         View Previous Quizzes Here
@@ -223,10 +224,3 @@ function Individual({ route, navigation }: IndividualProps) {
     )
   }
 }
-
-const options = [
-  { value: 'Uncategorised', label: 'Uncategorised' },
-  { value: 'Coding', label: 'Coding' },
-  { value: 'Math', label: 'Math' },
-  { value: 'NUS Modules', label: 'NUS Modules' },
-]

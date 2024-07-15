@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import QuizCard from "@app/components/quizcardonsearch";
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
+import React from "react";
 
 type PlayProps = NativeStackScreenProps<HomeStackParamList, "Play">
 
@@ -25,8 +26,8 @@ interface FetchedQuestionForQuiz {
 
 type FetchedQuizProps = {
   _id: string,
-  title: string, 
-  topic: string, 
+  title: string,
+  topic: string,
   questions: Array<FetchedQuestionForQuiz>,
   author: string,
   rating: number,
@@ -42,9 +43,10 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
   const [searchFrom, setSearchFrom] = useState("All");
   const [searchText, setSearchText] = useState("");
   const [quizzes, setQuizzes] = useState([]);
+  const [searchTopic, setSearchTopic] = useState("");
   const user = returnUser();
 
-  const fetchSavedQuizzes : () => Promise<Array<FetchedQuizProps>> = async () => {
+  const fetchSavedQuizzes: () => Promise<Array<FetchedQuizProps>> = async () => {
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchSavedQuizzes`, { params: { username: user } });
       return response.data.quizzes;
@@ -61,7 +63,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
     }
   }
 
-  const fetchCreatedQuizzes : () => Promise<Array<FetchedQuizProps>> = async () => {
+  const fetchCreatedQuizzes: () => Promise<Array<FetchedQuizProps>> = async () => {
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchCreatedQuizzes`, { params: { username: user } });
       return response.data.quizzes;
@@ -78,7 +80,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
     }
   }
 
-  const fetchAllQuizzes : () => Promise<Array<FetchedQuizProps>> = async () => {
+  const fetchAllQuizzes: () => Promise<Array<FetchedQuizProps>> = async () => {
     try {
       const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchAllQuizzes`);
       return response.data.quizzes;
@@ -97,7 +99,16 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={{ fontSize: 22 }}>Search quizzes from? </Text>
+      {<View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+        <Text style={{ fontSize: 22 }}>Search quizzes in </Text>
+        <TextInput
+          value={searchTopic}
+          onChangeText={setSearchTopic}
+          placeholder={"Custom"}
+          style={{ color: 'green', fontSize: 22 }}
+        />
+        <Text style={{ fontSize: 22 }}> from?</Text>
+      </View>}
       <View style={{ flexDirection: "row" }}>
         <TouchableOpacity
           onPress={() => setSearchFrom("Saved")}
@@ -146,9 +157,9 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           onChangeText={setSearchText}
           value={searchText}
         />
-        <TouchableOpacity style={{ justifyContent: "center", flex: 1 }} onPress={ async () => {
+        <TouchableOpacity style={{ justifyContent: "center", flex: 1 }} onPress={async () => {
           // Pull questions
-          var response : Array<FetchedQuizProps> ;
+          var response: Array<FetchedQuizProps>;
           if (searchFrom === 'Saved') {
             response = await fetchSavedQuizzes();
           } else if (searchFrom === 'Mine') {

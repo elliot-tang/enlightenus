@@ -309,7 +309,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
       /*here we display the score, and tally up which qn is correct or wrong*/
       return (
-        <SafeAreaView style={{ flex: 1, gap: 10, paddingTop: 30 }}>
+        <SafeAreaView style={{ flex: 1, gap: 10, paddingTop: 30, backgroundColor:"white" }}>
           <View>
             <Text style={{ fontSize: 18 }}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
           </View>

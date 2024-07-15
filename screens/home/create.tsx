@@ -90,8 +90,6 @@ function AnswerEdittorBox(props: {
   );
 }
 
-// the search feature fetches an array of datatype jasons
-
 //note the id created here is a local id, it SHOULD NOT be passed into mongobongo in page 4
 
 //the newqnlocal determines which of the created questions need to be pushed to database, which are pre-fetched so no need to push. it stores the corresponding local id.
@@ -103,7 +101,7 @@ const deleteQuestion = (questionProps: Array<QnProps>, questionId: string) => {
 
 const Create = ({ route, navigation }: CreateProps) => {
   const passedunfinished = React.useContext(UnfinishedQuizCreationData)
-  const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised" || route.params.topic === "")) ? "Uncategorised" : route.params.topic;
+  const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised" || route.params.topic === "")) ? "uncategorised" : route.params.topic;
   const [renderstate, setRender] = useState(0);
   const [questions, setQuestions] = useState(passedunfinished.data);
   const [quiztitle, setTitle] = useState("");
@@ -111,7 +109,8 @@ const Create = ({ route, navigation }: CreateProps) => {
   const [searchText, setSearchText] = useState("");
   const [newQnsLocalID, setNew] = useState(passedunfinished.save);
   const [selectionRender, setSelection] = useState<FetchedQuestion[]>([]);
-  const [oldQnsmongoIDs, setMongo] = useState(passedunfinished.mongo)
+  const [oldQnsmongoIDs, setMongo] = useState(passedunfinished.mongo);
+  const [customTopic, setCustomTopic] = useState("");
 
   //pingpong bad design
 
@@ -234,7 +233,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
   if (renderstate == 0) {
     return (
-      <ScrollView>
+      <ScrollView style={{backgroundColor:"white"}}>
         <View style={{ height: height * 0.1 }} />
         <Text style={styles.header}>Create New Quiz ({topic})</Text>
 
@@ -320,7 +319,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
     return (
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} style={styles.buttonContainer}>
-        <SafeAreaView>
+        <SafeAreaView style={{backgroundColor:"white"}}>
           <KeyboardAwareScrollView>
             <View style={{ height: height * 0.04 }} />
             {renderstate == 1 ? <Text style={styles.header}>Create a new question</Text> : <Text style={styles.header}>Edit Question</Text>}
@@ -529,7 +528,7 @@ const Create = ({ route, navigation }: CreateProps) => {
   /*questions retrieved from database wouldnt have a new flag, so append to questions but not to newLocalID*/
   if (renderstate == 3) {
     return (
-      <SafeAreaView style={{ gap: 15, flex: 1 }}>
+      <SafeAreaView style={{ gap: 15, flex: 1, backgroundColor:"white" }}>
         <View style={{ height: height * 0.04 }} />
         <Text style={{ fontSize: 24 }}> Search questions from? </Text>
         <View style={{ flexDirection: "row" }}>
@@ -638,7 +637,17 @@ const Create = ({ route, navigation }: CreateProps) => {
           <Text style={{ fontWeight: "bold", fontSize: 22 }}>Finalise and Publish Quiz</Text>
           <View style={{ flexDirection: 'row', gap: 10 }}>
           </View>
-          <Text>Give your ({topic}) quiz a title</Text>
+          {topic !== "Custom" ? <Text>Give your {topic} quiz a title.</Text> :
+            <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Text>Give your </Text>
+              <TextInput
+                value={customTopic}
+                onChangeText={setCustomTopic}
+                placeholder={"Custom"}
+                style={{ color: 'green' }}
+              />
+              <Text> quiz a title.</Text>
+            </View>}
           <TextInput
             style={styles.input}
             placeholder="Your Quiz will be searchable by its title"
@@ -696,7 +705,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
               const quizId = await pushQuiz({
                 title: quiztitle,
-                topic: topic,
+                topic: ((topic !== "Custom")? topic.toLowerCase(): customTopic.toLowerCase()),
                 questions: toPush,
                 author: user
               });
