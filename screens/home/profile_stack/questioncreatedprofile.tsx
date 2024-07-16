@@ -31,8 +31,6 @@ export const IndivCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
                 </View>)}
             </ScrollView>
             <Button title="Go Back" onPress={() => navigation.goBack()} />
-            <Button title="Delete this Quiz" onPress={() => {alert("To do: elliot delete"); navigation.navigate("Profile")} /*
-            it is important to navigate all the way back to the profile entry screen so that the list of created questions can be refetched and updated */} />
         </SafeAreaView>
     )
 }

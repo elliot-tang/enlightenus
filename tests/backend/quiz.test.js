@@ -1237,6 +1237,8 @@ describe('Take Quiz', () => {
     expect(response.body).toHaveProperty('takenQuizId');
     const objectIdPattern = /^[a-f\d]{24}$/i;
     expect(response.body.takenQuizId).toMatch(objectIdPattern);
+    
+    // Check for change in test
   });
 
   it('Should return 400 if user not provided', async () => {

@@ -37,8 +37,8 @@ export type HomeStackParamList = {
   ScrollScreen: { qzprop: QuizProps };
   OneScreen: { qzprop: QuizProps };
   Profile: undefined;
-  Pquizcreated: { fetchedQz: FetchedQuizPropsProfile[] };
-  Pquizsaved: { fetchedQz: FetchedQuizPropsProfile[] };
+  Pquizcreated: undefined;
+  Pquizsaved: undefined;
   Pquestioncreated: { quizprops: FetchedQuizPropsProfile }; //to pass in questions, title and topic
   Pquestionsaved: { quizprops: FetchedQuizPropsProfile }; //to pass in questions, title and topic
 }

@@ -33,7 +33,7 @@ router.post('/quiz/createMCQ', async (req, res) => {
     if (!options.some(option => option.isCorrect === true)) {
       return res.status(400).json({ message: 'You must have at least one correct answer!' });
     }
-    
+
     // Checks for missing author
     if (!author) {
       return res.status(400).json({ message: 'User not provided' });
@@ -1051,13 +1051,20 @@ router.post('/quiz/takeQuiz', async (req, res) => {
       return res.status(400).json({ message: 'Invalid score' });
     }
 
+    // Updates timesTaken field of quiz
+    const toDo = [];
+    quiz.timesTaken = quiz.timesTaken + 1;
+    toDo.push(quiz.save());
+
     const takenQuiz = new UserTakenQuiz({
       userId: user._id,
       quizId: quizId,
       score: score,
       breakdown: breakdown
     });
-    await takenQuiz.save()
+    toDo.push(takenQuiz.save());
+    
+    await Promise.all(toDo)
       .then(takenQuiz => console.log(`Quiz ID: ${quizId} taken by User ${username} successfully.`))
     res.status(201).json({ takenQuizId: takenQuiz._id });
   } catch (error) {
@@ -1131,6 +1138,130 @@ router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
     console.log('Unable to fetch taken quizzes');
     console.error(error);
     res.status(500).json({ message: 'Error fetching taken quizzes', error });
+  }
+});
+
+router.get('/quiz/getAnalytics', async (req, res) => {
+  try {
+    const username = req.query.username;
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    async function getCreatedQuizzes(limit) {
+      const pipeline = [
+        { $sort: { dateCreated: -1 } },
+        { $match: { 'author': user._id } },
+        {
+          $group: {
+            _id: "$topic",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: "$_id",
+            count: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(1, 0, { $limit: limit });
+      }
+
+      return await Quiz.aggregate(pipeline);
+    };
+
+    async function getSavedQuizzes(limit) {
+      const pipeline = [
+        { $sort: { dateCreated: -1 } },
+        { $match: { 'userId': user._id } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        {
+          $group: {
+            _id: "$quizData.topic",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: "$_id",
+            count: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(1, 0, { $limit: limit });
+      }
+
+      return await UserSavedQuiz.aggregate(pipeline);
+    };
+
+    async function getTakenQuizzes(limit) {
+      const pipeline = [
+        { $sort: { dateCreated: -1 } },
+        { $match: { 'userId': user._id } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        {
+          $group: {
+            _id: "$quizData.topic",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: "$_id",
+            count: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(1, 0, { $limit: limit });
+      }
+
+      return await UserTakenQuiz.aggregate(pipeline);
+    };
+
+    const limits = [5, 10, 25, null];
+    const createds = await Promise.all(limits.map(limit => getCreatedQuizzes(limit)));
+    const saveds = await Promise.all(limits.map(limit => getSavedQuizzes(limit)));
+    const takens = await Promise.all(limits.map(limit => getTakenQuizzes(limit)));
+
+    console.log('Quiz analytics fetched successfully!');
+    res.status(200).json({ created: createds, saved: saveds, taken: takens });
+  } catch (error) {
+    console.log('Unable to fetch quiz analytics stats');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quiz analytics stats', error });
   }
 });
 
