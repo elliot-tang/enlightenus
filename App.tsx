@@ -63,13 +63,6 @@ export const UnfinishedQuizCreationData = createContext<UnfinwithCall>({
   setMongo: (newMongo) => { },
 });
 
-type BottomTabNavigationParamList = {
-  Leaderboard: undefined;
-  Forum: undefined;
-  Home: undefined;
-  History: undefined
-};
-
 export const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 const AuthStackNav = createNativeStackNavigator<AuthStackParamList>();
@@ -91,10 +84,10 @@ const HomeStack = () => (
       <Stack.Screen name="Create" component={CreateScreen} />
     </Stack.Group>
     <Stack.Group>
-      <Stack.Screen name="Play" component={PlayScreen} />
-      <Stack.Screen name="DisplayPlay" component={QuizScreen} />
-      <Stack.Screen name="ScrollScreen" component={ScrollScreen} />
-      <Stack.Screen name="OneScreen" component={OneScreen} />
+      <Stack.Screen name="Play" component={PlayScreen} options={{ headerShown: false}}/>
+      <Stack.Screen name="DisplayPlay" component={QuizScreen} options={{ headerShown: false}}/>
+      <Stack.Screen name="ScrollScreen" component={ScrollScreen} options={{ headerShown: false}}/>
+      <Stack.Screen name="OneScreen" component={OneScreen} options={{ headerShown: false}}/>
     </Stack.Group>
     <Stack.Group screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Profile" component={ProfileScreen} />

@@ -33,16 +33,22 @@ router.post('/report/reportQuestion', async (req, res) => {
     var question;
     var questionType;
 
-    question = await MCQ.findById(questionId);
+    question = await MCQ.findById(questionId).exec();
     if (question) {
       questionType = 'MCQ';
     } else {
-      question = await OEQ.findById(questionId);
+      question = await OEQ.findById(questionId).exec();
       if (question) {
         questionType = 'OEQ';
       } else {
         return res.status(404).json({ message: `Question with questionId ${questionId} not found` });
       }
+    }
+
+    // Checks if question has been reported before
+    const previousReport = await ReportedQuestion.findOne({ reporter: user._id, 'question.questionId': questionId }).exec();
+    if (previousReport) {
+      return res.status(400).json({ message: `Question has already been reported. \n \nPrevious report reason: "${previousReport.reportReason}"`});
     }
 
     // Checks report body
@@ -90,9 +96,15 @@ router.post('/report/reportForumPost', async (req, res) => {
     }
 
     // Checks for forum post
-    const forumPost = await ForumPost.findById(postId);
+    const forumPost = await ForumPost.findById(postId).exec();
     if (!forumPost) {
       return res.status(404).json({ message: `Post with postId ${postId} not found` });
+    }
+
+    // Checks if post has been reported before
+    const previousReport = await ReportedPost.findOne({ reporter: user._id, postId: postId }).exec();
+    if (previousReport) {
+      return res.status(400).json({ message: `Post has already been reported. \n \nPrevious report reason: "${previousReport.reportReason}"`});
     }
 
     // Checks report body
@@ -137,9 +149,15 @@ router.post('/report/reportForumReply', async (req, res) => {
     }
 
     // Checks for forum reply
-    const forumReply = await ForumReply.findById(replyId);
+    const forumReply = await ForumReply.findById(replyId).exec();
     if (!forumReply) {
       return res.status(404).json({ message: `Reply with replyId ${replyId} not found` });
+    }
+
+    // Checks if reply has been reported before
+    const previousReport = await ReportedReply.findOne({ reporter: user._id, replyId: replyId }).exec();
+    if (previousReport) {
+      return res.status(400).json({ message: `Reply has already been reported. \n \nPrevious report reason: "${previousReport.reportReason}"`});
     }
 
     // Checks report body
@@ -194,7 +212,66 @@ router.get('/report/fetchReportedQuestions', async (req, res) => {
     res.status(500).json({ message: 'Error fetching reported questions', error });
   }
 });
+router.get('/report/fetchReportedQuestions', async (req, res) => {
+  try {
+    const fetched = await ReportedQuestion.find()
+                                          .sort({ dateCreated: -1 })
+                                          .limit(50)
+                                          .populate({
+                                            path: 'question.questionId',
+                                            populate: {
+                                              path: 'author',
+                                            }
+                                          })
+                                          .populate('reporter')
+                                          .exec();
+    
+    const mappedQuestions = fetched.map(doc => {
+      const toObj = doc.toObject();
+      toObj.question.questionId.questionType = toObj.question.questionType;
+      toObj.question.questionId.author = toObj.question.questionId.author.username;
+      toObj.question = toObj.question.questionId;
+      toObj.reporter = toObj.reporter.username;
+      return toObj;
+    });
+    console.log('Reported questions fetched successfully!');
+    res.status(200).json({ questions: mappedQuestions });
+  } catch (error) {
+    console.log('Unable to fetch reported questions');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching reported questions', error });
+  }
+});
 
+// fetch all reported forum posts (doesn't populate attachments)
+router.get('/report/fetchReportedPosts', async (req, res) => {
+  try {
+    const fetched = await ReportedPost.find()
+                                      .sort({ dateCreated: -1 })
+                                      .limit(50)
+                                      .populate('reporter')
+                                      .populate({
+                                        path: 'postId',
+                                        populate: {
+                                          path: 'userId',
+                                        }
+                                      })
+                                      .exec();
+    
+    const mappedPosts = fetched.map(doc => {
+      const toObj = doc.toObject();
+      toObj.reporter = toObj.reporter.username;
+      toObj.postId.userId = toObj.postId.userId.username;
+      return toObj;
+    });
+    console.log('Reported posts fetched successfully!');
+    res.status(200).json({ questions: mappedPosts });
+  } catch (error) {
+    console.log('Unable to fetch reported posts');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching reported posts', error });
+  }
+});
 // fetch all reported forum posts (doesn't populate attachments)
 router.get('/report/fetchReportedPosts', async (req, res) => {
   try {

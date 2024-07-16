@@ -172,89 +172,136 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
     }
   }
 
+  const saveQuiz: () => Promise<string> = async () => {
+    try {
+      const savedQuiz = {
+        username: user,
+        quizId: quizId,
+      }
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/saveQuiz`, savedQuiz);
+      console.log(`Question ID: ${quizId} saved by User ${user}`);
+      return response.data.savedQuizId;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  };
+
+  const reportQuestion: () => Promise<string> = async () => {
+    try {
+      if (reportstring.trim() === '') {
+        alert('Please provide a report reason!');
+        setReportstring('');
+      } else {
+        const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/report/reportQuestion`, { username: user, questionId: currentReportid, reportReason: reportstring });
+        return response.data.reportId;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  };
+
   if (pageNo === 0) {
     if (subState == false || qAnswers.includes(undefined)) {
-      return (<ScrollView style={{backgroundColor:"white"}}>
-        <FlatList
-          ItemSeparatorComponent={
-            (() => (
-              <View
-                style={{ height: 16 }}
-              />
-            ))
-          }
-          data={questions}
-          renderItem={({ item }) => <QnScroll
-            id={item.id}
-            mcq={item.mcq}
-            maxAttempt={item.maxAttempt}
-            quizstmt={item.quizstmt}
-            corrans={item.corrans}
-            wrongs={item.wrongs}
-            noOption={item.noOption}
-            explainText={item.explainText}
-            enumerate={questions.indexOf(item) + 1}
-            updateFunc={updateAns(item)} />}
-
-        />
-        <Button
-          title="Submit All"
-          onPress={async () => {
-            // Determines score and tracks whether user got the question right or wrong
-            try {
-              var tmpScore = 0;
-              var tmpIsCorrects = Array(questions.length).fill(false);
-              for (var i = 0; i < questions.length; i++) {
-                if (questions[i].corrans.includes(qAnswers[i])) {
-                  tmpScore += 1;
-                  tmpIsCorrects[i] = true;
-                };
+      return (
+        <SafeAreaView style={{ paddingTop: 30 }}>
+          <ScrollView>
+            <FlatList
+              ItemSeparatorComponent={
+                (() => (
+                  <View
+                    style={{ height: 16 }}
+                  />
+                ))
               }
-              setScore(tmpScore);
-              setIsCorrects(tmpIsCorrects);
+              data={questions}
+              renderItem={({ item }) => <QnScroll
+                id={item.id}
+                mcq={item.mcq}
+                maxAttempt={item.maxAttempt}
+                quizstmt={item.quizstmt}
+                corrans={item.corrans}
+                wrongs={item.wrongs}
+                noOption={item.noOption}
+                explainText={item.explainText}
+                enumerate={questions.indexOf(item) + 1}
+                updateFunc={updateAns(item)} />}
 
-              // Saves the taken quiz and user response into the database
-              var breakdown: Array<TakenQuestionProps> = [];
-              for (var i = 0; i < questions.length; i++) {
-                const qn = {
-                  question: {
-                    questionId: questions[i].id,
-                    questionType: questions[i].mcq ? 'MCQ' : 'OEQ'
-                  },
-                  noAttempts: questions[i].maxAttempt, // TODO implement no of attempts, for now just the max number of attempts
-                  responses: [qAnswers[i]],
-                  isCorrect: tmpIsCorrects[i]
+            />
+            <Button
+              title="Submit All"
+              onPress={async () => {
+                // Determines score and tracks whether user got the question right or wrong
+                try {
+                  var tmpScore = 0;
+                  var tmpIsCorrects = Array(questions.length).fill(false);
+                  for (var i = 0; i < questions.length; i++) {
+                    if (questions[i].corrans.includes(qAnswers[i])) {
+                      tmpScore += 1;
+                      tmpIsCorrects[i] = true;
+                    };
+                  }
+                  setScore(tmpScore);
+                  setIsCorrects(tmpIsCorrects);
+
+                  // Saves the taken quiz and user response into the database
+                  var breakdown: Array<TakenQuestionProps> = [];
+                  for (var i = 0; i < questions.length; i++) {
+                    const qn = {
+                      question: {
+                        questionId: questions[i].id,
+                        questionType: questions[i].mcq ? 'MCQ' : 'OEQ'
+                      },
+                      noAttempts: questions[i].maxAttempt, // TODO implement no of attempts, for now just the max number of attempts
+                      responses: [qAnswers[i]],
+                      isCorrect: tmpIsCorrects[i]
+                    }
+                    breakdown.push(qn);
+                  }
+
+                  console.log(tmpScore);
+                  const TakenQuiz: TakenQuizProps = {
+                    username: user,
+                    quizId: quizId,
+                    score: tmpScore,
+                    breakdown: breakdown
+                  }
+
+                  const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/takeQuiz`, TakenQuiz);
+                  console.log(`Quiz taken! TakenQuiz ID: ${response}`);
+                } catch (error) {
+                  if (axios.isAxiosError(error)) {
+                    const errorMessage: string = error.response?.data.message;
+                    alert(`Axios Error: ${errorMessage}`);
+                    console.error('Axios error:', error.message);
+                    console.error('Error response:', error.response?.data);
+                  } else {
+                    alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+                    console.error('Unexpected error:', error);
+                  }
+                } finally {
+                  setSub(true);
                 }
-                breakdown.push(qn);
-              }
-
-              console.log(tmpScore);
-              const TakenQuiz: TakenQuizProps = {
-                username: user,
-                quizId: quizId,
-                score: tmpScore,
-                breakdown: breakdown
-              }
-
-              const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/takeQuiz`, TakenQuiz);
-              console.log(`Quiz taken! TakenQuiz ID: ${response}`);
-            } catch (error) {
-              if (axios.isAxiosError(error)) {
-                const errorMessage: string = error.response?.data.message;
-                alert(`Axios Error: ${errorMessage}`);
-                console.error('Axios error:', error.message);
-                console.error('Error response:', error.response?.data);
-              } else {
-                alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
-                console.error('Unexpected error:', error);
-              }
-            } finally {
-              setSub(true);
-            }
-          }}
-          disabled={qAnswers.includes(undefined)} /*dont allow submit when not all qn attempted*/
-        />
-      </ScrollView>
+              }}
+              disabled={qAnswers.includes(undefined)} /*dont allow submit when not all qn attempted*/
+            />
+          </ScrollView>
+        </SafeAreaView>
       )
     }
     else {
@@ -262,13 +309,13 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
       /*here we display the score, and tally up which qn is correct or wrong*/
       return (
-        <SafeAreaView style={{ flex: 1, gap: 10, backgroundColor:"white" }}>
+        <SafeAreaView style={{ flex: 1, gap: 10, paddingTop: 30, backgroundColor:"white" }}>
           <View>
             <Text style={{ fontSize: 18 }}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
           </View>
           <View>
             <ScrollView>
-              {toShow.map((item) => <View style={{paddingTop:10}}>
+              {toShow.map((item) => <View style={{ paddingTop: 10 }}>
                 <TallyCard
                   key={item[0].id}
                   {...item[0]}
@@ -276,22 +323,9 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
                   correct={item[1]}
                   userAns={item[2]}
                   reportQn={() => {
-                    // TODO: Report question
-                    alert('Currently under development!');
                     setCurrentI(item[0].id);
                     setCurrentQ(item[0].quizstmt)
                     setPage(-1);
-                  }}
-                  saveQn={() => {
-                    // TODO: Save question
-                    alert('Currently under development!');
-                    var temp = Array.from(save);
-                    temp.push(item[0].id);
-                    setSave(temp)
-                  }}
-                  unsaveQn={() => {
-                    var temp = save.filter(ele => ele != item[0].id)
-                    setSave(temp)
                   }}
                 />
                 <AnsScroll
@@ -305,9 +339,14 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
                   setIsCorrects([]);
                   exitScreen();
                 }} />
-                <Button title="Save this quiz" onPress={() => alert("Currently Under Development")} />
+                <Button title="Save this quiz" onPress={async () => {
+                  const response = await saveQuiz();
+                  if (response) {
+                    alert('Quiz successfully saved!');
+                  }
+                }} />
               </View>
-              <View style={{height:45}}/>
+              <View style={{ height: 45 }} />
             </ScrollView>
           </View>
         </SafeAreaView>
@@ -317,7 +356,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
   else {
     return (
-      <View style={{ gap: 5, paddingTop: 20 }}>
+      <View style={{ gap: 5, paddingTop: 30 }}>
         <Text style={{ textAlign: "left" }}>Report Question: {currentReportQn} </Text>
         <TextInput
           style={{
@@ -333,12 +372,27 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
           value={reportstring}
         />
         <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
-          <Button title="Submit" onPress={() => { alert("Currently under development!"); setPage(0) }} />
+          <Button title="Submit" onPress={async () => {
+            const response = await reportQuestion();
+            if (response) {
+              alert(`Question successfully reported! Report ID: ${response}`);
+              setReportstring('');
+              setCurrentQ('');
+              setCurrentI('');
+              setPage(0);
+            }
+          }} />
         </View>
         <View style={{ height: 10 }} />
         <View>
           <Text> Note for reports, please follow the general guidelines for what is reportable content.</Text>
         </View>
+        <Button title="Go Back" onPress={() => {
+          setReportstring('');
+          setCurrentQ('');
+          setCurrentI('');
+          setPage(0);
+        }}></Button>
       </View>
     )
   }

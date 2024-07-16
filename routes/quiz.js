@@ -12,9 +12,9 @@ const router = express.Router();
 router.post('/quiz/createMCQ', async (req, res) => {
   try {
     const { questionBody, options, author, explainText } = req.body;
-    
+
     // Ensures question body is not empty
-    if (questionBody.trim() === "") {
+    if (!questionBody || questionBody.trim() === "") {
       return res.status(400).json({ message: 'Please do not input an empty question body!' });
     }
 
@@ -32,6 +32,11 @@ router.post('/quiz/createMCQ', async (req, res) => {
     // Checks for at least one correct answer
     if (!options.some(option => option.isCorrect === true)) {
       return res.status(400).json({ message: 'You must have at least one correct answer!' });
+    }
+    
+    // Checks for missing author
+    if (!author) {
+      return res.status(400).json({ message: 'User not provided' });
     }
 
     // Checks for valid author
@@ -54,7 +59,7 @@ router.post('/quiz/createMCQ', async (req, res) => {
     // Saves question and pushes to db
     const question = new MCQ(questionData);
     await question.save()
-                  .then(qn => console.log(`Question ID: ${ question._id } saved successfully.`));
+      .then(qn => console.log(`Question ID: ${question._id} saved successfully.`));
     res.status(201).json({ questionId: question._id });
   } catch (error) {
     console.log('Unable to add MCQ');
@@ -78,6 +83,11 @@ router.post('/quiz/createOEQ', async (req, res) => {
       return res.status(400).json({ message: 'You must have at least one answer option!' });
     }
 
+    // Checks for missing author
+    if (!author) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
     // Checks for valid author
     const user = await User.findOne({ username: author }).exec();
     if (!user) {
@@ -98,7 +108,7 @@ router.post('/quiz/createOEQ', async (req, res) => {
     // Saves question and pushes to db
     const question = new OEQ(questionData);
     await question.save()
-                  .then(qn => console.log(`Question ID: ${ question._id } saved successfully.`));
+      .then(qn => console.log(`Question ID: ${question._id} saved successfully.`));
     res.status(201).json({ questionId: question._id });
   } catch (error) {
     console.log('Unable to add OEQ');
@@ -110,7 +120,7 @@ router.post('/quiz/createOEQ', async (req, res) => {
 router.get('/quiz/fetchSavedQuestions', async (req, res) => {
   try {
     const username = req.query.username;
-    
+
     // No user provided
     if (!username) {
       return res.status(400).json({ message: 'User not provided' });
@@ -124,15 +134,15 @@ router.get('/quiz/fetchSavedQuestions', async (req, res) => {
 
     // Fetches only 20 for now
     const fetched = await UserSavedQuestion.find({ userId: user._id, }, 'question -_id')
-                                           .sort({ dateSaved: -1 })
-                                           .limit(50)
-                                           .populate({
-                                              path: 'question.questionId', 
-                                              populate: {
-                                                path: 'author',
-                                              }
-                                            })
-                                           .exec();
+      .sort({ dateSaved: -1 })
+      .limit(50)
+      .populate({
+        path: 'question.questionId',
+        populate: {
+          path: 'author',
+        }
+      })
+      .exec();
     const questions = fetched.map(doc => {
       const toObj = doc.question.questionId.toObject ? doc.question.questionId.toObject() : doc.question.questionId;
       toObj['questionType'] = doc.question.questionType;
@@ -151,7 +161,7 @@ router.get('/quiz/fetchSavedQuestions', async (req, res) => {
 router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
   try {
     const username = req.query.username;
-    
+
     // No user provided
     if (!username) {
       return res.status(400).json({ message: 'User not provided' });
@@ -165,7 +175,7 @@ router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
 
     // Fetches only 20 for now
     const [fetchedMCQs, fetchedOEQs] = await Promise.all([
-      MCQ.find({ author: user._id }).populate('author').exec(), 
+      MCQ.find({ author: user._id }).populate('author').exec(),
       OEQ.find({ author: user._id }).populate('author').exec()
     ]);
 
@@ -183,7 +193,7 @@ router.get('/quiz/fetchCreatedQuestions', async (req, res) => {
       return toObj;
     });
 
-    const questions = [...MCQs, ...OEQs];   
+    const questions = [...MCQs, ...OEQs];
     questions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
     const limited = questions.slice(0, 50);
     console.log('All questions fetched successfully!');
@@ -199,11 +209,11 @@ router.get('/quiz/fetchAllQuestions', async (req, res) => {
   try {
     const [fetchedMCQs, fetchedOEQs] = await Promise.all([
       MCQ.find({})
-         .populate('author')
-         .exec(), 
+        .populate('author')
+        .exec(),
       OEQ.find({})
-         .populate('author')
-         .exec()]);
+        .populate('author')
+        .exec()]);
     const MCQs = fetchedMCQs.map(doc => {
       const toObj = doc.toObject();
       toObj['questionType'] = 'MCQ';
@@ -216,7 +226,7 @@ router.get('/quiz/fetchAllQuestions', async (req, res) => {
       toObj['author'] = toObj.author.username;
       return toObj;
     });
-    const questions = [...MCQs, ...OEQs];   
+    const questions = [...MCQs, ...OEQs];
     questions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
     const limited = questions.slice(0, 50);
     console.log('All questions fetched successfully!');
@@ -229,15 +239,19 @@ router.get('/quiz/fetchAllQuestions', async (req, res) => {
 
 // create quiz
 router.post('/quiz/createQuiz', async (req, res) => {
-  try {  
+  try {
     var { title, topic, questions, author, isVerified } = req.body;
-    
+
+    if (!author) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
     // Checks for valid author
     const user = await User.findOne({ username: author }).exec();
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     // Ensures title is not empty
     if (!title || title.trim() === '') {
       return res.status(400).json({ message: 'Please provide a quiz title!' });
@@ -247,6 +261,9 @@ router.post('/quiz/createQuiz', async (req, res) => {
     if (!topic || topic.trim() === '') {
       topic = 'Uncategorised';
     }
+
+    // Ensures correct capitalisation of topic
+    topic = topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase();
 
     // Ensures correct capitalisation of topic
     topic = topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase();
@@ -275,7 +292,7 @@ router.post('/quiz/createQuiz', async (req, res) => {
       if (qn.questionType === 'MCQ') {
         fetched = await MCQ.findById(qn.questionId);
         if (!fetched) {
-          return res.status(404).json({ message: `Question with questionId ${qn.questionId} not found`});
+          return res.status(404).json({ message: `Question with questionId ${qn.questionId} not found` });
         }
 
         if (qn.noOptions && qn.noOptions > fetched.options.length) {
@@ -285,17 +302,17 @@ router.post('/quiz/createQuiz', async (req, res) => {
         // Assigns default noOptions to number of provided options
         if (!qn.noOptions) {
           qn.noOptions = fetched.options.length;
-        } 
+        }
       } else if (qn.questionType === 'OEQ') {
         fetched = await OEQ.findById(qn.questionId);
         if (!fetched) {
-          return res.status(404).json({ message: `Question with questionId ${qn.questionId} not found`});
+          return res.status(404).json({ message: `Question with questionId ${qn.questionId} not found` });
         }
 
         // Assign a dummy noOptions (bad code i got it)
         if (!qn.noOptions) {
           qn.noOptions = 1;
-        } 
+        }
       }
 
       // Validate noOfAttempts if present
@@ -312,14 +329,14 @@ router.post('/quiz/createQuiz', async (req, res) => {
     // Saves quiz to db
     const createdQuiz = new Quiz({
       title: title,
-      topic: topic.toLowerCase(), 
+      topic: topic.toLowerCase(),
       questions: questions,
       author: user._id,
       isVerified: isVerified,
     });
 
     await createdQuiz.save()
-                     .then(quiz => console.log(`Quiz ID: ${ createdQuiz._id } saved successfully.`));
+      .then(quiz => console.log(`Quiz ID: ${createdQuiz._id} saved successfully.`));
     res.status(201).json({ quizId: createdQuiz._id });
   } catch (error) {
     console.log('Unable to create quiz');
@@ -337,7 +354,7 @@ router.post('/quiz/pushQuestion', async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(quizId)) {
       return res.status(400).json({ message: 'Invalid quizId' });
     }
-    
+
     if (!mongoose.Types.ObjectId.isValid(questionId)) {
       return res.status(400).json({ message: 'Invalid questionId' });
     }
@@ -349,7 +366,7 @@ router.post('/quiz/pushQuestion', async (req, res) => {
 
     // Gets quiz
     const quiz = await Quiz.findById(quizId).populate('author').populate('questions.questionId').exec();
-    
+
     if (!quiz) {
       return res.status(404).json({ message: 'Quiz not found' });
     }
@@ -377,7 +394,7 @@ router.post('/quiz/pushQuestion', async (req, res) => {
     }
 
     if (!question) {
-      return res.status(404).json({ message: 'Question not found '});
+      return res.status(404).json({ message: 'Question not found ' });
     }
 
     // Default questionAttempts = 1
@@ -395,7 +412,7 @@ router.post('/quiz/pushQuestion', async (req, res) => {
       // Assigns default noOptions to number of provided options
       if (!noOptions) {
         checkedOptions = question.options.length;
-      } 
+      }
     } else {
       if (!noOptions) {
         checkedOptions = 1;
@@ -411,7 +428,7 @@ router.post('/quiz/pushQuestion', async (req, res) => {
     });
 
     await quiz.save()
-              .then(quiz => console.log(`Quiz ID: ${ quizId } updated successfully.`));
+      .then(quiz => console.log(`Quiz ID: ${quizId} updated successfully.`));
     res.status(200).json({ quizId: quiz._id });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
@@ -429,7 +446,11 @@ router.post('/quiz/pushQuestion', async (req, res) => {
 router.post('/quiz/saveQuestion', async (req, res) => {
   try {
     const { username, questionId } = req.body;
-    
+
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
     // checks for valid questionId
     if (!mongoose.Types.ObjectId.isValid(questionId)) {
       return res.status(400).json({ message: 'Invalid questionId' });
@@ -469,7 +490,7 @@ router.post('/quiz/saveQuestion', async (req, res) => {
       }
     });
     await savedQuestion.save()
-                       .then(savedQn => console.log(`Question ID: ${ questionId } saved to User ${ username } successfully.`));
+      .then(savedQn => console.log(`Question ID: ${questionId} saved to User ${username} successfully.`));
     res.status(201).json({ savedQuestionId: savedQuestion._id });
   } catch (error) {
     console.log('Unable to save question');
@@ -481,7 +502,7 @@ router.post('/quiz/saveQuestion', async (req, res) => {
 router.get('/quiz/checkSavedQuestion', async (req, res) => {
   try {
     const { username, questionId } = req.query;
-    
+
     // checks for valid questionId
     if (!mongoose.Types.ObjectId.isValid(questionId)) {
       return res.status(400).json({ message: 'Invalid questionId' });
@@ -521,7 +542,7 @@ router.get('/quiz/checkSavedQuestion', async (req, res) => {
 router.post('/quiz/unsaveQuestion', async (req, res) => {
   try {
     const { username, questionId } = req.body;
-    
+
     // checks for valid questionId
     if (!mongoose.Types.ObjectId.isValid(questionId)) {
       return res.status(400).json({ message: 'Invalid questionId' });
@@ -566,7 +587,11 @@ router.post('/quiz/unsaveQuestion', async (req, res) => {
 router.post('/quiz/saveQuiz', async (req, res) => {
   try {
     const { username, quizId } = req.body;
-    
+
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
     // checks for valid quizId
     if (!mongoose.Types.ObjectId.isValid(quizId)) {
       return res.status(400).json({ message: 'Invalid quizId' });
@@ -595,11 +620,47 @@ router.post('/quiz/saveQuiz', async (req, res) => {
       quizId: quizId,
     });
     await savedQuiz.save()
-                   .then(savedQuiz => console.log(`Quiz ID: ${ quizId } saved to User ${ username } successfully.`));
+      .then(savedQuiz => console.log(`Quiz ID: ${quizId} saved to User ${username} successfully.`));
     res.status(201).json({ savedQuizId: savedQuiz._id });
   } catch (error) {
     console.log('Unable to save quiz');
     res.status(500).json({ message: 'Error saving quiz', error });
+  }
+});
+
+router.post('/quiz/unsaveQuiz', async (req, res) => {
+  try {
+    const { username, quizId } = req.body;
+
+    // checks for valid quizId
+    if (!mongoose.Types.ObjectId.isValid(quizId)) {
+      return res.status(400).json({ message: 'Invalid quizId' });
+    }
+
+    // Checks if user and quiz both exist
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const quiz = await Quiz.findById(quizId).exec();
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
+
+    // Checks if quiz has already been saved by user
+    const existing = await UserSavedQuiz.findOne({ userId: user._id, quizId: quizId });
+    if (!existing) {
+      return res.status(400).json({ message: 'Quiz not saved by user!' });
+    }
+
+    await UserSavedQuiz.findByIdAndDelete(existing._id);
+    console.log(`Quiz ID: ${quizId} unsaved by user ${username} successfully`);
+    res.status(200).json({ message: "Quiz unsaved successfully!" });
+  } catch (error) {
+    console.log('Unable to unsave quiz');
+    console.error(error);
+    res.status(500).json({ message: 'Error unsaving quiz', error });
   }
 });
 
@@ -621,24 +682,24 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
 
     // Fetches only 20 for now
     const fetched = await UserSavedQuiz.find({ userId: user._id })
-                                       .sort({ dateSaved: -1 })
-                                       .limit(50)
-                                       .populate({
-                                        path: 'quizId',
-                                        populate: [
-                                            { 
-                                              path: 'questions.questionId',
-                                              populate: {
-                                                path: 'author'
-                                              } 
-                                            }, 
-                                            { 
-                                              path: 'author' 
-                                            }
-                                          ]
-                                        }
-                                      )
-                                       .exec();
+      .sort({ dateSaved: -1 })
+      .limit(50)
+      .populate({
+        path: 'quizId',
+        populate: [
+          {
+            path: 'questions.questionId',
+            populate: {
+              path: 'author'
+            }
+          },
+          {
+            path: 'author'
+          }
+        ]
+      }
+      )
+      .exec();
     const quizzes = fetched.map(doc => doc.quizId);
     const mappedQuizzes = quizzes.map(quiz => {
       const quizObject = quiz.toObject();
@@ -664,6 +725,7 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
 });
 
 // fetch quizzes created by user, limited to 50 for now
+// fetch quizzes created by user, limited to 50 for now
 router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
   try {
     const username = req.query.username;
@@ -680,16 +742,16 @@ router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
     }
 
     const fetched = await Quiz.find({ author: user._id })
-                              .sort({ dateCreated: -1 })
-                              .limit(50)
-                              .populate({
-                                path: 'questions.questionId',
-                                populate: {
-                                  path: 'author',
-                                }
-                              })
-                              .populate('author')
-                              .exec();
+      .sort({ dateCreated: -1 })
+      .limit(50)
+      .populate({
+        path: 'questions.questionId',
+        populate: {
+          path: 'author',
+        }
+      })
+      .populate('author')
+      .exec();
     const quizzes = fetched.map(quiz => {
       const quizObject = quiz.toObject();
       const mappedQuestions = quizObject.questions.map(question => {
@@ -713,19 +775,20 @@ router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
 });
 
 // fetch all quizzes in the database, limited to 50 for now
+// fetch all quizzes in the database, limited to 50 for now
 router.get('/quiz/fetchAllQuizzes', async (req, res) => {
   try {
     const fetched = await Quiz.find({})
-                              .sort({ dateCreated: -1 })
-                              .limit(50)
-                              .populate({
-                                path: 'questions.questionId',
-                                populate: {
-                                  path: 'author',
-                                }
-                              })
-                              .populate('author')
-                              .exec();
+      .sort({ dateCreated: -1 })
+      .limit(50)
+      .populate({
+        path: 'questions.questionId',
+        populate: {
+          path: 'author',
+        }
+      })
+      .populate('author')
+      .exec();
     const quizzes = fetched.map(quiz => {
       const quizObject = quiz.toObject();
       const mappedQuestions = quizObject.questions.map(question => {
@@ -760,7 +823,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
     if (title) {
       if (typeof title !== 'string' || title.trim() === '') {
         return res.status(400).json('Invalid title');
-      } 
+      }
       query.title = { $regex: title, $options: 'i' };
     }
 
@@ -768,7 +831,7 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
     if (topic) {
       if (typeof topic !== 'string' || topic.trim() === '') {
         return res.status(400).json('Invalid topic');
-      } 
+      }
       query.topic = { $regex: `^${topic}$`, $options: 'i' };
     }
 
@@ -776,21 +839,21 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
     if (isVerified !== undefined && isVerified !== null) {
       if (typeof isVerified !== 'string' || isVerified.trim() === '' || (isVerified !== 'true' && isVerified !== 'false')) {
         return res.status(400).json('Invalid isVerified');
-      } 
+      }
       query.isVerified = isVerified === 'true';
     }
 
     const fetched = await Quiz.find(query)
-                              .sort({ dateSaved: -1 })
-                              .limit(50)
-                              .populate({
-                                path: 'questions.questionId',
-                                populate: {
-                                  path: 'author',
-                                }
-                              })
-                              .populate('author')
-                              .exec();
+      .sort({ dateSaved: -1 })
+      .limit(50)
+      .populate({
+        path: 'questions.questionId',
+        populate: {
+          path: 'author',
+        }
+      })
+      .populate('author')
+      .exec();
     const quizzes = fetched.map(quiz => {
       const quizObject = quiz.toObject();
       const mappedQuestions = quizObject.questions.map(question => {
@@ -807,10 +870,61 @@ router.get('/quiz/fetchAllQuizMatchCriteria', async (req, res) => {
     });
     console.log('Quizzes fetched successfully!');
     res.status(200).json({ quizzes: quizzes });
+    res.status(200).json({ quizzes: quizzes });
   } catch (error) {
     console.log('Unable to fetch quizzes');
     console.error(error);
     res.status(500).json({ message: 'Error fetching quizzes \n' + error.message, error });
+  }
+});
+
+// given an array of quizzes, checks each individually to see if they are saved
+router.post('/quiz/checkSavedQuizzes', async (req, res) => {
+  try {
+    const { username, quizIds } = req.body;
+
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Checks each quizId for validity
+    for (const quizId of quizIds) {
+      // Checks if ObjectIds are valid
+      if (!mongoose.Types.ObjectId.isValid(quizId)) {
+        return res.status(400).json({ message: 'Invalid quizId' });
+      }
+
+      // Checks for valid quiz
+      const quiz = await Quiz.findById(quizId).exec();
+      if (!quiz) {
+        return res.status(404).json({ message: 'Quiz not found' });
+      }
+    }
+
+    const savedQuizzes = await Promise.all(
+      quizIds.map(async quizId => {
+        // Checks if quiz is saved
+        const savedQuiz = await UserSavedQuiz.findOne({ userId: user._id, quizId: quizId }).exec();
+        if (savedQuiz) {
+          return { quizId, saved: true };
+        } else {
+          return { quizId, saved: false };
+        }
+      })
+    )
+    console.log('Saved quizzes checked successfully!');
+    res.status(200).json({ savedQuizzes: savedQuizzes });
+  } catch (error) {
+    console.log('Unable to check saved quizzes');
+    console.error(error);
+    res.status(500).json({ message: 'Error checking saved quizzes', error });
   }
 });
 
@@ -827,7 +941,7 @@ router.post('/quiz/rateQuiz', async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(quizId)) {
       return res.status(400).json({ message: 'Invalid quizId' });
     }
-    
+
     // Checks for valid quiz
     const quiz = await Quiz.findById(quizId).exec();
     if (!quiz) {
@@ -844,7 +958,7 @@ router.post('/quiz/rateQuiz', async (req, res) => {
     quiz.rating = (currRating * currTimesRated + rating) / (currTimesRated + 1);
     quiz.timesRated = currTimesRated + 1;
     await quiz.save()
-              .then(quiz => console.log(`Quiz ID: ${quizId} rated successfully`));
+      .then(quiz => console.log(`Quiz ID: ${quizId} rated successfully`));
     res.status(200).json({ quiz: quizId });
   } catch (error) {
     console.log('Unable to rate quiz');
@@ -877,7 +991,7 @@ router.post('/quiz/takeQuiz', async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(quizId)) {
       return res.status(400).json({ message: 'Invalid quizId' });
     }
-    
+
     // Checks for valid quiz
     const quiz = await Quiz.findById(quizId).populate('questions.questionId').exec();
     if (!quiz) {
@@ -944,7 +1058,7 @@ router.post('/quiz/takeQuiz', async (req, res) => {
       breakdown: breakdown
     });
     await takenQuiz.save()
-                   .then(takenQuiz => console.log(`Quiz ID: ${ quizId } taken by User ${ username } successfully.`))
+      .then(takenQuiz => console.log(`Quiz ID: ${quizId} taken by User ${username} successfully.`))
     res.status(201).json({ takenQuizId: takenQuiz._id });
   } catch (error) {
     console.log('Unable to submit taken quiz');
@@ -956,7 +1070,7 @@ router.post('/quiz/takeQuiz', async (req, res) => {
 router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
   try {
     const username = req.query.username;
-    
+
     // No user provided
     if (!username) {
       return res.status(400).json({ message: 'User not provided' });
@@ -970,24 +1084,24 @@ router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
 
     // Fetches only 20 for now
     const fetched = await UserTakenQuiz.find({ userId: user._id })
-                                       .sort({ dateTaken: -1 })
-                                       .limit(50)
-                                       .populate({
-                                        path: 'quizId',
-                                        populate: [
-                                            { 
-                                              path: 'questions.questionId',
-                                              populate: {
-                                                path: 'author'
-                                              } 
-                                            }, 
-                                            { 
-                                              path: 'author' 
-                                            }
-                                          ]
-                                        }
-                                      )
-                                       .exec();
+      .sort({ dateTaken: -1 })
+      .limit(50)
+      .populate({
+        path: 'quizId',
+        populate: [
+          {
+            path: 'questions.questionId',
+            populate: {
+              path: 'author'
+            }
+          },
+          {
+            path: 'author'
+          }
+        ]
+      }
+      )
+      .exec();
 
     const quizzes = fetched.map(doc => {
       const quiz = doc.quizId.toObject();
@@ -1004,7 +1118,7 @@ router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
         toObj.noAttempts = matchingBreakdown.noAttempts;
         toObj.responses = matchingBreakdown.responses;
         toObj.isCorrect = matchingBreakdown.isCorrect;
-        
+
         return toObj;
       });
       quiz.questions = mappedQuestions;

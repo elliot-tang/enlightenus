@@ -36,6 +36,7 @@ export default function PlayHist() {
 function MainHistory({ navigation }: HistoryScreenProps) {
   const [topic, setTopic] = useState("Uncategorised");
   const [quizStats, setQuizStats] = useState([]);
+  const [topics, setTopics] = useState([]);
   const user = returnUser();
 
   // Loads 50 most recently taken quizzes into graph
@@ -45,12 +46,15 @@ function MainHistory({ navigation }: HistoryScreenProps) {
         try {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchTakenQuizzes`, { params: { username: user } });
           const quizzes = response.data.quizzes;
+          const quizIds = quizzes.map(quiz => quiz._id);
+          const savedResponse = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/checkSavedQuizzes`, { username: user, quizIds: quizIds });
+          const saved = savedResponse.data.savedQuizzes;
           const data = quizzes.map(quiz => {
             const takenId = quiz.takenId;
             const id = quiz._id;
             const title = quiz.title;
             const topic = quiz.topic;
-            const hasSaved = false; // TODO: Fetch, set as default for now
+            const hasSaved = saved.find(quizId => quizId.quizId === id).saved;
             const score = quiz.score;
             const questions = quiz.questions.map(qn => {
               const id = qn._id;
@@ -69,8 +73,25 @@ function MainHistory({ navigation }: HistoryScreenProps) {
             return { takenId, id, title, topic, hasSaved, questions, score };
           });
           setQuizStats(data);
+
+          const quizTopics = new Set(quizzes.map(quiz => quiz.topic));
+          const dropdownTopics = Array.from(quizTopics).map(topic => { 
+            return { 
+              value: topic,
+              label: topic,
+            }
+          });
+          setTopics(dropdownTopics);
         } catch (error) {
-          console.error('Error loading quizzes:', error);
+          if (axios.isAxiosError(error)) {
+            const errorMessage: string = error.response?.data.message;
+            alert(`Axios Error: ${errorMessage}`);
+            console.error('Axios error:', error.message);
+            console.error('Error response:', error.response?.data);
+          } else {
+            alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+            console.error('Unexpected error:', error);
+          }
           setQuizStats([]);
         }
       }
@@ -79,24 +100,21 @@ function MainHistory({ navigation }: HistoryScreenProps) {
   );
 
   const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);
+
   return (
     <View style={{ flex: 1, gap: 10, backgroundColor:"white" }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={{ fontSize: 23, fontWeight: "bold" }}>
         View Previous Quizzes Here
       </Text>
-      <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
-          <TextInput
-            style={{ flex: 5 }}
-            placeholder="Search by topic..."
-            onChangeText={setTopic}
-            value={topic}
-          />
-          <TouchableOpacity
-            style={{ justifyContent: "center", flex: 1 }}>
-            <MaterialIcons name="search" size={24} color="gray" />
-          </TouchableOpacity>
-        </View>
+      <View style={{ zIndex: 1 }}>
+        <CustomPicker
+          options={topics}
+          selectedValue={topic}
+          onValueChange={setTopic}
+          label="Topic:"
+        />
+      </View>
       <ScrollView style={{ flex: 1 }}>
         {toShowData.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard
@@ -112,69 +130,97 @@ function MainHistory({ navigation }: HistoryScreenProps) {
 function Individual({ route, navigation }: IndividualProps) {
   const toShowProps = (route.params === undefined) ? { id: "", title: "", topic: "", questions: Array<QuestionPropsForHistory>(), score: 0 } : route.params.indivProps
   const toShow = toShowProps.questions;
+  const [reportPage, setReportPage] = useState<string>('');
+  const [currentReportQn, setCurrentReportQn] = useState<string>('');
+  const [reportstring, setReportstring] = useState<string>('');
   const user = returnUser();
-  return (
-    <View style={{ flex: 1, backgroundColor:"white" }}>
-      <View style={{ height: height * 0.07 }} />
-      <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShowProps.topic} : {toShowProps.title}</Text>
-      <View style={{ height: 0.05 * height, flexDirection: "row" }} />
-      <ScrollView style={{ height: height * 0.67, gap: 10 }}>
-        {toShow.map((item) => <View style={{ paddingTop: 10 }}>
-          <HistoryTallyCard
-            {...item}
-          />
-        </View>)}
-      </ScrollView>
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
-    </View>
 
-  )
+  // Navigates to question report page, to be passed into History Tally Card
+  const navigateReport: (questionId: string, questionBody: string) => void = (questionId: string, questionBody: string) => {
+    setReportPage(questionId);
+    setCurrentReportQn(questionBody);
+  }
 
-}
-
-const options = [
-  { value: 'Uncategorised', label: 'Uncategorised' },
-  { value: 'Coding', label: 'Coding' },
-  { value: 'Math', label: 'Math' },
-  { value: 'NUS Modules', label: 'NUS Modules' },
-]
-
-/* const testData = [
-  {
-    id: "hsbfhbfj",
-    title: "myquiz",
-    topic: "Coding",
-    questions: [
-      {
-        id: "jddjs",
-        mcq: false,
-        maxAttempt: 1,
-        quizstmt: "questio hcshcjkn",
-        corrans: ["dhsbdh", "dhsdh"],
-        wrongs: [],
-        noOption: 2,
-        explainText: "hdbsh",
-        responses: ['dhsdh'],
-        isCorrect: true,
-        noAttempts: 1
-      },
-      {
-        id: "jddjs2",
-        mcq: false,
-        maxAttempt: 1,
-        quizstmt: "questio hcshcjkn",
-        corrans: ["dhsbdh", "dhsdh"],
-        wrongs: [],
-        noOption: 2,
-        explainText: "hdbsh",
-        responses: ['wrjhfe', 'effj'],
-        isCorrect: false,
-        noAttempts: 1
+  const reportQuestion: () => Promise<string> = async () => {
+    try {
+      if (reportstring.trim() === '') {
+        alert('Please provide a report reason!');
+        setReportstring('');
+      } else {
+        const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/report/reportQuestion`, { username: user, questionId: reportPage, reportReason: reportstring });
+        return response.data.reportId;
       }
-    ],
-    hasSaved: true,
-    score: 1
-  },
-  { id: "hsbfbfj", title: "myquiz2", topic: "Math", questions: [], hasSaved: true, score: 0 },
-  { id: "hsdjiofj", title: "myquiz3", topic: "Coding", questions: [], hasSaved: false, score: 0 }
-] */
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  }
+
+  if (reportPage === '') {
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={{ height: height * 0.07 }} />
+        <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShowProps.topic} : {toShowProps.title}</Text>
+        <View style={{ height: 0.05 * height, flexDirection: "row" }} />
+        <ScrollView style={{ height: height * 0.67, gap: 10 }}>
+          {toShow.map((item) => <View style={{ paddingTop: 10 }}>
+            <HistoryTallyCard
+              {...item}
+              reportQn={() => navigateReport(item.id, item.quizstmt)}
+            />
+          </View>)}
+        </ScrollView>
+        <Button title="Go Back" onPress={() => navigation.goBack()} />
+      </View>
+    )
+  } else {
+    // return the report page
+    return (
+      <View style={{ gap: 5, paddingTop: 30 }}>
+        <Text style={{ fontSize: 30 }}>Report Question</Text>
+        <Text style={{ textAlign: "left" }}>Question: {currentReportQn} </Text>
+        <Text style={{ paddingTop: 10 }}>Please enter your report reason:</Text>
+        <TextInput
+          style={{
+            height: 50,
+            paddingHorizontal: 20,
+            borderColor: "green",
+            borderWidth: 1,
+            borderRadius: 7
+          }}
+          multiline={true}
+          placeholder="Enter Text Here..."
+          onChangeText={setReportstring}
+          value={reportstring}
+        />
+        <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
+          <Button title="Submit" onPress={async () => {
+            const response = await reportQuestion();
+            if (response) {
+              alert(`Question successfully reported! Report ID: ${response}`);
+              setReportPage('');
+              setCurrentReportQn('');
+              setReportstring('');
+            }
+          }} />
+        </View>
+        <View style={{ height: 10 }} />
+        <View>
+          <Text>Note for reports, please follow the general guidelines for what is reportable content.</Text>
+        </View>
+        <Button title="Go back" onPress={() => {
+          setReportPage('');
+          setCurrentReportQn('');
+          setReportstring('');
+        }}></Button>
+      </View>
+    )
+  }
+}

@@ -1,4 +1,4 @@
-import { View, Text, Button, TouchableOpacity, TextInput, FlatList } from "react-native"
+import { View, Text, Button, TouchableOpacity, TextInput, FlatList, StyleSheet, SafeAreaView } from "react-native"
 import { HomeStackParamList } from "@app/App"
 import { useState } from "react"
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -98,7 +98,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
   }
 
   return (
-    <View style={{ gap: 15, backgroundColor:"white" }}>
+    <SafeAreaView style={styles.container}>
       {<View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
         <Text style={{ fontSize: 22 }}>Search quizzes in </Text>
         <TextInput
@@ -150,11 +150,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
         <Text>Press the search button to search for quizzes!</Text>
       </View>
       <View style={{ gap: 25 }} />
-      {searchFrom === "Mine" && <Text>*Note: You can only playtest your own quizzes and the scores will not be reflected in the leaderboards</Text>}
-      <View style={{
-        // search bar
-        flexDirection: "row", backgroundColor: 'white'
-      }}>
+      <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
         <TextInput
           style={{ flex: 10 }}
           placeholder="Search..."
@@ -210,6 +206,16 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           />
         ))} />
       <Button title="Go back" onPress={() => navigation.goBack()} />
-    </View>
+    </SafeAreaView>
   )
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 30,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    gap: 15,
+  },
+})

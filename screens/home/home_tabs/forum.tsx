@@ -77,7 +77,6 @@ export default function ForumScreen() {
   );
 }
 
-
 function MainForum({ navigation }: ForumScreenProps) {
 
   const [posts, setPosts] = useState<Array<ForumProps>>([]);
@@ -317,7 +316,6 @@ function Individual({ route, navigation }: IndividualProps) {
 }
 
 function Report({ route, navigation }: ReportProps) {
-
   var tempid: string;
   var temptype: string;
 
@@ -327,6 +325,41 @@ function Report({ route, navigation }: ReportProps) {
   }
 
   const [reportText, setReport] = useState('');
+  const user = returnUser();
+
+  const reportForumContent: () => Promise<string> = async () => {
+    try {
+      if (!tempid || !temptype) {
+        alert('Please provide a post/reply to report!');
+      } else if (reportText.trim() === '') {
+        alert('Please provide a report reason!');
+        setReport('');
+      } else {
+        var response;
+        if (temptype === 'reply') {
+          response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/report/reportForumReply`, { username: user, replyId: tempid, reportReason: reportText });
+          return response.data.reportId;
+        } else if (temptype === 'post') {
+          response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/report/reportForumPost`, { username: user, postId: tempid, reportReason: reportText });
+          return response.data.reportId;
+        } else {
+          throw 'Invalid report type'
+        }
+      }
+    } catch (error) {
+      if (error === 'Invalid report type') {
+        alert('Please provide a valid report type: (post/reply)!');
+      } else if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  }
   return (
     <View style={{ gap: 5, backgroundColor:"white" }}>
       <View style={{ height: height * 0.07 }} />
@@ -339,16 +372,24 @@ function Report({ route, navigation }: ReportProps) {
         value={reportText}
       />
       <View style={{ justifyContent: "flex-end", flexDirection: "row" }}>
-        <Button title="Submit" onPress={() => {
-          // TODO: Report forum post
-          alert("Currently under development!");
-          navigation.goBack()
+        <Button title="Submit" onPress={async () => {
+          const response = await reportForumContent();
+          const type = temptype.charAt(0).toUpperCase() + temptype.slice(1);
+          if (response) {
+            alert(`${type} successfully reported! Report ID: ${response}`);
+            setReport('');
+            navigation.goBack();
+          }
         }} />
       </View>
       <View style={{ height: 10 }} />
       <View>
         <Text> Note for reports, please follow the general guidelines for what is reportable content.</Text>
       </View>
+      <Button title='Go Back' onPress={() => {
+        setReport('');
+        navigation.goBack();
+      }}></Button>
     </View>
   )
 }
@@ -763,45 +804,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   }
 })
-
-// const testData = [
-//   {
-//     id: "dsdhsbdsjndskjds",
-//     title: "Welcome to the Forum!",
-//     topic: "Misc",
-//     body: "This is a placeholder post to showcase the layout of the forum feature. Stay tuned for future developments!",
-//     author: "enlighteNUS",
-//     replies: [{
-//       id: "fjnjdfnd",
-//       author: "excitedUser1",
-//       body: "Wow! I am so excited!"
-//     }, {
-//       id: "nfjk",
-//       author: "skepticalUser2",
-//       body: "Hopefully the UI gets better."
-//     }],
-//     attached: []
-//   },
-
-//   {
-//     id: "dsdhsbdsjndskfffjds",
-//     title: "This post has attachments",
-//     topic: "Misc",
-//     body: "Questions and quizzes can be shared via the upcoming attachment feature for users to save and share!",
-//     author: "enlighteNUS",
-//     replies: [{
-//       id: "fjnjdfnd",
-//       author: "excitedUser1",
-//       body: "Yay! I can't wait to share and save questions!"
-//     }, {
-//       id: "nfjk",
-//       author: "excitedUser2",
-//       body: "Yay!"
-//     }],
-//     attached: [{ id: "quizid1", single: false }]
-//   },
-
-// ];
-
-// const mockqndatabase = [{ id: "qnid1", title: "Question fun" }]
-// const mockqzdatabase = [{ id: "quizid1", title: "Future Quiz" }, { id: "quizid2", title: "Quiz funner2" }]
