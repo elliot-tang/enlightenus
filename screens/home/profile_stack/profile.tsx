@@ -227,45 +227,11 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
     }, [])
   );
 
-  var toDisplayCreate: Array<{ count: number, topic: string }> = quizStatsCreate[3];
-  var toDisplaySaved: Array<{ count: number, topic: string }> = quizStatsSaved[3];
-  var toDisplayTaken: Array<{ count: number, topic: string }> = quizStatsPlayed[3];
-  var toDisplayTakenScore: { best: { avgScore: number, topic: string }, worst: { avgScore: number, topic: string }, avg: number } = quizStatsTakenScore[3];
-  var toDisplayCreatedScore: number = quizStatsCreatedScore[3];
-  switch (fetchLimit) {
-    case 5:
-      toDisplayCreate = quizStatsCreate[0];
-      toDisplaySaved = quizStatsSaved[0];
-      toDisplayTaken = quizStatsPlayed[0];
-      toDisplayTakenScore = quizStatsTakenScore[0];
-      toDisplayCreatedScore = quizStatsCreatedScore[0];
-      break;
-
-    case 10:
-      toDisplayCreate = quizStatsCreate[1];
-      toDisplaySaved = quizStatsSaved[1];
-      toDisplayTaken = quizStatsPlayed[1];
-      toDisplayTakenScore = quizStatsTakenScore[1];
-      toDisplayCreatedScore = quizStatsCreatedScore[1];
-      break;
-
-    case 25:
-      toDisplayCreate = quizStatsCreate[2];
-      toDisplaySaved = quizStatsSaved[2];
-      toDisplayTaken = quizStatsPlayed[2];
-      toDisplayTakenScore = quizStatsTakenScore[2];
-      toDisplayCreatedScore = quizStatsCreatedScore[2];
-      break;
-
-    case 'All':
-      toDisplayCreate = quizStatsCreate[3];
-      toDisplaySaved = quizStatsSaved[3];
-      toDisplayTaken = quizStatsPlayed[3];
-      toDisplayTakenScore = quizStatsTakenScore[3];
-      toDisplayCreatedScore = quizStatsCreatedScore[3];
-  }
-
-  // TO DO ELLIOT: fetch actual quiz saved and quiz played
+  var toDisplayCreate: Array<{ count: number, topic: string }> = quizStatsCreate[options.indexOf(options.find(x => x.value === fetchLimit))];
+  var toDisplaySaved: Array<{ count: number, topic: string }> = quizStatsSaved[options.indexOf(options.find(x => x.value === fetchLimit))];
+  var toDisplayTaken: Array<{ count: number, topic: string }> = quizStatsPlayed[options.indexOf(options.find(x => x.value === fetchLimit))];
+  var toDisplayTakenScore: { best: { avgScore: number, topic: string }, worst: { avgScore: number, topic: string }, avg: number } = quizStatsTakenScore[options.indexOf(options.find(x => x.value === fetchLimit))];
+  var toDisplayCreatedScore: number = quizStatsCreatedScore[options.indexOf(options.find(x => x.value === fetchLimit))];
 
   if (loaded) {
     return (
