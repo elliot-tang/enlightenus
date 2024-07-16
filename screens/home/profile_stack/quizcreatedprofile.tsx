@@ -18,6 +18,7 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
   const [quizzes, setQuizzes] = useState([]);
   const [toDisplayQuizzes, setToDisplay] = useState([]);
   const [topic, setTopic] = useState("Uncategorised");
+  const [topics, setTopics] = useState([]);
   const user = returnUser();
 
   useFocusEffect(
@@ -66,25 +67,20 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
       <Text style={{ fontSize: 23, fontWeight: "bold" }}>
         View Created Quizzes Here
       </Text>
-      <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
-        <TextInput
-          style={{ flex: 5 }}
-          placeholder="Search by topic..."
-          onChangeText={setTopic}
-          value={topic}
+      <View style={{ zIndex: 1 }}>
+        <CustomPicker
+          options={Array.from(new Set(quizzes.map(quiz => quiz.topic))).map(topic => {return { value: topic, label: topic }})}
+          selectedValue={topic}
+          onValueChange={setTopic}
+          label="Topic:"
         />
-        <TouchableOpacity
-          style={{ justifyContent: "center", flex: 1 }}
-          onPress={()=>setToDisplay(quizzes.filter((ele)=>ele.topic==topic))}>
-          <MaterialIcons name="search" size={24} color="gray" />
-        </TouchableOpacity>
       </View>
       <ScrollView style={{ flex: 1 }}>
         {toDisplayQuizzes.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard2
-            key={item._id}
+            key={item.takenId}
             {...item}
-            id={item._id} avescore={0} numberplays={0} //to do: numberplays should be length of the array whose user-quiz map contains this quiz id, and also the average of scores
+            id={item.takenId} avescore={0} numberplays={0} //to do: numberplays should be length of the array whose user-quiz map contains this quiz id, and also the average of scores
             goToInd={() => navigation.navigate("Pquestioncreated", { quizprops: item })} />
         </View>)}
       </ScrollView>

@@ -1063,7 +1063,7 @@ router.post('/quiz/takeQuiz', async (req, res) => {
       breakdown: breakdown
     });
     toDo.push(takenQuiz.save());
-    
+
     await Promise.all(toDo)
       .then(takenQuiz => console.log(`Quiz ID: ${quizId} taken by User ${username} successfully.`))
     res.status(201).json({ takenQuizId: takenQuiz._id });
@@ -1155,7 +1155,8 @@ router.get('/quiz/getAnalytics', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    async function getCreatedQuizzes(limit) {
+    // Fetches number of quizzes for each topic
+    async function getCreatedQuizzesCount(limit) {
       const pipeline = [
         { $sort: { dateCreated: -1 } },
         { $match: { 'author': user._id } },
@@ -1175,15 +1176,15 @@ router.get('/quiz/getAnalytics', async (req, res) => {
       ];
 
       if (limit) {
-        pipeline.splice(1, 0, { $limit: limit });
+        pipeline.splice(2, 0, { $limit: limit });
       }
 
       return await Quiz.aggregate(pipeline);
     };
 
-    async function getSavedQuizzes(limit) {
+    async function getSavedQuizzesCount(limit) {
       const pipeline = [
-        { $sort: { dateCreated: -1 } },
+        { $sort: { dateSaved: -1 } },
         { $match: { 'userId': user._id } },
         {
           $lookup: {
@@ -1210,15 +1211,15 @@ router.get('/quiz/getAnalytics', async (req, res) => {
       ];
 
       if (limit) {
-        pipeline.splice(1, 0, { $limit: limit });
+        pipeline.splice(2, 0, { $limit: limit });
       }
 
       return await UserSavedQuiz.aggregate(pipeline);
     };
 
-    async function getTakenQuizzes(limit) {
+    async function getTakenQuizzesCount(limit) {
       const pipeline = [
-        { $sort: { dateCreated: -1 } },
+        { $sort: { dateTaken: -1 } },
         { $match: { 'userId': user._id } },
         {
           $lookup: {
@@ -1245,19 +1246,96 @@ router.get('/quiz/getAnalytics', async (req, res) => {
       ];
 
       if (limit) {
-        pipeline.splice(1, 0, { $limit: limit });
+        pipeline.splice(2, 0, { $limit: limit });
       }
 
       return await UserTakenQuiz.aggregate(pipeline);
     };
 
+    // Fetches average score for each topic
+    async function getTakenQuizzesScore(limit) {
+      const pipeline = [
+        { $sort: { dateTaken: -1 } },
+        { $match: { 'userId': user._id } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        {
+          $group: {
+            _id: "$quizData.topic",
+            avgScore: { $avg: { $multiply: [100, { $divide: ['$score', { $size: '$quizData.questions' }] }] } }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: "$_id",
+            avgScore: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(2, 0, { $limit: limit });
+      }
+
+      const quizzes = await UserTakenQuiz.aggregate(pipeline);
+      const sorted = quizzes.sort((x, y) => y.avgScore - x.avgScore);
+      const average = sorted.reduce((x, y) => x + y.avgScore, 0) / sorted.length;
+      return { best: sorted[0], worst: sorted[sorted.length - 1], avg: average};
+    };
+
+    async function getCreatedQuizzesScore(limit) {
+      const pipeline = [
+        { $sort: { dateCreated: -1 } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        { $match: { 'quizData.author': user._id } },
+        {
+          $group: {
+            _id: "$quizData.topic",
+            avgScore: { $avg: { $multiply: [100, { $divide: ['$score', { $size: '$quizData.questions' }] }] } }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: "$_id",
+            avgScore: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(4, 0, { $limit: limit });
+      }
+
+      const quizzes = await UserTakenQuiz.aggregate(pipeline);
+      return quizzes.reduce((x, y) => x + y.avgScore, 0) / quizzes.length;
+    }
+
     const limits = [5, 10, 25, null];
-    const createds = await Promise.all(limits.map(limit => getCreatedQuizzes(limit)));
-    const saveds = await Promise.all(limits.map(limit => getSavedQuizzes(limit)));
-    const takens = await Promise.all(limits.map(limit => getTakenQuizzes(limit)));
+    const createds = await Promise.all(limits.map(limit => getCreatedQuizzesCount(limit)));
+    const saveds = await Promise.all(limits.map(limit => getSavedQuizzesCount(limit)));
+    const takens = await Promise.all(limits.map(limit => getTakenQuizzesCount(limit)));
+    const takenScores = await Promise.all(limits.map(limit => getTakenQuizzesScore(limit)));
+    const createdScores = await Promise.all(limits.map(limit => getCreatedQuizzesScore(limit)));
 
     console.log('Quiz analytics fetched successfully!');
-    res.status(200).json({ created: createds, saved: saveds, taken: takens });
+    res.status(200).json({ created: createds, saved: saveds, taken: takens, takenScores: takenScores, createdScores: createdScores });
   } catch (error) {
     console.log('Unable to fetch quiz analytics stats');
     console.error(error);

@@ -15,7 +15,8 @@ const { height, width } = Dimensions.get("window");
 type ProfileQzSProps = NativeStackScreenProps<HomeStackParamList, "Pquizsaved">
 
 export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
-  const [toDisplayQuizzes, setToDisplay] = useState(route.params.fetchedQz)
+  const [quizzes, setQuizzes] = useState([]);
+  const [toDisplayQuizzes, setToDisplay] = useState([])
   const [topic, setTopic] = useState("Uncategorised")
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
@@ -32,7 +33,7 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
         />
         <TouchableOpacity
           style={{ justifyContent: "center", flex: 1 }}
-          onPress={() => setToDisplay(route.params.fetchedQz.filter((ele) => ele.topic == topic))}>
+          onPress={() => setToDisplay(quizzes.filter((ele) => ele.topic == topic))}>
           <MaterialIcons name="search" size={24} color="gray" />
         </TouchableOpacity>
       </View>

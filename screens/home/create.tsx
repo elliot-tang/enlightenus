@@ -235,7 +235,7 @@ const Create = ({ route, navigation }: CreateProps) => {
     return (
       <ScrollView style={{ backgroundColor: "white" }}>
         <View style={{ height: height * 0.1 }} />
-        <Text style={styles.header}>Create New Quiz ({topic})</Text>
+        <Text style={styles.header}>Create New Quiz</Text>
 
         <View style={styles.buttonContainer}>
           <Button color='#6cac48' title="Add question from scratch" onPress={() => setRender(1)} />

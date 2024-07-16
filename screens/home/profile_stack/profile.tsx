@@ -129,18 +129,68 @@ function BarCard(props: BarCardProps) {
   // }
 }
 
-const placeholderQuizzes = [
+const placeholderCountQuizzes = [
   [{ count: 1, topic: 'Uncategorised' }],
   [{ count: 1, topic: 'Uncategorised' }],
   [{ count: 1, topic: 'Uncategorised' }],
   [{ count: 1, topic: 'Uncategorised' }]
-]
+];
+
+const placeholderTakenScoreQuizzes = [
+  {
+    best: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    worst: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    avg: 100
+  },
+  {
+    best: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    worst: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    avg: 100
+  },
+  {
+    best: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    worst: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    avg: 100
+  },
+  {
+    best: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    worst: {
+      avgScore: 100,
+      topic: 'Uncategorised'
+    },
+    avg: 100
+  },
+];
+
 
 export const ProfileScreen = ({ navigation }: ProfileProps) => {
   const [fetchLimit, setFetchLimit] = useState<string | number>(null);
-  const [quizStatsCreate, setQuizStatsCreate] = useState(placeholderQuizzes);
-  const [quizStatsPlayed, setQuizStatsPlayed] = useState(placeholderQuizzes);
-  const [quizStatsSaved, setQuizStatsSaved] = useState(placeholderQuizzes);
+  const [quizStatsCreate, setQuizStatsCreate] = useState(placeholderCountQuizzes);
+  const [quizStatsPlayed, setQuizStatsPlayed] = useState(placeholderCountQuizzes);
+  const [quizStatsSaved, setQuizStatsSaved] = useState(placeholderCountQuizzes);
+  const [quizStatsTakenScore, setQuizStatsTakenScore] = useState(placeholderTakenScoreQuizzes);
+  const [quizStatsCreatedScore, setQuizStatsCreatedScore] = useState([0, 0, 0, 0]);
   const [loaded, setLoaded] = useState<boolean>(false);
   const user = returnUser();
 
@@ -149,10 +199,12 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
       async function loadQuizzes() {
         try {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/getAnalytics`, { params: { username: user } });
-          const { created, saved, taken } = response.data;
+          const { created, saved, taken, takenScores, createdScores } = response.data;
           setQuizStatsCreate(created);
           setQuizStatsSaved(saved);
           setQuizStatsPlayed(taken);
+          setQuizStatsTakenScore(takenScores);
+          setQuizStatsCreatedScore(createdScores);
           setLoaded(true);
         } catch (error) {
           if (axios.isAxiosError(error)) {
@@ -167,6 +219,7 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
           setQuizStatsCreate([]);
           setQuizStatsSaved([]);
           setQuizStatsPlayed([]);
+          setQuizStatsTakenScore([]);
           setLoaded(true);
         }
       }
@@ -177,29 +230,39 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
   var toDisplayCreate: Array<{ count: number, topic: string }> = quizStatsCreate[3];
   var toDisplaySaved: Array<{ count: number, topic: string }> = quizStatsSaved[3];
   var toDisplayTaken: Array<{ count: number, topic: string }> = quizStatsPlayed[3];
+  var toDisplayTakenScore: { best: { avgScore: number, topic: string }, worst: { avgScore: number, topic: string }, avg: number } = quizStatsTakenScore[3];
+  var toDisplayCreatedScore: number = quizStatsCreatedScore[3];
   switch (fetchLimit) {
     case 5:
       toDisplayCreate = quizStatsCreate[0];
       toDisplaySaved = quizStatsSaved[0];
       toDisplayTaken = quizStatsPlayed[0];
+      toDisplayTakenScore = quizStatsTakenScore[0];
+      toDisplayCreatedScore = quizStatsCreatedScore[0];
       break;
 
     case 10:
       toDisplayCreate = quizStatsCreate[1];
       toDisplaySaved = quizStatsSaved[1];
       toDisplayTaken = quizStatsPlayed[1];
+      toDisplayTakenScore = quizStatsTakenScore[1];
+      toDisplayCreatedScore = quizStatsCreatedScore[1];
       break;
 
     case 25:
       toDisplayCreate = quizStatsCreate[2];
       toDisplaySaved = quizStatsSaved[2];
       toDisplayTaken = quizStatsPlayed[2];
+      toDisplayTakenScore = quizStatsTakenScore[2];
+      toDisplayCreatedScore = quizStatsCreatedScore[2];
       break;
 
     case 'All':
       toDisplayCreate = quizStatsCreate[3];
       toDisplaySaved = quizStatsSaved[3];
       toDisplayTaken = quizStatsPlayed[3];
+      toDisplayTakenScore = quizStatsTakenScore[3];
+      toDisplayCreatedScore = quizStatsCreatedScore[3];
   }
 
   // TO DO ELLIOT: fetch actual quiz saved and quiz played
@@ -231,10 +294,10 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
           <Text>Some statistics at a glance</Text>
           <View style={{ justifyContent: "center", alignItems: "center", gap: 5 }}>
             <View style={{ height: 15 }} />
-            <Text>Your best performing topic is xxx with a score of xxx</Text>
-            <Text>Your worst performing topic is xxx with a score of xxx</Text>
-            <Text>On average, you scored </Text>
-            <Text>On average, others scored xxx on quizzes you made</Text>
+            <Text>Your best performing topic is {toDisplayTakenScore.best.topic} with a score of {Math.round(toDisplayTakenScore.best.avgScore * 100) / 100}%</Text>
+            <Text>Your worst performing topic is {toDisplayTakenScore.worst.topic} with a score of {Math.round(toDisplayTakenScore.worst.avgScore * 100) / 100}%</Text>
+            <Text>On average, you scored {Math.round(toDisplayTakenScore.avg * 100) / 100}%</Text>
+            <Text>On average, others scored {Math.round(toDisplayCreatedScore * 100) / 100}% on quizzes you made</Text>
           </View>
           <View style={{ height: 15 }} />
           <Button onPress={() => navigation.navigate("HomeTabs")} title={"Back Home"} />
