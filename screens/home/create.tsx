@@ -233,7 +233,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
   if (renderstate == 0) {
     return (
-      <ScrollView style={{backgroundColor:"white"}}>
+      <ScrollView style={{ backgroundColor: "white" }}>
         <View style={{ height: height * 0.1 }} />
         <Text style={styles.header}>Create New Quiz ({topic})</Text>
 
@@ -319,7 +319,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
     return (
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} style={styles.buttonContainer}>
-        <SafeAreaView style={{backgroundColor:"white"}}>
+        <SafeAreaView style={{ backgroundColor: "white" }}>
           <KeyboardAwareScrollView>
             <View style={{ height: height * 0.04 }} />
             {renderstate == 1 ? <Text style={styles.header}>Create a new question</Text> : <Text style={styles.header}>Edit Question</Text>}
@@ -528,7 +528,7 @@ const Create = ({ route, navigation }: CreateProps) => {
   /*questions retrieved from database wouldnt have a new flag, so append to questions but not to newLocalID*/
   if (renderstate == 3) {
     return (
-      <SafeAreaView style={{ gap: 15, flex: 1, backgroundColor:"white" }}>
+      <SafeAreaView style={{ gap: 15, flex: 1, backgroundColor: "white" }}>
         <View style={{ height: height * 0.04 }} />
         <Text style={{ fontSize: 24 }}> Search questions from? </Text>
         <View style={{ flexDirection: "row" }}>
@@ -563,7 +563,7 @@ const Create = ({ route, navigation }: CreateProps) => {
         <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
           <TextInput
             style={{ flex: 5 }}
-            placeholder="Search..."
+            placeholder="Search by question body..."
             onChangeText={setSearchText}
             value={searchText}
           />
@@ -577,6 +577,12 @@ const Create = ({ route, navigation }: CreateProps) => {
                 fetched = await fetchCreatedQuestions();
               } else {
                 fetched = await fetchAllQuestions();
+              }
+
+              // Filters questions by question body
+              if (searchText.trim() !== '') {
+                const query = new RegExp(searchText, 'i');
+                fetched = fetched.filter(qn => query.test(qn.questionBody));
               }
               setSelection(fetched);
             }}>
@@ -615,6 +621,7 @@ const Create = ({ route, navigation }: CreateProps) => {
               var getMongoId = Array.from(oldQnsmongoIDs);
               getMongoId.push({ localID: localid, mongoID: item._id });
               setMongo(getMongoId);
+              setSearchText('');
               setRender(0);
               return;
             }
@@ -624,7 +631,10 @@ const Create = ({ route, navigation }: CreateProps) => {
             </TouchableOpacity>
           </View>)}
         </ScrollView>
-        <Button title="Go back" onPress={() => setRender(0)} />
+        <Button title="Go back" onPress={() => {
+          setSearchText('');
+          setRender(0);
+        }} />
         <View style={{ height: 20 }} />
       </SafeAreaView>
     )
@@ -705,7 +715,7 @@ const Create = ({ route, navigation }: CreateProps) => {
 
               const quizId = await pushQuiz({
                 title: quiztitle,
-                topic: ((topic !== "Custom")? topic.toLowerCase(): customTopic.toLowerCase()),
+                topic: ((topic !== "Custom") ? topic.toLowerCase() : customTopic.toLowerCase()),
                 questions: toPush,
                 author: user
               });
