@@ -62,7 +62,6 @@ type BarCardProps = {
 }
 
 function BarCard(props: BarCardProps) {
-  console.log(props.data);
   const colors = ['#FF5733', '#33FFD4', '#C685FD', '#FD85DE', "#B8B6B7"];
   function Bar(props: { ratio: number, color: string }) {
     return (
@@ -76,7 +75,7 @@ function BarCard(props: BarCardProps) {
     )
   }
 
-  try {
+  if (props.data && props.data.length > 0) {
     const sortedTopics = props.data.sort((x, y) => y.count - x.count);
     const totalQuizzes = props.data.reduce((x, y) => x + y.count, 0);
     const toDisplay = sortedTopics.slice(0, 3);
@@ -111,86 +110,31 @@ function BarCard(props: BarCardProps) {
           )
           )}
         </View>
-      </TouchableOpacity>)
-  } catch (error) {
-    console.error(error);
+      </TouchableOpacity>
+    )
+  } else {
+    const verb: string = props.displayString === 'Number of Quizzes Created' ? 'Create' : props.displayString === 'Number of Quizzes Played' ? 'Take' : 'Save';
+    return (
+      <TouchableOpacity style={styles.touchable} onPress={props.onPress}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text>{props.displayString}:</Text>
+          <Text>{'0'}</Text>
+        </View>
+        <View>
+          <Text>{verb} some quizzes to view your statistics!</Text>
+        </View>
+      </TouchableOpacity>
+    )
   }
-
-
-
-
-  // // TODO: CHANGE
-  // const barList = countOccurrences(props.data.map((item) => item.topic.toLowerCase()));
-  // const total = props.data.length;
-  // const toDisplayList = barList.slice(0, 4);
-  // //adds in a final others column if too many unique topics
-  // if (barList.length > 4) {
-  //   toDisplayList.push(["others", total - toDisplayList.map((item) => item[1]).reduce((accumulator, currentValue) => accumulator + currentValue, 0)])
-  // }
 }
 
-const placeholderCountQuizzes = [
-  [{ count: 1, topic: 'Uncategorised' }],
-  [{ count: 1, topic: 'Uncategorised' }],
-  [{ count: 1, topic: 'Uncategorised' }],
-  [{ count: 1, topic: 'Uncategorised' }]
-];
-
-const placeholderTakenScoreQuizzes = [
-  {
-    best: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    worst: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    avg: 100
-  },
-  {
-    best: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    worst: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    avg: 100
-  },
-  {
-    best: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    worst: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    avg: 100
-  },
-  {
-    best: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    worst: {
-      avgScore: 100,
-      topic: 'Uncategorised'
-    },
-    avg: 100
-  },
-];
-
-
 export const ProfileScreen = ({ navigation }: ProfileProps) => {
-  const [fetchLimit, setFetchLimit] = useState<string | number>(null);
-  const [quizStatsCreate, setQuizStatsCreate] = useState(placeholderCountQuizzes);
-  const [quizStatsPlayed, setQuizStatsPlayed] = useState(placeholderCountQuizzes);
-  const [quizStatsSaved, setQuizStatsSaved] = useState(placeholderCountQuizzes);
-  const [quizStatsTakenScore, setQuizStatsTakenScore] = useState(placeholderTakenScoreQuizzes);
-  const [quizStatsCreatedScore, setQuizStatsCreatedScore] = useState([0, 0, 0, 0]);
+  const [fetchLimit, setFetchLimit] = useState<string | number>('All');
+  const [quizStatsCreate, setQuizStatsCreate] = useState([]);
+  const [quizStatsPlayed, setQuizStatsPlayed] = useState([]);
+  const [quizStatsSaved, setQuizStatsSaved] = useState([]);
+  const [quizStatsTakenScore, setQuizStatsTakenScore] = useState([]);
+  const [quizStatsCreatedScore, setQuizStatsCreatedScore] = useState([]);
   const [loaded, setLoaded] = useState<boolean>(false);
   const user = returnUser();
 
@@ -227,13 +171,12 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
     }, [])
   );
 
-  var toDisplayCreate: Array<{ count: number, topic: string }> = quizStatsCreate[options.indexOf(options.find(x => x.value === fetchLimit))];
-  var toDisplaySaved: Array<{ count: number, topic: string }> = quizStatsSaved[options.indexOf(options.find(x => x.value === fetchLimit))];
-  var toDisplayTaken: Array<{ count: number, topic: string }> = quizStatsPlayed[options.indexOf(options.find(x => x.value === fetchLimit))];
-  var toDisplayTakenScore: { best: { avgScore: number, topic: string }, worst: { avgScore: number, topic: string }, avg: number } = quizStatsTakenScore[options.indexOf(options.find(x => x.value === fetchLimit))];
-  var toDisplayCreatedScore: number = quizStatsCreatedScore[options.indexOf(options.find(x => x.value === fetchLimit))];
-
   if (loaded) {
+    var toDisplayCreate: Array<{ count: number, topic: string }> = quizStatsCreate[options.indexOf(options.find(x => x.value === fetchLimit))];
+    var toDisplaySaved: Array<{ count: number, topic: string }> = quizStatsSaved[options.indexOf(options.find(x => x.value === fetchLimit))];
+    var toDisplayTaken: Array<{ count: number, topic: string }> = quizStatsPlayed[options.indexOf(options.find(x => x.value === fetchLimit))];
+    var toDisplayTakenScore: { best: { avgScore: number, topic: string }, worst: { avgScore: number, topic: string }, avg: number } | undefined = quizStatsTakenScore[options.indexOf(options.find(x => x.value === fetchLimit))];
+    var toDisplayCreatedScore: number | undefined = quizStatsCreatedScore[options.indexOf(options.find(x => x.value === fetchLimit))];
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView style={{ flex: 1 }}>
@@ -260,17 +203,25 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
           <Text>Some statistics at a glance</Text>
           <View style={{ justifyContent: "center", alignItems: "center", gap: 5 }}>
             <View style={{ height: 15 }} />
-            <Text>Your best performing topic is {toDisplayTakenScore.best.topic} with a score of {Math.round(toDisplayTakenScore.best.avgScore * 100) / 100}%</Text>
-            <Text>Your worst performing topic is {toDisplayTakenScore.worst.topic} with a score of {Math.round(toDisplayTakenScore.worst.avgScore * 100) / 100}%</Text>
-            <Text>On average, you scored {Math.round(toDisplayTakenScore.avg * 100) / 100}%</Text>
-            <Text>On average, others scored {Math.round(toDisplayCreatedScore * 100) / 100}% on quizzes you made</Text>
+            {toDisplayTakenScore ? (
+              <View>
+                <Text>Your best performing topic is {toDisplayTakenScore.best.topic} with a score of {Math.round(toDisplayTakenScore.best.avgScore * 100) / 100}%</Text>
+                <Text>Your worst performing topic is {toDisplayTakenScore.worst.topic} with a score of {Math.round(toDisplayTakenScore.worst.avgScore * 100) / 100}%</Text>
+                <Text>On average, you scored {Math.round(toDisplayTakenScore.avg * 100) / 100}%</Text>
+              </View>
+            ) : (
+              <Text>Take some quizzes to view more statistics!</Text>
+            )}
+            {toDisplayCreatedScore ? (
+              <Text>On average, others scored {Math.round(toDisplayCreatedScore * 100) / 100}% on quizzes you made</Text>
+            ) : (
+              <Text>Get people to take your quizzes to view more statistics!</Text>
+            )}
           </View>
           <View style={{ height: 15 }} />
           <Button onPress={() => navigation.navigate("HomeTabs")} title={"Back Home"} />
         </ScrollView>
       </SafeAreaView>
-
-      //TO DO ELLIOT: fetch actual stuff and put into data
     )
   } else {
     return (
