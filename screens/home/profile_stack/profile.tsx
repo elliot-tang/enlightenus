@@ -41,18 +41,33 @@ interface FetchedQuestionForQuiz {
   options?: { answer: string, isCorrect?: boolean, _id?: string }[];
 }
 
-export type FetchedQuizPropsProfile = {
-  _id: string,
+type QuestionPropsForAnalytics = {
+  id: string,
+  mcq: boolean,
+  maxAttempt: number,
+  quizstmt: string,
+  corrans: Array<string>,
+  wrongs: Array<string>,
+  noOption: number,
+  explainText: string,
+  responses: Array<string>,
+  isCorrect: boolean,
+  noAttempts: number,
+  wrongAnswers: {
+    responses: Array<string>,
+    count: number
+  };
+  numberCorrect: number
+}
+
+export type QuizPropsForAnalytics = {
+  takenId: string,
+  id: string,
   title: string,
   topic: string,
-  questions: Array<QuestionPropsForHistory>,
-  author: string,
-  rating: number,
-  timesRated: number,
+  questions: Array<QuestionPropsForAnalytics>,
+  avgScore: number,
   timesTaken: number,
-  isVerified?: boolean,
-  dateCreated: string,
-  __v: number
 }
 
 type BarCardProps = {

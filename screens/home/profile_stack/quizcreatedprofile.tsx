@@ -18,22 +18,23 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
   const [quizzes, setQuizzes] = useState([]);
   const [toDisplayQuizzes, setToDisplay] = useState([]);
   const [topic, setTopic] = useState("Uncategorised");
-  const [topics, setTopics] = useState([]);
   const user = returnUser();
 
   useFocusEffect(
     React.useCallback(() => {
       async function loadQuizzes() {
         try {
-          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchCreatedQuizzes`, { params: { username: user } });
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchCreatedQuizzesForAnalytics`, { params: { username: user } });
           const quizzes = response.data.quizzes;
           const data = quizzes.map(quiz => {
             const takenId = quiz.takenId;
             const id = quiz._id;
             const title = quiz.title;
             const topic = quiz.topic;
-            const score = quiz.score;
+            const avgScore = quiz.quizStats.avgQuizScore;
+            const timesTaken = quiz.timesTaken;
             const questions = quiz.questions.map(qn => {
+              const qnNo = quiz.questions.indexOf(qn);
               const id = qn._id;
               const mcq = qn.questionType === 'MCQ';
               const maxAttempt = qn.questionAttempts;
@@ -45,9 +46,11 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
               const responses = qn.responses;
               const isCorrect = qn.isCorrect;
               const noAttempts = qn.noAttempts;
-              return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts };
+              const wrongAnswers = quiz.quizStats.wrongAnswers !== null ? quiz.quizStats.wrongAnswers[qnNo] : null;
+              const numberCorrect = quiz.quizStats.numberCorrect[qnNo];
+              return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts, wrongAnswers, numberCorrect };
             });
-            return { takenId, id, title, topic, questions, score };
+            return { takenId, id, title, topic, questions, avgScore, timesTaken };
           });
           setQuizzes(data);
           setToDisplay(data);

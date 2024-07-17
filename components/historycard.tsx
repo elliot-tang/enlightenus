@@ -5,6 +5,7 @@ import React from 'react';
 import { useState } from 'react';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
+import { QuizPropsForAnalytics } from '@app/screens/home/profile_stack/profile';
 
 export type QuestionPropsForHistory = {
   id: string,
@@ -48,14 +49,7 @@ export type HistoryProps = {
 
 type HistoryPropswFunc = HistoryProps & { goToInd: () => void};
 
-export type HistoryProps2 = {
-  id: string,
-  title: string,
-  topic: string,
-  questions: Array<QuestionPropsForHistory>,
-  avescore: number,
-  numberplays: number
-} 
+type QuizCreateScreenAnalyticsProps = QuizPropsForAnalytics & { goToInd: () => void};
 
 export type HistoryProps3 = {
   id: string,
@@ -65,7 +59,6 @@ export type HistoryProps3 = {
   hasSaved: boolean
 } 
 
-type HistoryPropswFunc2 = HistoryProps2 & { goToInd: () => void};
 type HistoryPropswFunc3 = HistoryProps3 & { goToInd: () => void};
 
 export default function HistoryCard(hprops: HistoryPropswFunc) {
@@ -142,11 +135,11 @@ export default function HistoryCard(hprops: HistoryPropswFunc) {
   )
 }
 
-export function HistoryCard2(hprops: HistoryPropswFunc2) {
+export function HistoryCard2(hprops: QuizCreateScreenAnalyticsProps) {
   return(<TouchableOpacity style = {styles2.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
-    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Average Score: {hprops.avescore} </Text>
-    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Times Played: {hprops.numberplays} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Average Score: {Math.round(hprops.avgScore * 100) / 100} out of {hprops.questions.length} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Times Played: {hprops.timesTaken} </Text>
   </TouchableOpacity>)
 }
 

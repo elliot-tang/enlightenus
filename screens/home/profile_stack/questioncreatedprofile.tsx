@@ -16,17 +16,16 @@ type ProfileQzCProps = NativeStackScreenProps<HomeStackParamList, "Pquestioncrea
 
 export const IndivCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
     const quizprops = route.params.quizprops;
-    const toShow = { topic: quizprops.topic, title: quizprops.title, questions: quizprops.questions }
     return (
         <SafeAreaView style={{ flex: 1,  backgroundColor:"white" }}>
             <View style={{ height: height * 0.07 }} />
-            <Text style={{ fontSize: 21, fontWeight: "bold" }}>{toShow.topic} : {toShow.title}</Text>
+            <Text style={{ fontSize: 21, fontWeight: "bold" }}>{quizprops.topic} : {quizprops.title}</Text>
             <View style={{ height: 0.02 * height, flexDirection: "row" }} />
             <ScrollView style={{ height: height * 0.67, gap: 10 }}>
-                {toShow.questions.map((item) => <View style={{ paddingTop: 10 }}>
+                {quizprops.questions.map((item) => <View style={{ paddingTop: 10 }}>
                     <HistoryTallyCard2
                         key={item.id}
-                        {...item} percentageRight={0} mostCommonWrong={''} //to do: fetch this elliot
+                        {...item} percentageRight={item.numberCorrect / quizprops.timesTaken} mostCommonWrong={item.wrongAnswers === null ? null : '[' + item.wrongAnswers.responses.toString() + ']'}
                         />
                 </View>)}
             </ScrollView>

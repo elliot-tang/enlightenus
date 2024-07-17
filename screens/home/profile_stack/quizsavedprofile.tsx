@@ -16,26 +16,63 @@ type ProfileQzSProps = NativeStackScreenProps<HomeStackParamList, "Pquizsaved">
 
 export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
   const [quizzes, setQuizzes] = useState([]);
-  const [toDisplayQuizzes, setToDisplay] = useState([])
-  const [topic, setTopic] = useState("Uncategorised")
+  const [toDisplayQuizzes, setToDisplay] = useState([]);
+  const [topic, setTopic] = useState("Uncategorised");
+  const user = returnUser();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function loadQuizzes() {
+        try {
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchSavedQuizzes`, { params: { username: user } });
+          const quizzes = response.data.quizzes;
+          const data = quizzes.map(quiz => {
+            const takenId = quiz.takenId;
+            const id = quiz._id;
+            const title = quiz.title;
+            const topic = quiz.topic;
+            const score = quiz.score;
+            const questions = quiz.questions.map(qn => {
+              const id = qn._id;
+              const mcq = qn.questionType === 'MCQ';
+              const maxAttempt = qn.questionAttempts;
+              const quizstmt = qn.questionBody;
+              const corrans = mcq ? qn.options.filter(option => option.isCorrect).map(option => option.answer) : qn.correctOptions;
+              const wrongs = mcq ? qn.options.filter(option => !option.isCorrect).map(option => option.answer) : [];
+              const noOption = qn.noOptions;
+              const explainText = qn.explainText;
+              const responses = qn.responses;
+              const isCorrect = qn.isCorrect;
+              const noAttempts = qn.noAttempts;
+              return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts };
+            });
+            return { takenId, id, title, topic, questions, score };
+          });
+          setQuizzes(data);
+          setToDisplay(data);
+        } catch (error) {
+          console.error('Error loading quizzes:', error);
+          setQuizzes([]);
+          setToDisplay([]);
+        }
+      }
+      loadQuizzes();
+    }, [])
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ height: height * 0.07 }} />
       <Text style={{ fontSize: 23, fontWeight: "bold" }}>
         View Saved Quizzes Here
       </Text>
-      <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
-        <TextInput
-          style={{ flex: 5 }}
-          placeholder="Search by topic..."
-          onChangeText={setTopic}
-          value={topic}
+      <View style={{ zIndex: 1 }}>
+        <CustomPicker
+          options={Array.from(new Set(quizzes.map(quiz => quiz.topic))).map(topic => {return { value: topic, label: topic }})}
+          selectedValue={topic}
+          onValueChange={setTopic}
+          label="Topic:"
         />
-        <TouchableOpacity
-          style={{ justifyContent: "center", flex: 1 }}
-          onPress={() => setToDisplay(quizzes.filter((ele) => ele.topic == topic))}>
-          <MaterialIcons name="search" size={24} color="gray" />
-        </TouchableOpacity>
       </View>
       <ScrollView style={{ flex: 1 }}>
         {toDisplayQuizzes.map((item) => <View style={{ paddingTop: 10 }}>
