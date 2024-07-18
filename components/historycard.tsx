@@ -1,10 +1,11 @@
-import { View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Pressable, Button } from 'react-native';
 import { QnProps } from './question1by1';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from 'react';
 import { useState } from 'react';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
+import { QuizPropsForAnalytics } from '@app/screens/home/profile_stack/profile';
 
 export type QuestionPropsForHistory = {
   id: string,
@@ -46,16 +47,9 @@ export type HistoryProps = {
 // the schema this taken in will be a quiz-user pair that will have quiz id, user id, and tally. Fetch the quiz using the quiz id, the quiz and bring the title and topic over from quiz props to here, quiz can either just store the question prop arrays, OR store a bunch of question id strings that point to individual question props. eitherway, first will need to bundle the question props together, then feed into following. 
 //Somehow we need to ask if this quiz has questions saved by the user, and also get that....
 
-type HistoryPropswFunc = HistoryProps & { goToInd: () => void};
+type HistoryPropswFunc = HistoryProps & { goToInd: () => void };
 
-export type HistoryProps2 = {
-  id: string,
-  title: string,
-  topic: string,
-  questions: Array<QuestionPropsForHistory>,
-  avescore: number,
-  numberplays: number
-} 
+type QuizCreateScreenAnalyticsProps = QuizPropsForAnalytics & { goToInd: () => void };
 
 export type HistoryProps3 = {
   id: string,
@@ -63,10 +57,9 @@ export type HistoryProps3 = {
   topic: string,
   questions: Array<QuestionPropsForHistory>,
   hasSaved: boolean
-} 
+}
 
-type HistoryPropswFunc2 = HistoryProps2 & { goToInd: () => void};
-type HistoryPropswFunc3 = HistoryProps3 & { goToInd: () => void};
+type HistoryPropswFunc3 = HistoryProps3 & { goToInd: () => void, unsaveQuiz: () => Promise<string> };
 
 export default function HistoryCard(hprops: HistoryPropswFunc) {
   const [saved, setSaved] = useState<boolean>(hprops.hasSaved);
@@ -142,17 +135,24 @@ export default function HistoryCard(hprops: HistoryPropswFunc) {
   )
 }
 
-export function HistoryCard2(hprops: HistoryPropswFunc2) {
-  return(<TouchableOpacity style = {styles2.touchable} onPress={hprops.goToInd}>
+export function HistoryCard2(hprops: QuizCreateScreenAnalyticsProps) {
+  return (<TouchableOpacity style={styles2.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
-    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Average Score: {hprops.avescore} </Text>
-    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Times Played: {hprops.numberplays} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Average Score: {Math.round(hprops.avgScore * 100) / 100} out of {hprops.questions.length} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Times Played: {hprops.timesTaken} </Text>
   </TouchableOpacity>)
 }
 
 export function HistoryCard3(hprops: HistoryPropswFunc3) {
-  return(<TouchableOpacity style = {styles2.touchable} onPress={hprops.goToInd}>
+  return (<TouchableOpacity style={styles2.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
+    <Button title="Unsave" onPress={async () => {
+      const response = await hprops.unsaveQuiz();
+      if (response) {
+        alert('Quiz unsaved successfully!');
+      }
+    }}
+    />
   </TouchableOpacity>)
 }
 

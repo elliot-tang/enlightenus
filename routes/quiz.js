@@ -14,7 +14,7 @@ router.post('/quiz/createMCQ', async (req, res) => {
     const { questionBody, options, author, explainText } = req.body;
 
     // Ensures question body is not empty
-    if (!questionBody || questionBody.trim() === "") {
+    if (!questionBody || questionBody.trim() === '') {
       return res.status(400).json({ message: 'Please do not input an empty question body!' });
     }
 
@@ -33,7 +33,7 @@ router.post('/quiz/createMCQ', async (req, res) => {
     if (!options.some(option => option.isCorrect === true)) {
       return res.status(400).json({ message: 'You must have at least one correct answer!' });
     }
-    
+
     // Checks for missing author
     if (!author) {
       return res.status(400).json({ message: 'User not provided' });
@@ -52,7 +52,7 @@ router.post('/quiz/createMCQ', async (req, res) => {
     }
 
     // Checks for explainText and adds it to questionData if present
-    if (explainText && explainText.trim() !== "") {
+    if (explainText && explainText.trim() !== '') {
       questionData.explainText = explainText;
     }
 
@@ -74,7 +74,7 @@ router.post('/quiz/createOEQ', async (req, res) => {
     const { questionBody, correctOptions, author, explainText } = req.body;
 
     // Ensures question body is not empty
-    if (!questionBody || questionBody.trim() === "") {
+    if (!questionBody || questionBody.trim() === '') {
       return res.status(400).json({ message: 'Please do not input an empty question body!' });
     }
 
@@ -101,7 +101,7 @@ router.post('/quiz/createOEQ', async (req, res) => {
     }
 
     // Checks for explainText and adds it to questionData if present
-    if (explainText && explainText.trim() !== "") {
+    if (explainText && explainText.trim() !== '') {
       questionData.explainText = explainText;
     }
 
@@ -575,7 +575,7 @@ router.post('/quiz/unsaveQuestion', async (req, res) => {
 
     await UserSavedQuestion.findByIdAndDelete(existing._id);
     console.log(`Question ID: ${questionId} unsaved by user ${username} successfully`);
-    res.status(200).json({ message: "Question unsaved successfully!" });
+    res.status(200).json({ message: 'Question unsaved successfully!' });
   } catch (error) {
     console.log('Unable to unsave question');
     console.error(error);
@@ -656,7 +656,7 @@ router.post('/quiz/unsaveQuiz', async (req, res) => {
 
     await UserSavedQuiz.findByIdAndDelete(existing._id);
     console.log(`Quiz ID: ${quizId} unsaved by user ${username} successfully`);
-    res.status(200).json({ message: "Quiz unsaved successfully!" });
+    res.status(200).json({ message: 'Quiz unsaved successfully!' });
   } catch (error) {
     console.log('Unable to unsave quiz');
     console.error(error);
@@ -724,7 +724,6 @@ router.get('/quiz/fetchSavedQuizzes', async (req, res) => {
   }
 });
 
-// fetch quizzes created by user, limited to 50 for now
 // fetch quizzes created by user, limited to 50 for now
 router.get('/quiz/fetchCreatedQuizzes', async (req, res) => {
   try {
@@ -1051,13 +1050,20 @@ router.post('/quiz/takeQuiz', async (req, res) => {
       return res.status(400).json({ message: 'Invalid score' });
     }
 
+    // Updates timesTaken field of quiz
+    const toDo = [];
+    quiz.timesTaken = quiz.timesTaken + 1;
+    toDo.push(quiz.save());
+
     const takenQuiz = new UserTakenQuiz({
       userId: user._id,
       quizId: quizId,
       score: score,
       breakdown: breakdown
     });
-    await takenQuiz.save()
+    toDo.push(takenQuiz.save());
+
+    await Promise.all(toDo)
       .then(takenQuiz => console.log(`Quiz ID: ${quizId} taken by User ${username} successfully.`))
     res.status(201).json({ takenQuizId: takenQuiz._id });
   } catch (error) {
@@ -1131,6 +1137,433 @@ router.get('/quiz/fetchTakenQuizzes', async (req, res) => {
     console.log('Unable to fetch taken quizzes');
     console.error(error);
     res.status(500).json({ message: 'Error fetching taken quizzes', error });
+  }
+});
+
+router.get('/quiz/getAnalytics', async (req, res) => {
+  try {
+    const username = req.query.username;
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Fetches number of quizzes for each topic
+    async function getCreatedQuizzesCount(limit) {
+      const pipeline = [
+        { $sort: { dateCreated: -1 } },
+        { $match: { 'author': user._id } },
+        {
+          $group: {
+            _id: '$topic',
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: '$_id',
+            count: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(2, 0, { $limit: limit });
+      }
+
+      return await Quiz.aggregate(pipeline);
+    };
+
+    async function getSavedQuizzesCount(limit) {
+      const pipeline = [
+        { $sort: { dateSaved: -1 } },
+        { $match: { 'userId': user._id } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        {
+          $group: {
+            _id: '$quizData.topic',
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: '$_id',
+            count: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(2, 0, { $limit: limit });
+      }
+
+      return await UserSavedQuiz.aggregate(pipeline);
+    };
+
+    async function getTakenQuizzesCount(limit) {
+      const pipeline = [
+        { $sort: { dateTaken: -1 } },
+        { $match: { 'userId': user._id } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        {
+          $group: {
+            _id: '$quizData.topic',
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: '$_id',
+            count: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(2, 0, { $limit: limit });
+      }
+
+      return await UserTakenQuiz.aggregate(pipeline);
+    };
+
+    // Fetches average score for each topic
+    async function getTakenQuizzesScore(limit) {
+      const pipeline = [
+        { $sort: { dateTaken: -1 } },
+        { $match: { 'userId': user._id } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        {
+          $group: {
+            _id: '$quizData.topic',
+            avgScore: { $avg: { $multiply: [100, { $divide: ['$score', { $size: '$quizData.questions' }] }] } }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: '$_id',
+            avgScore: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(2, 0, { $limit: limit });
+      }
+
+      const quizzes = await UserTakenQuiz.aggregate(pipeline);
+      const sorted = quizzes.sort((x, y) => y.avgScore - x.avgScore);
+      const average = sorted.reduce((x, y) => x + y.avgScore, 0) / sorted.length;
+      return { best: sorted[0], worst: sorted[sorted.length - 1], avg: average };
+    };
+
+    async function getCreatedQuizzesScore(limit) {
+      const pipeline = [
+        { $sort: { dateCreated: -1 } },
+        {
+          $lookup: {
+            from: 'quizzes',
+            localField: 'quizId',
+            foreignField: '_id',
+            as: 'quizData'
+          }
+        },
+        { $unwind: '$quizData' },
+        { $match: { 'quizData.author': user._id } },
+        {
+          $group: {
+            _id: '$quizData.topic',
+            avgScore: { $avg: { $multiply: [100, { $divide: ['$score', { $size: '$quizData.questions' }] }] } }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            topic: '$_id',
+            avgScore: 1
+          }
+        }
+      ];
+
+      if (limit) {
+        pipeline.splice(4, 0, { $limit: limit });
+      }
+
+      const quizzes = await UserTakenQuiz.aggregate(pipeline);
+      return quizzes.reduce((x, y) => x + y.avgScore, 0) / quizzes.length;
+    }
+
+    const limits = [5, 10, 25, null];
+    const createds = await Promise.all(limits.map(limit => getCreatedQuizzesCount(limit)));
+    const saveds = await Promise.all(limits.map(limit => getSavedQuizzesCount(limit)));
+    const takens = await Promise.all(limits.map(limit => getTakenQuizzesCount(limit)));
+    const takenScores = await Promise.all(limits.map(limit => getTakenQuizzesScore(limit)));
+    const createdScores = await Promise.all(limits.map(limit => getCreatedQuizzesScore(limit)));
+
+    console.log('Quiz analytics fetched successfully!');
+    res.status(200).json({ created: createds, saved: saveds, taken: takens, takenScores: takenScores, createdScores: createdScores });
+  } catch (error) {
+    console.log('Unable to fetch quiz analytics stats');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quiz analytics stats', error });
+  }
+});
+
+// functionally the same as fetchCreatedQuizzes, but adds several extra analytics stats:
+// average total score, average correct for each question, most common wrong answer for each question
+router.get('/quiz/fetchCreatedQuizzesForAnalytics', async (req, res) => {
+  try {
+    const username = req.query.username;
+
+    // No user provided
+    if (!username) {
+      return res.status(400).json({ message: 'User not provided' });
+    }
+
+    // Checks for user
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const fetched = await Quiz.find({ author: user._id })
+      .sort({ dateCreated: -1 })
+      .limit(50)
+      .populate({
+        path: 'questions.questionId',
+        populate: {
+          path: 'author',
+        }
+      })
+      .populate('author')
+      .exec();
+
+    async function fetchQuizStats(quizId, noQuestions) {
+      const quizStats = await UserTakenQuiz.aggregate([
+        { $match: { 'quizId': quizId } },
+        {
+          $facet: {
+            averageQuizScore: [
+              {
+                $group: {
+                  _id: null,
+                  averageScore: { $avg: '$score' }
+                }
+              },
+              {
+                $project: {
+                  _id: 0,
+                  averageScore: 1
+                }
+              }
+            ],
+            wrongAnswers: [
+              {
+                $unwind: {
+                  path: '$breakdown',
+                  includeArrayIndex: 'qnNumber'
+                }
+              },
+              {
+                $addFields: {
+                  qnNo: { $toString: '$qnNumber' }
+                }
+              },
+              { $unwind: '$breakdown.responses' },
+              { $match: { 'breakdown.isCorrect': false } },
+              {
+                $group: {
+                  _id: { quizId: '$quizId', qnNo: '$qnNo', response: '$breakdown.responses' },
+                  count: { $sum: 1 }
+                }
+              },
+              { $sort: { count: -1 } },
+              {
+                $group: {
+                  _id: { quizId: '$_id.quizId', qnNo: '$_id.qnNo' },
+                  maxCount: { $first: '$count' },
+                  responses: { $push: { response: '$_id.response', count: '$count' } }
+                }
+              },
+              {
+                $project: {
+                  _id: 1,
+                  responses: {
+                    $filter: {
+                      input: '$responses',
+                      as: 'resp',
+                      cond: { $eq: ['$$resp.count', '$maxCount'] }
+                    }
+                  }
+                }
+              },
+              {
+                $group: {
+                  _id: '$_id.quizId',
+                  mostCommonIncorrectResponses: {
+                    $push: {
+                      qnNo: '$_id.qnNo',
+                      responses: {
+                        responses: '$responses.response',
+                        count: '$responses.count'
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                $project: {
+                  mostCommonIncorrectResponses: {
+                    $arrayToObject: {
+                      $map: {
+                        input: '$mostCommonIncorrectResponses',
+                        as: 'response',
+                        in: ['$$response.qnNo', '$$response.responses']
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            numberCorrect: [
+              {
+                $unwind: {
+                  path: '$breakdown',
+                  includeArrayIndex: 'qnNumber'
+                }
+              },
+              {
+                $addFields: {
+                  qnNo: { $toString: '$qnNumber' }
+                }
+              },
+              { $match: { 'breakdown.isCorrect': true } },
+              {
+                $group: {
+                  _id: '$qnNumber',
+                  numberCorrect: { $sum: 1 }
+                }
+              },
+              {
+                $group: {
+                  _id: null,
+                  numberCorrectArray: { $push: { k: { $toString: '$_id' }, v: '$numberCorrect' } }
+                }
+              },
+              {
+                $project: {
+                  _id: 0,
+                  numberCorrectObject: {
+                    $arrayToObject: '$numberCorrectArray'
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          $project: {
+            avgQuizScore: { $arrayElemAt: ['$averageQuizScore.averageScore', 0] },
+            wrongAnswers: { $arrayElemAt: ['$wrongAnswers', 0] },
+            numberCorrect: { $arrayElemAt: ['$numberCorrect.numberCorrectObject', 0] },
+            // wrongAnswers: '$wrongAnswers'
+          }
+        }
+      ]);
+      var result = quizStats[0];
+
+      // Maps the wrong answers into array
+      const wrongAnswersObj = result.wrongAnswers;
+      if (wrongAnswersObj) {
+        const wrongAnswers = Array(noQuestions).fill().map((x, i) => i)
+          .map(key => {
+            const value = wrongAnswersObj.mostCommonIncorrectResponses[key];
+            if (value) {
+              value.count = value.count[0];
+              return value;
+            } else {
+              return null;
+            }
+          });
+        result.wrongAnswers = wrongAnswers;
+      } else {
+        result.wrongAnswers = null;
+      }
+
+      // Maps the numberCorrect into array
+      const numCorrectObj = result.numberCorrect;
+      if (numCorrectObj) {
+        const numCorrect = Array(noQuestions).fill().map((x, i) => i)
+          .map(key => {
+            const value = numCorrectObj[key.toString()];
+            if (value) {
+              return value;
+            } else {
+              return 0;
+            }
+          });
+        result.numberCorrect = numCorrect;
+      } else {
+        result.numberCorrect = Array(noQuestions).fill(0);
+      }
+
+      return result;
+    }
+
+    const quizzes = await Promise.all(fetched.map(async quiz => {
+      const quizObject = quiz.toObject();
+      const mappedQuestions = quizObject.questions.map(question => {
+        var toObj = question.questionId;
+        toObj.questionType = question.questionType;
+        toObj.questionAttempts = question.questionAttempts;
+        toObj.noOptions = question.noOptions;
+        toObj.author = toObj.author.username;
+        return toObj;
+      });
+      quizObject.questions = mappedQuestions;
+      quizObject.author = quizObject.author.username;
+      quizObject.quizStats = await fetchQuizStats(quizObject._id, quizObject.questions.length);
+      return quizObject;
+    }));
+    console.log('Quizzes fetched for analytics successfully!');
+    res.status(200).json({ quizzes: quizzes });
+  } catch (error) {
+    console.log('Unable to fetch quizzes for analytics');
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching quizzes for analytics', error });
   }
 });
 

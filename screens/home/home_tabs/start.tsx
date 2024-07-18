@@ -152,9 +152,6 @@ function StartScreen({ navigation }: HomeScreenProps) {
             </View>
           </TouchableOpacity>
 
-
-
-
         </ScrollView>
       </View>
 

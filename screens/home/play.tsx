@@ -3,7 +3,8 @@ import { HomeStackParamList } from "@app/App"
 import { useState } from "react"
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import QuizCard from "@app/components/quizcardonsearch";
+import QuizCard, { QuizProps } from "@app/components/quizcardonsearch";
+import CustomPicker from '@app/components/mypicker';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
 import React from "react";
@@ -39,12 +40,15 @@ type FetchedQuizProps = {
 }
 
 export default function PlayScreen({ route, navigation }: PlayProps) {
-  const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised" || route.params.topic === "")) ? "Uncategorised" : route.params.topic;
+  const [topic, setTopic] = useState("Uncategorised");
+  // const topic = ((route.params === undefined) || (route.params.topic === "Uncategorised" || route.params.topic === "")) ? "Uncategorised" : route.params.topic;
   const [searchFrom, setSearchFrom] = useState("All");
   const [searchText, setSearchText] = useState("");
-  const [quizzes, setQuizzes] = useState([]);
+  const [quizzes, setQuizzes] = useState<Array<QuizProps>>([]);
   const [searchTopic, setSearchTopic] = useState("");
   const user = returnUser();
+
+  const filtered = quizzes.filter(quiz => quiz.topic === topic);
 
   const fetchSavedQuizzes: () => Promise<Array<FetchedQuizProps>> = async () => {
     try {
@@ -99,16 +103,9 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {<View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-        <Text style={{ fontSize: 22 }}>Search quizzes in </Text>
-        <TextInput
-          value={searchTopic}
-          onChangeText={setSearchTopic}
-          placeholder={"Custom"}
-          style={{ color: 'green', fontSize: 22 }}
-        />
-        <Text style={{ fontSize: 22 }}> from?</Text>
-      </View>}
+      <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+        <Text style={{ fontSize: 22 }}>Search quizzes from? </Text>
+      </View>
       <View style={{ flexDirection: "row" }}>
         <TouchableOpacity
           onPress={() => setSearchFrom("Saved")}
@@ -146,17 +143,26 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           </Text>
         </TouchableOpacity>
       </View>
-      <View style={{ gap: 25 }}>
+      <View>
         <Text>Press the search button to search for quizzes!</Text>
       </View>
       <View style={{ gap: 25 }} />
+      <View style={{ zIndex: 1 }}>
+        <CustomPicker
+          options={Array.from(new Set(quizzes.map(quiz => quiz.topic))).map(topic => {return { value: topic, label: topic }})}
+          selectedValue={topic}
+          onValueChange={setTopic}
+          label="Topic:"
+        />
+      </View>
       <View style={{ flexDirection: "row", backgroundColor: 'white' }}>
         <TextInput
           style={{ flex: 10 }}
-          placeholder="Search..."
+          placeholder="Search by quiz title..."
           onChangeText={setSearchText}
           value={searchText}
         />
+
         <TouchableOpacity style={{ justifyContent: "center", flex: 1 }} onPress={async () => {
           // Pull questions
           var response: Array<FetchedQuizProps>;
@@ -169,11 +175,10 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           }
 
           // Maps response to quiz card props
-          const finalQuizzes = response.map(quiz => {
+          var finalQuizzes = response.map(quiz => {
             const id = quiz._id;
             const title = quiz.title;
             const topic = quiz.topic;
-            const oneByOne = false;
             const authorid = quiz.author;
             const questions = quiz.questions.map(question => {
               const id = question._id;
@@ -186,15 +191,21 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
               const explainText = question.explainText;
               return { id, mcq, quizstmt, corrans, wrongs, noOption, maxAttempt, explainText };
             });
-            return { id, title, topic, oneByOne, authorid, questions };
+            return { id, title, topic, authorid, questions };
           });
+
+          // Filters by quiz title
+          if (searchText.trim() !== '') {
+            const query = new RegExp(searchText, 'i');
+            finalQuizzes = finalQuizzes.filter(quiz => query.test(quiz.title));
+          }
           setQuizzes(finalQuizzes);
         }}>
           <MaterialIcons name="search" size={24} color="gray" />
         </TouchableOpacity>
       </View>
       <FlatList
-        data={quizzes}
+        data={filtered}
         keyExtractor={item => item.id}
         renderItem={({ item }) => <QuizCard
           {...item}
@@ -216,6 +227,6 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     backgroundColor: 'white',
     justifyContent: 'center',
-    gap: 15,
+    gap: 10,
   },
 })
