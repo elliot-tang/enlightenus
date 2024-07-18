@@ -25,7 +25,7 @@ export const IndivCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
                 {quizprops.questions.map((item) => <View style={{ paddingTop: 10 }}>
                     <HistoryTallyCard2
                         key={item.id}
-                        {...item} percentageRight={item.numberCorrect / quizprops.timesTaken} mostCommonWrong={item.wrongAnswers === null ? null : '[' + item.wrongAnswers.responses.toString() + ']'}
+                        {...item} percentageRight={item.numberCorrect / quizprops.timesTaken} mostCommonWrong={item.wrongAnswers}
                         />
                 </View>)}
             </ScrollView>

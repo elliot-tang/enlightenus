@@ -27,7 +27,6 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchCreatedQuizzesForAnalytics`, { params: { username: user } });
           const quizzes = response.data.quizzes;
           const data = quizzes.map(quiz => {
-            const takenId = quiz.takenId;
             const id = quiz._id;
             const title = quiz.title;
             const topic = quiz.topic;
@@ -50,7 +49,7 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
               const numberCorrect = quiz.quizStats.numberCorrect[qnNo];
               return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts, wrongAnswers, numberCorrect };
             });
-            return { takenId, id, title, topic, questions, avgScore, timesTaken };
+            return { id, title, topic, questions, avgScore, timesTaken };
           });
           setQuizzes(data);
           setToDisplay(data);
@@ -81,9 +80,9 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
       <ScrollView style={{ flex: 1 }}>
         {toDisplayQuizzes.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard2
-            key={item.takenId}
+            key={item.id}
             {...item}
-            id={item.takenId} avescore={0} numberplays={0} //to do: numberplays should be length of the array whose user-quiz map contains this quiz id, and also the average of scores
+            id={item.id} avescore={0} numberplays={0} //to do: numberplays should be length of the array whose user-quiz map contains this quiz id, and also the average of scores
             goToInd={() => navigation.navigate("Pquestioncreated", { quizprops: item })} />
         </View>)}
       </ScrollView>

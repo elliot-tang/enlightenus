@@ -8,6 +8,7 @@ import { StackedBarChart } from 'react-native-svg-charts';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
 import { QuestionPropsForHistory } from '@app/components/historycard';
+import { QnProps } from '@app/components/question1by1';
 
 const { height, width } = Dimensions.get("window");
 
@@ -61,13 +62,19 @@ type QuestionPropsForAnalytics = {
 }
 
 export type QuizPropsForAnalytics = {
-  takenId: string,
   id: string,
   title: string,
   topic: string,
   questions: Array<QuestionPropsForAnalytics>,
   avgScore: number,
   timesTaken: number,
+}
+
+export type SavedQuizPropsForAnalytics = {
+  id: string,
+  title: string,
+  topic: string,
+  questions: Array<QnProps>,
 }
 
 type BarCardProps = {

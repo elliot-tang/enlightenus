@@ -27,7 +27,6 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
           const response = await axios.get(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/fetchSavedQuizzes`, { params: { username: user } });
           const quizzes = response.data.quizzes;
           const data = quizzes.map(quiz => {
-            const takenId = quiz.takenId;
             const id = quiz._id;
             const title = quiz.title;
             const topic = quiz.topic;
@@ -41,12 +40,9 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
               const wrongs = mcq ? qn.options.filter(option => !option.isCorrect).map(option => option.answer) : [];
               const noOption = qn.noOptions;
               const explainText = qn.explainText;
-              const responses = qn.responses;
-              const isCorrect = qn.isCorrect;
-              const noAttempts = qn.noAttempts;
-              return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText, responses, isCorrect, noAttempts };
+              return { id, mcq, maxAttempt, quizstmt, corrans, wrongs, noOption, explainText };
             });
-            return { takenId, id, title, topic, questions, score };
+            return { id, title, topic, questions, score };
           });
           setQuizzes(data);
           setToDisplay(data);
@@ -60,6 +56,30 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
     }, [])
   );
 
+  const unsaveQuiz: (quizId: string) => Promise<string> = async (quizId: string) => {
+    try {
+      const savedQuiz = {
+        username: user,
+        quizId: quizId
+      }
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/unsaveQuiz`, savedQuiz);
+      console.log(`Question ID: ${quizId} unsaved by User ${user}`);
+      setQuizzes(Array.from(quizzes).filter(quiz => quiz.id !== quizId));
+      setToDisplay(Array.from(toDisplayQuizzes).filter(quiz => quiz.id !== quizId));
+      return response.data.message;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ height: height * 0.07 }} />
@@ -68,7 +88,7 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
       </Text>
       <View style={{ zIndex: 1 }}>
         <CustomPicker
-          options={Array.from(new Set(quizzes.map(quiz => quiz.topic))).map(topic => {return { value: topic, label: topic }})}
+          options={Array.from(new Set(quizzes.map(quiz => quiz.topic))).map(topic => { return { value: topic, label: topic } })}
           selectedValue={topic}
           onValueChange={setTopic}
           label="Topic:"
@@ -77,10 +97,12 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
       <ScrollView style={{ flex: 1 }}>
         {toDisplayQuizzes.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard3
-            hasSaved={false} key={item._id}
+            hasSaved={false} key={item.id}
             {...item}
-            id={item._id}
-            goToInd={() => navigation.navigate("Pquestionsaved", { quizprops: item })} />
+            id={item.id}
+            goToInd={() => navigation.navigate("Pquestionsaved", { quizprops: item })}
+            unsaveQuiz={() => unsaveQuiz(item.id)}
+          />
         </View>)}
       </ScrollView>
       <Button title="Go Back" onPress={() => navigation.goBack()} />
