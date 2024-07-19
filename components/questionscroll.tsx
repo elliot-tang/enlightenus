@@ -221,28 +221,22 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
       return (
         <SafeAreaView style={{ paddingTop: 30 }}>
           <ScrollView>
-            <FlatList
-              ItemSeparatorComponent={
-                (() => (
-                  <View
-                    style={{ height: 16 }}
-                  />
-                ))
-              }
-              data={questions}
-              renderItem={({ item }) => <QnScroll
-                id={item.id}
-                mcq={item.mcq}
-                maxAttempt={item.maxAttempt}
-                quizstmt={item.quizstmt}
-                corrans={item.corrans}
-                wrongs={item.wrongs}
-                noOption={item.noOption}
-                explainText={item.explainText}
-                enumerate={questions.indexOf(item) + 1}
-                updateFunc={updateAns(item)} />}
-
-            />
+            {questions.map((item) =>
+              <View style={{ paddingTop: 16 }}>
+                <QnScroll
+                  key={item.id}
+                  id={item.id}
+                  mcq={item.mcq}
+                  maxAttempt={item.maxAttempt}
+                  quizstmt={item.quizstmt}
+                  corrans={item.corrans}
+                  wrongs={item.wrongs}
+                  noOption={item.noOption}
+                  explainText={item.explainText}
+                  enumerate={questions.indexOf(item) + 1}
+                  updateFunc={updateAns(item)} />
+              </View>
+            )}
             <Button
               title="Submit All"
               onPress={async () => {
@@ -309,7 +303,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
       /*here we display the score, and tally up which qn is correct or wrong*/
       return (
-        <SafeAreaView style={{ flex: 1, gap: 10, paddingTop: 30, backgroundColor:"white" }}>
+        <SafeAreaView style={{ flex: 1, gap: 10, paddingTop: 30, backgroundColor: "white" }}>
           <View>
             <Text style={{ fontSize: 18 }}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
           </View>
