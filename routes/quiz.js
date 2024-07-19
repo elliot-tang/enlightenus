@@ -9,10 +9,6 @@ const UserTakenQuiz = require('../schema/usertakenquiz');
 
 const router = express.Router();
 
-// const configuration = new Configuration({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-// const openai = new OpenAIApi(configuration);
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
@@ -156,7 +152,7 @@ router.post('/quiz/generateQuestion', async (req, res) => {
         messages: [{ role: 'user', content: prompt }],
         model: 'gpt-3.5-turbo',
         response_format: { type: 'json_object' },
-        max_tokens: 300,
+        max_tokens: 500,
         temperature: 0.7
       });
     } else {
@@ -165,7 +161,7 @@ router.post('/quiz/generateQuestion', async (req, res) => {
         messages: [{ role: 'user', content: prompt }],
         model: 'gpt-3.5-turbo',
         response_format: { type: 'json_object' },
-        max_tokens: 300,
+        max_tokens: 500,
         temperature: 0.7
       });
     }
