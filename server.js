@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 const AuthRouter = require("./routes/auth");
 const QuizRouter = require("./routes/quiz");
 const ReportRouter = require("./routes/report");
@@ -20,6 +21,7 @@ app.use(cors());
 
 // uses routers for respective routes
 app.use(express.json());
+app.use(bodyParser.json());
 app.use('/', AuthRouter);
 app.use('/', QuizRouter);
 app.use('/', ReportRouter);
