@@ -119,6 +119,7 @@ function MainForum({ navigation }: ForumScreenProps) {
       <ScrollView style={{ flex: 1 }}>
         {posts.map((item) => <View style={{ paddingTop: 10 }}>
           <ForumCard
+          key={item.id}
             {...item}
             goToInd={() => navigation.navigate("individual", { post: item })} />
         </View>)}

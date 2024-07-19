@@ -516,7 +516,16 @@ const Create = ({ route, navigation }: CreateProps) => {
   }
 
   if (renderstate == 2) {
-    return (
+    return (//here is the first page to specify topic, mcq or not?, no of options, no of correct options, a button does a post then move to 2.5 <-- save opt as state
+      <View>
+        <Text>Work in progress!</Text>
+        <Button title="Go back" onPress={() => setRender(0)} />
+      </View>
+    )
+  }
+
+  if (renderstate == 2.5) {
+    return (//this page will have one button to add the question, one button to reroll, one to just go back to 0
       <View>
         <Text>Work in progress!</Text>
         <Button title="Go back" onPress={() => setRender(0)} />
