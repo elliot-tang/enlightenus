@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const OpenAI = require('openai');
 const { MCQ, OEQ } = require('../schema/question');
 const Quiz = require('../schema/quiz');
 const User = require('../schema/user');
@@ -7,6 +8,10 @@ const { UserSavedQuestion, UserSavedQuiz } = require('../schema/usersavedquiz');
 const UserTakenQuiz = require('../schema/usertakenquiz');
 
 const router = express.Router();
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 // create MCQ
 router.post('/quiz/createMCQ', async (req, res) => {
@@ -113,6 +118,97 @@ router.post('/quiz/createOEQ', async (req, res) => {
   } catch (error) {
     console.log('Unable to add OEQ');
     res.status(500).json({ message: 'Error adding OEQ', error });
+  }
+});
+
+// generates question using openai api
+router.post('/quiz/generateQuestion', async (req, res) => {
+  try {
+    const { topic, questionType, noOptions, noCorrectOptions } = req.body;
+
+    // checks for topic
+    if (!topic || typeof topic !== 'string' || topic.trim() === '') {
+      return res.status(400).json({ message: 'Topic not provided' });
+    }
+
+    // checks question type
+    if (!questionType || typeof questionType !== 'string' || (questionType !== 'MCQ' && questionType !== 'OEQ')) {
+      return res.status(400).json({ message: 'Invalid questionType ' });
+    }
+
+    var response;
+    if (questionType === 'MCQ') {
+      // checks noOptions and noCorrectOptions
+      if (!noOptions || typeof noOptions !== 'number' || noOptions <= 0) {
+        return res.status(400).json({ message: 'Invalid noOptions' });
+      }
+
+      if (!noCorrectOptions || typeof noCorrectOptions !== 'number' || noCorrectOptions > noOptions) {
+        return res.status(400).json({ message: 'Invalid noCorrectOptions' });
+      }
+
+      const prompt = `Generate a quiz question about ${topic} with ${noOptions} options, ${noCorrectOptions} of which must be correct. You can include an optional text explaining the answer. Your response should consist of a single JSON object with the following format, and you should not wrap it within markdown markers: { questionBody: "Your question here", options: [ {answer: "Option 1"}, {answer: "Option 2", isCorrect: true} ...], explainText: "Text" }`;
+      response = await openai.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'gpt-3.5-turbo',
+        response_format: { type: 'json_object' },
+        max_tokens: 500,
+        temperature: 0.7
+      });
+    } else {
+      const prompt = `Generate a quiz question about ${topic} and provide all correct answers (case-sensitive). You can include an optional text explaining the answer. Your response should consist of a single JSON object with the following format, and you should not wrap it within markdown markers: { questionBody: "Your question here", correctOptions: [ ], explainText: "Text" }`;
+      response = await openai.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'gpt-3.5-turbo',
+        response_format: { type: 'json_object' },
+        max_tokens: 500,
+        temperature: 0.7
+      });
+    }
+
+    const generatedResponse = response.choices[0];
+
+    if (generatedResponse.finish_reason === 'stop') {
+      const question = JSON.parse(generatedResponse.message.content);
+
+      // Checks generated response
+      if (!question.hasOwnProperty('questionBody') || question.questionBody.trim() === '') {
+        return res.status(502).json({ message: 'Invalid question generated' });
+      }
+
+      if (questionType === 'MCQ') {
+        if (!question.hasOwnProperty('options') || !(question.options instanceof Array)) {
+          return res.status(502).json({ message: 'Invalid question generated' });
+        }
+
+        question.options.forEach(option => {
+          if (!option.hasOwnProperty('answer')) {
+            return res.status(502).json({ message: 'Invalid question generated' });
+          }
+        });
+
+        const correctAnswers = question.options.filter(option => option.isCorrect);
+        if (correctAnswers.length === 0) {
+          return res.status(502).json({ message: 'Invalid question generated' });
+        }
+      } else {
+        if (!question.hasOwnProperty('correctOptions') || question.correctOptions.length === 0) {
+          return res.status(502).json({ message: 'Invalid question generated' });
+        }
+      }
+
+      console.log(`Question generated using ChatGPT with ${response.usage.total_tokens} tokens!`);
+      return res.status(201).json(question);
+    } else {
+      const failReason = generatedResponse.finish_reason === 'length'
+        ? 'Question generated was too long' : generatedResponse.finish_reason === 'content_filter'
+          ? 'Question generated was censored due to content filters' : 'Question just could not be generated';
+      return res.status(502).json({ message: `Question could not be generated, reason: ${failReason}` });
+    }
+  } catch (error) {
+    console.log('Unable to generate question');
+    console.error(error);
+    res.status(500).json({ message: 'Error generating question', error });
   }
 });
 
