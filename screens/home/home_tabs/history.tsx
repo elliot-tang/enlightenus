@@ -172,6 +172,7 @@ function Individual({ route, navigation }: IndividualProps) {
         <ScrollView style={{ height: height * 0.67, gap: 10 }}>
           {toShow.map((item) => <View style={{ paddingTop: 10 }}>
             <HistoryTallyCard
+              key={item.id}
               {...item}
               reportQn={() => navigateReport(item.id, item.quizstmt)}
             />
