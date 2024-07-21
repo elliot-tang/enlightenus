@@ -49,10 +49,6 @@ describe('History Card', () => {
     return (props) => <View {...props} />;
   });
 
-  // Mocks axios for save/unsave quiz tests
-  // jest.mock('axios');
-  // const mockedAxios = axios as jest.Mocked<typeof axios>;
-
   // Stores mock data into async storage
   beforeAll(async () => {
     await AsyncStorage.setItem('user', 'Mock User');

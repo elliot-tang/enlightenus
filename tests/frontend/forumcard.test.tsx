@@ -46,6 +46,7 @@ describe('ForumCard', () => {
     const touchableElement = getByText('Sample Author: Sample Title');
 
     fireEvent.press(touchableElement);
+    
     expect(defaultProps.goToInd).toHaveBeenCalled();
   });
 
