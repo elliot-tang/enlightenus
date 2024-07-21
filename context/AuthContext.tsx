@@ -15,7 +15,7 @@ interface Props {
   children?: ReactNode;
 }
 
-const AuthContext = createContext<AuthContextData>({} as AuthContextData);
+export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider = ({ children } : Props) => {
   const [user, setUser] = useState<string | undefined>(undefined);

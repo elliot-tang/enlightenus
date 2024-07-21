@@ -3,7 +3,19 @@ import { View } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
 import HistoryCard, { HistoryCard2, HistoryCard3 } from '../../components/historycard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthProvider } from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
+
+const MockAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const mockContextValue = {
+    token: 'Mock Token',
+    user: 'Mock User',
+    loading: false,
+    login: async (username: string, password: string, keepSignedIn: boolean) => {return},
+    register: async (email: string, username: string, password: string, keepSignedIn: boolean) => {return},
+    logout: async () => {return},
+  }; 
+  return <AuthContext.Provider value={mockContextValue}>{children}</AuthContext.Provider>;
+};
 
 // Ensure server is running before running save/unsave quiz tests
 describe('History Card', () => {
@@ -41,9 +53,9 @@ describe('History Card', () => {
 
   it('renders correctly with text fields', () => {
     const { getByText } = render(
-      <AuthProvider>
+      <MockAuthProvider>
         <HistoryCard {...defaultProps} />
-      </AuthProvider>
+      </MockAuthProvider>
     );
 
     expect(getByText('Quiz Topic: Quiz Title')).toBeTruthy();
@@ -51,14 +63,22 @@ describe('History Card', () => {
   });
 
   it('renders correctly with unsave button', () => {
-    const { UNSAFE_getByProps } = render(<HistoryCard {...defaultProps} />);
+    const { UNSAFE_getByProps } = render(
+      <MockAuthProvider>
+        <HistoryCard {...defaultProps} />
+      </MockAuthProvider>
+    );
 
     expect(UNSAFE_getByProps({ name: 'save', color: 'green' })).toBeTruthy();
   });
 
   it('renders correctly with save button', () => {
     const unsavedProps = { ...defaultProps, hasSaved: false }
-    const { UNSAFE_getByProps } = render(<HistoryCard {...defaultProps} />);
+    const { UNSAFE_getByProps } = render(
+      <MockAuthProvider>
+        <HistoryCard {...unsavedProps} />
+      </MockAuthProvider>
+    );
 
     expect(UNSAFE_getByProps({ name: 'save', color: 'red' })).toBeTruthy();
   });
