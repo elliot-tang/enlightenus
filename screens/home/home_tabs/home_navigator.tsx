@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { HomeStackParamList } from '@app/App';
 import StartScreen from './start';
-import LeaderboardScreen from './leaderboard';
+import InfoScreen from './leaderboard';
 import ForumScreen from './forum';
 import QuizHistoryScreen from './history';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -34,17 +34,6 @@ const HomeTabs : React.FC<Props> = () => (
       }}
     />
     <HomeTabNav.Screen 
-      name="Leaderboard" 
-      component={LeaderboardScreen} 
-      options={{
-        headerShown: false,
-        tabBarLabel: 'Leaderboard',
-        tabBarIcon: () => (
-          <MaterialIcons name="leaderboard" size={24} color="black" />
-        ), 
-      }}
-    />
-    <HomeTabNav.Screen 
       name="Forum" 
       component={ForumScreen} 
       options={{
@@ -63,6 +52,17 @@ const HomeTabs : React.FC<Props> = () => (
         tabBarLabel: 'Quiz History',
         tabBarIcon: () => (
           <MaterialIcons name="history" size={24} color="black" />
+        ), 
+      }}
+    />
+    <HomeTabNav.Screen 
+      name="Leaderboard" 
+      component={InfoScreen} 
+      options={{
+        headerShown: false,
+        tabBarLabel: 'Help',
+        tabBarIcon: () => (
+          <MaterialIcons name="help" size={24} color="black" />
         ), 
       }}
     />

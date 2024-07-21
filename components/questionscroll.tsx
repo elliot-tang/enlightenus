@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { Button, Text, TextInput, View, FlatList, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
 import { TallyCard } from './questioncard';
 import { returnUser } from '@app/context/AuthContext';
 import axios from 'axios';
+
+const height = Dimensions.get("window").height;
 
 export type QnProps = {
   id: string
@@ -107,12 +109,15 @@ export function QnScroll(props: QnPropsFuncs) {
       const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; */
 
       return (
-        <Item
-          item={item}
+        <View style={{paddingTop:8}}>
+          <Item
+          key = {item}
+          item = {item}
           onPress={() => { setAns(item); props.updateFunc(item) }}
           backgroundColor={backgroundColor}
           textColor={color}
         />
+        </View>
       );
     };
 
@@ -120,18 +125,8 @@ export function QnScroll(props: QnPropsFuncs) {
       <View style={{ borderRadius: 10, borderColor: "black", borderWidth: 2, backgroundColor: "#CAE1CB" }}>
         <Text style={{ fontSize: 20 }}>Q{props.enumerate}: {props.quizstmt}</Text>
         <View style={{ height: 15 }} />
-        <FlatList
-          data={optState}
-          renderItem={renderOps}
-          extraData={ansState}
-          ItemSeparatorComponent={
-            (() => (
-              <View
-                style={{ height: 7 }}
-              />
-            ))
-          }
-        />
+        {optState.map((item)=>
+        renderOps({item:item}))}
       </View>
     )
 
@@ -221,28 +216,22 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
       return (
         <SafeAreaView style={{ paddingTop: 30 }}>
           <ScrollView>
-            <FlatList
-              ItemSeparatorComponent={
-                (() => (
-                  <View
-                    style={{ height: 16 }}
-                  />
-                ))
-              }
-              data={questions}
-              renderItem={({ item }) => <QnScroll
-                id={item.id}
-                mcq={item.mcq}
-                maxAttempt={item.maxAttempt}
-                quizstmt={item.quizstmt}
-                corrans={item.corrans}
-                wrongs={item.wrongs}
-                noOption={item.noOption}
-                explainText={item.explainText}
-                enumerate={questions.indexOf(item) + 1}
-                updateFunc={updateAns(item)} />}
-
-            />
+            {questions.map((item) =>
+              <View style={{ paddingTop: 16 }}>
+                <QnScroll
+                  key={item.id}
+                  id={item.id}
+                  mcq={item.mcq}
+                  maxAttempt={item.maxAttempt}
+                  quizstmt={item.quizstmt}
+                  corrans={item.corrans}
+                  wrongs={item.wrongs}
+                  noOption={item.noOption}
+                  explainText={item.explainText}
+                  enumerate={questions.indexOf(item) + 1}
+                  updateFunc={updateAns(item)} />
+              </View>
+            )}
             <Button
               title="Submit All"
               onPress={async () => {
@@ -309,7 +298,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
       /*here we display the score, and tally up which qn is correct or wrong*/
       return (
-        <SafeAreaView style={{ flex: 1, gap: 10, paddingTop: 30, backgroundColor:"white" }}>
+        <SafeAreaView style={{ flex: 1, gap: 10, paddingTop: 30, backgroundColor: "white" }}>
           <View>
             <Text style={{ fontSize: 18 }}>Your score is {score}/{questions.length}. Listed below is a breakdown.</Text>
           </View>
@@ -329,6 +318,7 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
                   }}
                 />
                 <AnsScroll
+                  key={item[0].id}
                   {...item[0]}
                 />
               </View>)}
@@ -356,16 +346,12 @@ export function quizScroll(questions: Array<QnProps>, exitScreen: () => void, qu
 
   else {
     return (
-      <View style={{ gap: 5, paddingTop: 30 }}>
-        <Text style={{ textAlign: "left" }}>Report Question: {currentReportQn} </Text>
+      <View style={{ gap: 5, backgroundColor:"white" }}>
+        <View style={{ height: height * 0.07 }} />
+        <Text style={{fontSize:17, fontWeight:"bold"}}>Report Question: </Text>
+        <Text style={{ textAlign: "left" }}>{currentReportQn} </Text>
         <TextInput
-          style={{
-            height: 50,
-            paddingHorizontal: 20,
-            borderColor: "green",
-            borderWidth: 1,
-            borderRadius: 7
-          }}
+          style={{ width: '100%', borderWidth: 1, borderColor: 'green', borderRadius: 5, height: 100, textAlignVertical: "top" }}
           multiline={true}
           placeholder="Enter Text Here..."
           onChangeText={setReportstring}

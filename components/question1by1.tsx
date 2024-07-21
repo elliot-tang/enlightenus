@@ -190,7 +190,9 @@ export function Qn1b1(props: QnPropsFunc) {
       const color = (item === ansState ? 'white' : 'black'); /*can decide on a different style later; */
 
       return (
-        <Item
+        <View style={{paddingTop:8}}>
+          <Item
+          key={item}
           item={item}
           onPress={() => {
             setAns(item);
@@ -200,6 +202,7 @@ export function Qn1b1(props: QnPropsFunc) {
           backgroundColor={backgroundColor}
           textColor={color}
         />
+        </View>  
       );
     };
     if (ansState != props.corrans[seed] || submitState == false)
@@ -230,16 +233,8 @@ export function Qn1b1(props: QnPropsFunc) {
             <View style={{ height: 15 }} />
             <View style={{ height: height * 0.3 }}>
               <ScrollView>
-                <FlatList
-                  data={optState}
-                  renderItem={renderOps}
-                  extraData={ansState}
-                  ItemSeparatorComponent={(() => (
-                    <View
-                      style={{ height: 10 }}
-                    />
-                  ))}
-                />
+              {optState.map((item)=>
+        renderOps({item:item}))}
               </ScrollView>
             </View>
             <View style={{ height: 15 }} />
@@ -486,16 +481,12 @@ export const quiz1b1 = (questions: Array<QnProps>, exitScreen: () => void, quizI
 
   if (pageNo === -1) {
     return (
-      <View style={{ gap: 5, paddingTop: 30 }}>
-        <Text style={{ textAlign: "left" }}>Report Question: {currentReportQn} </Text>
+      <View style={{ gap: 5, backgroundColor:"white" }}>
+        <View style={{ height: height * 0.07 }} />
+        <Text style={{fontSize:17, fontWeight:"bold"}}>Report Question: </Text>
+        <Text style={{ textAlign: "left" }}>{currentReportQn} </Text>
         <TextInput
-          style={{
-            height: 50,
-            paddingHorizontal: 20,
-            borderColor: "green",
-            borderWidth: 1,
-            borderRadius: 7
-          }}
+          style={{ width: '100%', borderWidth: 1, borderColor: 'green', borderRadius: 5, height: 100, textAlignVertical: "top" }}
           multiline={true}
           placeholder="Enter Text Here..."
           onChangeText={setReportstring}

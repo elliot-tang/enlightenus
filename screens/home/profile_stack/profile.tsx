@@ -222,23 +222,34 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
           <View style={{ height: 15 }} />
           <BarCard data={toDisplaySaved} onPress={() => navigation.navigate("Pquizsaved")} displayString={"Number of Quizzes Saved"} />
           <View style={{ height: 30 }} />
-          <Text>Some statistics at a glance</Text>
+          <Text style={{ fontSize: 16 }}>Some statistics at a glance</Text>
           <View style={{ justifyContent: "center", alignItems: "center", gap: 5 }}>
             <View style={{ height: 15 }} />
-            {toDisplayTakenScore ? (
-              <View>
-                <Text>Your best performing topic is {toDisplayTakenScore.best.topic} with a score of {Math.round(toDisplayTakenScore.best.avgScore * 100) / 100}%</Text>
-                <Text>Your worst performing topic is {toDisplayTakenScore.worst.topic} with a score of {Math.round(toDisplayTakenScore.worst.avgScore * 100) / 100}%</Text>
-                <Text>On average, you scored {Math.round(toDisplayTakenScore.avg * 100) / 100}%</Text>
+            <View style={{ flexDirection: "row", gap: 30 }}>
+              <View style={styles.circleborder}>
+                <Text>Best Topic:</Text>
+                {toDisplayTakenScore ? <Text style={{ fontSize: 20 }}>{toDisplayTakenScore.best.topic}</Text> : <Text style={{ fontSize: 9 }}>Take some quizzes to view more statistics!</Text>}
+                {toDisplayTakenScore ? <Text>{Math.round(toDisplayTakenScore.best.avgScore * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}> </Text>}
               </View>
-            ) : (
-              <Text>Take some quizzes to view more statistics!</Text>
-            )}
-            {toDisplayCreatedScore ? (
-              <Text>On average, others scored {Math.round(toDisplayCreatedScore * 100) / 100}% on quizzes you made</Text>
-            ) : (
-              <Text>Get people to take your quizzes to view more statistics!</Text>
-            )}
+              <View style={styles.circleborder}>
+                <Text>Worst Topic:</Text>
+                {toDisplayTakenScore ? <Text style={{ fontSize: 20 }}>{toDisplayTakenScore.worst.topic}</Text> : <Text style={{ fontSize: 9, textAlign: "center" }}>Take some quizzes to view more statistics!</Text>}
+                {toDisplayTakenScore ? <Text>{Math.round(toDisplayTakenScore.worst.avgScore * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}> </Text>}
+              </View>
+            </View>
+            <View style={{ height: 15 }} />
+            <View style={{ flexDirection: "row", gap: 30 }}>
+              <View style={styles.circleborder}>
+                <Text>Average Score</Text>
+                <Text>On Quizzes You Created</Text>
+                {toDisplayCreatedScore ? <Text style={{ fontSize: 20 }}>{Math.round(toDisplayCreatedScore * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}>Create some quizzes to view more statistics!</Text>}
+              </View>
+              <View style={styles.circleborder}>
+                <Text>Average Score</Text>
+                <Text>On Quizzes You Played</Text>
+                {toDisplayTakenScore ? <Text style={{ fontSize: 20 }}>{Math.round(toDisplayTakenScore.avg * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}>Create some quizzes to view more statistics!</Text>}
+              </View>
+            </View>
           </View>
           <View style={{ height: 15 }} />
           <Button onPress={() => navigation.navigate("HomeTabs")} title={"Back Home"} />
@@ -271,6 +282,18 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
   },
+
+  circleborder: {
+    width: 0.4 * width,
+    height: 0.4 * width,
+    borderRadius: 0.4 * width / 2,
+    backgroundColor: "#1BFFF0",
+    borderWidth: 3,
+    justifyContent: "center",
+    alignItems: "center",
+    alignContent: "center",
+    gap: 2
+  }
 });
 
 //remark please pass another navigation in your invidicual screens with the stupids like QuestionCSreenProps etc etc.

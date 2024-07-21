@@ -12,7 +12,7 @@ import { returnUser, useAuth } from '@app/context/AuthContext'
 // - Knowledge (book): https://www.flaticon.com/free-icons/books
 // - Coding: https://www.flaticon.com/free-icons/html
 // - All/No Category: https://www.flaticon.com/free-icons/forbidden
-
+// -Custom: "https://www.flaticon.com/free-icons/custom"
 const { width, height } = Dimensions.get("window");
 
 const chartConfig = {
