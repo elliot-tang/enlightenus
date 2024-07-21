@@ -26,6 +26,13 @@ interface FetchedQuestion {
   options?: { answer: string, isCorrect?: boolean }[];
 }
 
+interface aiProps {
+  questionBody: string;
+  options?: { answer: string, isCorrect?: boolean }[];
+  explainText?: string;
+  correctOptions?: string[]
+}
+
 type MCQOptionProps = {
   answer: string,
   isCorrect?: boolean,
@@ -124,6 +131,18 @@ const Create = ({ route, navigation }: CreateProps) => {
   const [anyAns, setAnyAns] = useState("");
   const user = returnUser();
 
+  //morepingpong 
+
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiMCQ, setAiMCQ] = useState(false);
+  const [aiNoOpt, setAiNoOpt] = useState(1);
+  const [aiNoCorr, setAiNoCorr] = useState(1);
+  const [aiResponseBody, setResponseBody] = useState("");
+  const [aiResponseCorrans, setResponseCorrans] = useState<string[]>([]);
+  const [aiResponseWrongs, setResponseWrongs] = useState<string[]>([]);
+  const [aiExplainText, setExplainText] = useState("");
+
+
   var dataFlatlist = [...corrans, ...wrongs];
 
   const fetchSavedQuestions: () => Promise<FetchedQuestion> = async () => {
@@ -219,6 +238,24 @@ const Create = ({ route, navigation }: CreateProps) => {
       const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/createQuiz`, quiz);
       return response.data.quizId;
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage: string = error.response?.data.message;
+        alert(`Axios Error: ${errorMessage}`);
+        console.error('Axios error:', error.message);
+        console.error('Error response:', error.response?.data);
+      } else {
+        alert(`Unexpected error has occurred! Try again later \n \n Error: ${error.message}`);
+        console.error('Unexpected error:', error);
+      }
+    }
+  }
+
+  const getAI: (prompt: { topic: string, questionType: string, noOptions: number, noCorrectOptions: number }) => Promise<aiProps> = async (prompt: { topic: string, questionType: string, noOptions: number, noCorrectOptions: number }) => {
+    try {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/generateQuestion`, prompt);
+      return response.data;
+    }
+    catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage: string = error.response?.data.message;
         alert(`Axios Error: ${errorMessage}`);
@@ -517,19 +554,140 @@ const Create = ({ route, navigation }: CreateProps) => {
 
   if (renderstate == 2) {
     return (//here is the first page to specify topic, mcq or not?, no of options, no of correct options, a button does a post then move to 2.5 <-- save opt as state
-      <View>
-        <Text>Work in progress!</Text>
-        <Button title="Go back" onPress={() => setRender(0)} />
-      </View>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} style={styles.buttonContainer}>
+        <SafeAreaView style={{ backgroundColor: "white" }}>
+          <View style={{ height: height * 0.04 }} />
+          <Text style={styles.header}>Let AI create your Question</Text>
+          <View style={{ height: 10 }} />
+          {/* Input for ID */}
+          <TextInput
+            style={styles.input}
+            placeholder="Question Topic"
+            value={aiTopic}
+            onChangeText={(text) => setAiTopic(text)}
+          />
+          <View style={{ height: 10 }} />
+          {/* Switch for MCQ */}
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Text>Multiple Choice:</Text>
+            <Switch
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={aiMCQ ? '#f5dd4b' : '#f4f3f4'}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={(value) => setAiMCQ(value)}
+              value={aiMCQ}
+            />
+          </View>
+          <View style={{ height: 10 }} />
+          {aiMCQ && <View>
+            <Text> No of options
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="No of Options"
+              keyboardType="numeric"
+              value={aiNoOpt.toString()}
+              onChangeText={(text) => {
+                if (text) {
+                  setAiNoOpt(parseInt(text))
+                }
+                else {
+                  setAiNoOpt(0)
+                }
+              }}
+            />
+          </View>
+          }
+          {aiMCQ && <View style={{ height: 10 }} />}
+          {aiMCQ && <View>
+            <Text> No of Correct options
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="No of Correct Options"
+              keyboardType="numeric"
+              value={aiNoCorr.toString()}
+              onChangeText={(text) => {
+                if (text) {
+                  setAiNoCorr(parseInt(text))
+                }
+                else {
+                  setAiNoCorr(0)
+                }
+              }}
+            />
+          </View>
+          }
+          <Button title="Generate" onPress={async () => {
+            if (!aiTopic) {
+              alert("What is the topic?!")
+            }
+            else {
+              if (aiMCQ && (aiNoCorr == 0)) {
+                alert("Need at least 1 correct option")
+              }
+              else {
+                if (aiMCQ && (aiNoCorr >= aiNoOpt)) {
+                  alert("Too many correct answers to populate too few options")
+                }
+                else {
+                  setRender(2.5)
+                  const prompt = { topic: aiTopic, questionType: aiMCQ ? "MCQ" : "OEQ", noOptions: aiNoOpt, noCorrectOptions: aiNoCorr }
+                  const responseTemp = await getAI(prompt);
+                  if (responseTemp) {
+                    alert("Question successfully created")
+                    if (aiMCQ) {
+                      setResponseBody(responseTemp.questionBody);
+                      setResponseCorrans(responseTemp.options.filter((ele) => ele.isCorrect).map((ele) => ele.answer));
+                      setResponseWrongs(responseTemp.options.filter((ele) => ele.isCorrect === false || ele.isCorrect === undefined).map((ele) => ele.answer))
+                      setExplainText(responseTemp.explainText)
+                    }
+                    else {
+                      setResponseBody(responseTemp.questionBody);
+                      setResponseCorrans(responseTemp.correctOptions);
+                      setResponseWrongs([]);
+                      setExplainText(responseTemp.explainText);
+                    }
+                  }
+                  else {
+                    setResponseBody("");
+                    setResponseCorrans([]);
+                    setResponseWrongs([])
+                    setExplainText("")
+                  }
+                }
+              }
+            }
+          }} />
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
     )
   }
 
   if (renderstate == 2.5) {
     return (//this page will have one button to add the question, one button to reroll, one to just go back to 0
-      <View>
-        <Text>Work in progress!</Text>
-        <Button title="Go back" onPress={() => setRender(0)} />
-      </View>
+      <SafeAreaView style={{ gap: 15, flex: 1, backgroundColor: "white" }}>
+        <View style={{ height: height * 0.04 }} />
+        <Text style={styles.header}>Your Generated Question</Text>
+        <Text>Question body: {aiResponseBody}</Text>
+        <Text>Answer(s): {aiResponseCorrans.join(", ")}</Text>
+        {aiResponseWrongs.length !== 0 && <Text>Wrong Answer(s): {aiResponseWrongs.join(", ")}</Text>}
+        {aiExplainText !== undefined && <Text>Explanation: {aiExplainText}</Text>}
+        <View style={styles.buttonContainer}>
+          <Button title="Regenerate" onPress={() => setRender(2)} />
+          <Button title="Continue / Edit Response" onPress={() => {
+            setRender(1);
+            setQuizstmt(aiResponseBody);
+            setMcq(aiMCQ);
+            setCorrans(aiResponseCorrans);
+            setWrongs(aiResponseWrongs);
+            setExp(aiExplainText);
+            setNoOpt(aiNoOpt);
+          }
+          } />
+          <Button title="Go Back (w/o Saving)" onPress={() => setRender(0)} />
+        </View>
+      </SafeAreaView>
     )
   }
 
