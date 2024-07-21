@@ -294,7 +294,7 @@ function Individual({ route, navigation }: IndividualProps) {
               {item.author}: {item.body}
             </Text>
             <View style={{ flex: 1 }}>
-              <Button title="report" onPress={() => {
+              <Button title="Report" onPress={() => {
                 const id = item.id;
                 const contenttype = "reply";
                 navigation.navigate("report", { reportid: id, contenttype: contenttype })

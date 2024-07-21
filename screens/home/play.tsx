@@ -144,7 +144,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
         </TouchableOpacity>
       </View>
       <View>
-        <Text>Press the search button to search for quizzes!</Text>
+        <Text style={{fontSize:19}}>Press the search button to search for quizzes!</Text>
       </View>
       <View style={{ gap: 25 }} />
       <View style={{ zIndex: 1 }}>
