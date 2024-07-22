@@ -29,7 +29,7 @@ const InfoScreen: React.FC<Props> = ({ navigation }: Props) => {
         <Text style={styles.body}>This page shows a history of the quizzes you played. Note that it may take some time to load all the quizzes so please be patient. You may also save quizzes in the history page.</Text>
         <View style={{ gap: 5 }} />
         <Text style={styles.header}>Forum</Text>
-        <Text style={styles.body}>The forum allows users to discuss the contents of the quizzes or ask queries in general. To create a post, press the "Create New Post" button on the top of the screen. Users can choose to attach questions or quizzes to their post. Note that to attach an item, it must first be saved.</Text>
+        <Text style={styles.body}>The forum allows users to discuss the contents of the quizzes or ask queries in general. To create a post, press the "Create New Post" button on the top of the screen. Users can choose to attach questions or quizzes to their post.</Text>
         <View style={{ gap: 5 }} />
         <Text style={styles.header}>Report Content</Text>
         <Text style={styles.body}>Inappropriate content will be routinely checked for and removed. Users may make a report on questions, forum posts and forum replies. Listed below are some rules around appropriate and inappropriate content:</Text>
