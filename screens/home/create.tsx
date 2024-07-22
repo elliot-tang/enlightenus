@@ -682,7 +682,7 @@ const Create = ({ route, navigation }: CreateProps) => {
             setCorrans(aiResponseCorrans);
             setWrongs(aiResponseWrongs);
             setExp(aiExplainText);
-            setNoOpt(aiNoOpt);
+            setNoOpt(aiNoOpt-aiNoCorr+1);
           }
           } />
           <Button title="Go Back (w/o Saving)" onPress={() => setRender(0)} />
@@ -756,6 +756,7 @@ const Create = ({ route, navigation }: CreateProps) => {
             <MaterialIcons name="search" size={24} color="gray" />
           </TouchableOpacity>
         </View>
+        {selectionRender.length===0 ? <View style={{flex:10, justifyContent:"center", alignItems:"center"}}><Text>Nothing Found</Text></View>:
         <ScrollView style={{ flex: 10 }}>
           {selectionRender.map((item) => <View style={{ paddingTop: 10 }}>
             <TouchableOpacity style={{
@@ -797,7 +798,7 @@ const Create = ({ route, navigation }: CreateProps) => {
               <Text style={{ fontSize: 10 }}>By {item.author}</Text>
             </TouchableOpacity>
           </View>)}
-        </ScrollView>
+        </ScrollView>}
         <Button title="Go back" onPress={() => {
           setSearchText('');
           setRender(0);

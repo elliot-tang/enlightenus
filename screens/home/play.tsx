@@ -204,6 +204,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           <MaterialIcons name="search" size={24} color="gray" />
         </TouchableOpacity>
       </View>
+      {filtered.length === 0? <View style={{justifyContent:"center", alignItems:"center"}}><Text>Nothing Found</Text></View>:
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
@@ -215,7 +216,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           <View
             style={{ height: 10 }}
           />
-        ))} />
+        ))} />}
       <Button title="Go back" onPress={() => navigation.goBack()} />
     </SafeAreaView>
   )
@@ -226,7 +227,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 30,
     backgroundColor: 'white',
-    justifyContent: 'center',
     gap: 10,
   },
 })
