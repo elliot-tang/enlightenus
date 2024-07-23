@@ -45,7 +45,6 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
   const [searchFrom, setSearchFrom] = useState("All");
   const [searchText, setSearchText] = useState("");
   const [quizzes, setQuizzes] = useState<Array<QuizProps>>([]);
-  const [searchTopic, setSearchTopic] = useState("");
   const user = returnUser();
 
   const filtered = quizzes.filter(quiz => quiz.topic === topic);
@@ -204,7 +203,7 @@ export default function PlayScreen({ route, navigation }: PlayProps) {
           <MaterialIcons name="search" size={24} color="gray" />
         </TouchableOpacity>
       </View>
-      {filtered.length === 0? <View style={{justifyContent:"center", alignItems:"center"}}><Text>Nothing Found</Text></View>:
+      {(filtered.length === 0 && searchText !== "" )? <View style={{justifyContent:"center", alignItems:"center"}}><Text>Nothing Found</Text></View>:
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}

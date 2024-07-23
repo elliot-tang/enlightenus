@@ -756,7 +756,7 @@ const Create = ({ route, navigation }: CreateProps) => {
             <MaterialIcons name="search" size={24} color="gray" />
           </TouchableOpacity>
         </View>
-        {selectionRender.length===0 ? <View style={{flex:10, justifyContent:"center", alignItems:"center"}}><Text>Nothing Found</Text></View>:
+        {(selectionRender.length===0 && searchText !=="")? <View style={{flex:10, justifyContent:"center", alignItems:"center"}}><Text>Nothing Found</Text></View>:
         <ScrollView style={{ flex: 10 }}>
           {selectionRender.map((item) => <View style={{ paddingTop: 10 }}>
             <TouchableOpacity style={{
