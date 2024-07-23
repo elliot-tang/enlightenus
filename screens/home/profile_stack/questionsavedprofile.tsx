@@ -1,14 +1,8 @@
-import React, { useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { Button, Text, View, FlatList, SafeAreaView, StyleSheet, TextInput, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
+import React from 'react';
+import { Button, Text, View, SafeAreaView, ScrollView, Dimensions } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '@app/App';
-import CustomPicker from '@app/components/mypicker';
-import { StackedBarChart } from 'react-native-svg-charts';
-import { returnUser } from '@app/context/AuthContext';
-import axios from 'axios';
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { HistoryTallyCard, SavedAnalyticsTallyCard } from '@app/components/questioncard';
+import { SavedAnalyticsTallyCard } from '@app/components/questioncard';
 
 const { height, width } = Dimensions.get("window");
 

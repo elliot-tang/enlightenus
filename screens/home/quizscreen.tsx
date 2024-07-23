@@ -4,7 +4,7 @@ import { quizScroll } from '@app/components/questionscroll';
 import { returnUser } from '@app/context/AuthContext';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, SafeAreaView, Image, Switch } from 'react-native';
+import { View, Button, Text, Switch } from 'react-native';
 import axios from 'axios';
 
 type DisplayProps = NativeStackScreenProps<HomeStackParamList, "DisplayPlay">
