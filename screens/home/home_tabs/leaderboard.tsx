@@ -23,7 +23,7 @@ const InfoScreen: React.FC<Props> = ({ navigation }: Props) => {
         <Text style={styles.body}>At the end of each quiz, you may save the questions and quizzes. These will make them easier to access throghout the app.</Text>
         <View style={{ gap: 5 }} />
         <Text style={styles.header}>Profile</Text>
-        <Text style={styles.body}>The profile displays statistics regarding the quizzes you created, and the quizzes you played. You can delete the quizzes you created, or unsave unwanted quizzes here.</Text>
+        <Text style={styles.body}>The profile displays statistics regarding the quizzes you created, and the quizzes you played. You can unsave unwanted quizzes here.</Text>
         <View style={{ gap: 5 }} />
         <Text style={styles.header}>History</Text>
         <Text style={styles.body}>This page shows a history of the quizzes you played. Note that it may take some time to load all the quizzes so please be patient. You may also save quizzes in the history page.</Text>
