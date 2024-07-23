@@ -352,10 +352,10 @@ export function HistoryTallyCard2(question: QuestionPropsForTaken) {
       </Text>
       <Text>Correct answers: {question.corrans.toString()}</Text>
       {question.corrans.length > 3 && <Text style={styles.correctAnswer}>(And {question.corrans.length - 3} others) </Text>}
-      {question.mostCommonWrong !== null && question.mostCommonWrong.responses ? <Text style={{ color: "red" }}>The most common wrong answer was: {question.mostCommonWrong.responses.toString()}</Text> : <Text style={{ color: "red" }}>Everyone got your question right!</Text>}
+      {(question.mostCommonWrong !== null && !isNaN(question.percentageRight)) && (question.mostCommonWrong.responses ? <Text style={{ color: "red" }}>The most common wrong answer was: {question.mostCommonWrong.responses.toString()}</Text> : <Text style={{ color: "#013220" }}>Everyone got your question right!</Text>)}
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
         {/* <View style={{borderBottomLeftRadius:3, borderTopLeftRadius:3, height: 10, width: width*0.5*question.percentageRight, backgroundColor:"#52CA05"}}/> */}
-        <Text>{Math.round(question.percentageRight * 10000) / 100}% correct</Text>
+        {!isNaN(question.percentageRight)? <Text>{Math.round(question.percentageRight * 10000) / 100}% correct</Text>: <Text>No one has taken the quiz yet.</Text>}
       </View>
     </View>
   )

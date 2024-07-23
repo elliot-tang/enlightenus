@@ -138,7 +138,7 @@ export default function HistoryCard(hprops: HistoryPropswFunc) {
 export function HistoryCard2(hprops: QuizCreateScreenAnalyticsProps) {
   return (<TouchableOpacity style={styles2.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
-    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Average Score: {Math.round(hprops.avgScore * 100) / 100} out of {hprops.questions.length} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Average Score: {isNaN(hprops.avgScore)? "No data to show": (Math.round(hprops.avgScore * 100) / 100).toString()+ " out of " + (hprops.questions.length).toString()} </Text>
     <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Times Played: {hprops.timesTaken} </Text>
   </TouchableOpacity>)
 }
@@ -146,6 +146,7 @@ export function HistoryCard2(hprops: QuizCreateScreenAnalyticsProps) {
 export function HistoryCard3(hprops: HistoryPropswFunc3) {
   return (<TouchableOpacity style={styles2.touchable} onPress={hprops.goToInd}>
     <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{hprops.topic}: {hprops.title} </Text>
+    <View style={{width:100, justifyContent:"center", alignSelf:"center"}}>
     <Button title="Unsave" onPress={async () => {
       const response = await hprops.unsaveQuiz();
       if (response) {
@@ -153,6 +154,7 @@ export function HistoryCard3(hprops: HistoryPropswFunc3) {
       }
     }}
     />
+    </View>
   </TouchableOpacity>)
 }
 

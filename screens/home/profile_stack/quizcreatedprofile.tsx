@@ -82,7 +82,7 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
           <HistoryCard2
             key={item.id}
             {...item}
-            id={item.id} avescore={0} numberplays={0} //to do: numberplays should be length of the array whose user-quiz map contains this quiz id, and also the average of scores
+            id={item.id} //to do: numberplays should be length of the array whose user-quiz map contains this quiz id, and also the average of scores
             goToInd={() => navigation.navigate("Pquestioncreated", { quizprops: item })} />
         </View>)}
       </ScrollView>
