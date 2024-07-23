@@ -20,7 +20,6 @@ const MockAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children })
   return <AuthContext.Provider value={mockContextValue}>{children}</AuthContext.Provider>;
 };
 
-// NOTE: Ensure server is running before running save/unsave quiz tests
 describe('History Card', () => {
   const defaultProps = {
     id: 'Quiz ObjectId',
