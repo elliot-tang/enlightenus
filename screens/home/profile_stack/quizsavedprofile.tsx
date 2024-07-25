@@ -14,9 +14,10 @@ type ProfileQzSProps = NativeStackScreenProps<HomeStackParamList, "Pquizsaved">
 
 export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
   const [quizzes, setQuizzes] = useState([]);
-  const [toDisplayQuizzes, setToDisplay] = useState([]);
   const [topic, setTopic] = useState("Uncategorised");
   const user = returnUser();
+
+  const filtered = quizzes.filter(quiz => quiz.topic === topic)
 
   useFocusEffect(
     React.useCallback(() => {
@@ -43,11 +44,9 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
             return { id, title, topic, questions, score };
           });
           setQuizzes(data);
-          setToDisplay(data);
         } catch (error) {
           console.error('Error loading quizzes:', error);
           setQuizzes([]);
-          setToDisplay([]);
         }
       }
       loadQuizzes();
@@ -63,7 +62,6 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
       const response = await axios.post(`${process.env.EXPO_PUBLIC_BACKEND_API}/quiz/unsaveQuiz`, savedQuiz);
       console.log(`Question ID: ${quizId} unsaved by User ${user}`);
       setQuizzes(Array.from(quizzes).filter(quiz => quiz.id !== quizId));
-      setToDisplay(Array.from(toDisplayQuizzes).filter(quiz => quiz.id !== quizId));
       return response.data.message;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -93,7 +91,7 @@ export const QuizSavedScreen = ({ route, navigation }: ProfileQzSProps) => {
         />
       </View>
       <ScrollView style={{ flex: 1 }}>
-        {toDisplayQuizzes.map((item) => <View style={{ paddingTop: 10 }}>
+        {filtered.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard3
             hasSaved={false} key={item.id}
             {...item}

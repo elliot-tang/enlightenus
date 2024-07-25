@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Dimensions } from "react-native";
@@ -96,7 +96,7 @@ function MainHistory({ navigation }: HistoryScreenProps) {
         }
       }
       loadQuizzes();
-    }, [])
+    }, [topic])
   );
 
   const toShowData = (topic === "Uncategorised" || topic === "") ? quizStats : quizStats.filter(ele => ele.topic === topic);

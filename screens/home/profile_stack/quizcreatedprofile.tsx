@@ -14,9 +14,10 @@ type ProfileQzCProps = NativeStackScreenProps<HomeStackParamList, "Pquizcreated"
 
 export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
   const [quizzes, setQuizzes] = useState([]);
-  const [toDisplayQuizzes, setToDisplay] = useState([]);
   const [topic, setTopic] = useState("Uncategorised");
   const user = returnUser();
+
+  const filtered = quizzes.filter(quiz => quiz.topic === topic)
 
   useFocusEffect(
     React.useCallback(() => {
@@ -50,11 +51,9 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
             return { id, title, topic, questions, avgScore, timesTaken };
           });
           setQuizzes(data);
-          setToDisplay(data);
         } catch (error) {
           console.error('Error loading quizzes:', error);
           setQuizzes([]);
-          setToDisplay([]);
         }
       }
       loadQuizzes();
@@ -76,7 +75,7 @@ export const QuizCreateScreen = ({ route, navigation }: ProfileQzCProps) => {
         />
       </View>
       <ScrollView style={{ flex: 1 }}>
-        {toDisplayQuizzes.map((item) => <View style={{ paddingTop: 10 }}>
+        {filtered.map((item) => <View style={{ paddingTop: 10 }}>
           <HistoryCard2
             key={item.id}
             {...item}
