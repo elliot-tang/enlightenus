@@ -71,7 +71,7 @@ export type ForumPropsDisplay = ForumProps & { goToInd: () => void};
 
 export const ForumCard = (fprops: ForumPropsDisplay) =>{
   return(<TouchableOpacity style = {styles.touchable} onPress={fprops.goToInd}>
-    <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{fprops.author}:  {fprops.title} </Text>
+    <Text style={{ fontWeight: 'bold', fontSize: 17 }}>{fprops.author}: {fprops.title} </Text>
     <Text numberOfLines={4} ellipsizeMode="tail">
       {fprops.body}
     </Text>
