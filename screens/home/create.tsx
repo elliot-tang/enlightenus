@@ -141,6 +141,7 @@ const Create = ({ route, navigation }: CreateProps) => {
   const [aiResponseCorrans, setResponseCorrans] = useState<string[]>([]);
   const [aiResponseWrongs, setResponseWrongs] = useState<string[]>([]);
   const [aiExplainText, setExplainText] = useState("");
+  const [aiLoading, setAiLoading] = useState(true);
 
 
   var dataFlatlist = [...corrans, ...wrongs];
@@ -402,23 +403,24 @@ const Create = ({ route, navigation }: CreateProps) => {
 
             <View style={{ height: 5 }} />
             {/* Input for Correct Answers */}
-            <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: "row", elevation: 3, zIndex: 3 }}>
               <TextInput
-                style={[styles.input, { flex: 5 }]}
-                placeholder="Type an answer here and press the submit/OK button on your keyboard to submit!"
+                style={[styles.input, { flex: 5, height: 60 }]}
+                placeholder="Type your answers/options one by one here and press the submit/OK button each time on your keyboard to submit!"
                 value={anyAns}
+                multiline={true}
                 onChangeText={(text) => setAnyAns(text)}
-                onSubmitEditing={() => {
-                  if (dataFlatlist.includes(anyAns.trim())) {
-                    alert("Repeat answers are not allowed")
-                    return
-                  }
-                  if (!anyAns) {
-                    alert("Answer field cannot be empty")
-                  }
-                  else { setCorrans((prevArray) => [...prevArray, anyAns.trim()]); setAnyAns(""); }
-                }}
               />
+              <Button title="OK" onPress={() => {
+                if (dataFlatlist.includes(anyAns.trim())) {
+                  alert("Repeat answers are not allowed")
+                  return
+                }
+                if (!anyAns) {
+                  alert("Answer field cannot be empty")
+                }
+                else { setCorrans((prevArray) => [...prevArray, anyAns.trim()]); setAnyAns(""); }
+              }} />
             </View>
 
             {mcq && <View>
@@ -449,6 +451,7 @@ const Create = ({ route, navigation }: CreateProps) => {
               onChangeText={(text) => setExp(text)}
             />
             <View style={{ height: 10 }} />
+            {[...corrans, ...wrongs].length > 0 && <Text>Press the ✅ and ❌ for MCQs to mark them as right/wrong!</Text>}
             <View style={{ gap: 10 }}>
               {[...corrans, ...wrongs].map((item) => (
                 <View style={{ justifyContent: "center", alignItems: "center", paddingTop: 5 }}>
@@ -631,9 +634,11 @@ const Create = ({ route, navigation }: CreateProps) => {
                   alert("Too many correct answers to populate too few options")
                 }
                 else {
-                  setRender(2.5)
+                  setAiLoading(true);
+                  setRender(2.5);
                   const prompt = { topic: aiTopic, questionType: aiMCQ ? "MCQ" : "OEQ", noOptions: aiNoOpt, noCorrectOptions: aiNoCorr }
                   const responseTemp = await getAI(prompt);
+                  setAiLoading(false);
                   if (responseTemp) {
                     alert("Question successfully created")
                     if (aiMCQ) {
@@ -665,30 +670,38 @@ const Create = ({ route, navigation }: CreateProps) => {
   }
 
   if (renderstate == 2.5) {
-    return (//this page will have one button to add the question, one button to reroll, one to just go back to 0
-      <SafeAreaView style={{ gap: 15, flex: 1, backgroundColor: "white" }}>
-        <View style={{ height: height * 0.04 }} />
-        <Text style={styles.header}>Your Generated Question</Text>
-        <Text>Question body: {aiResponseBody}</Text>
-        <Text>Answer(s): {aiResponseCorrans.join(", ")}</Text>
-        {aiResponseWrongs.length !== 0 && <Text>Wrong Answer(s): {aiResponseWrongs.join(", ")}</Text>}
-        {aiExplainText !== undefined && <Text>Explanation: {aiExplainText}</Text>}
-        <View style={styles.buttonContainer}>
-          <Button title="Regenerate" onPress={() => setRender(2)} />
-          <Button title="Continue / Edit Response" onPress={() => {
-            setRender(1);
-            setQuizstmt(aiResponseBody);
-            setMcq(aiMCQ);
-            setCorrans(aiResponseCorrans);
-            setWrongs(aiResponseWrongs);
-            setExp(aiExplainText);
-            setNoOpt(aiNoOpt-aiNoCorr+1);
-          }
-          } />
-          <Button title="Go Back (w/o Saving)" onPress={() => setRender(0)} />
+    if (aiLoading) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
+          <Text style={{ fontSize: 30 }}>Generating question!</Text>
         </View>
-      </SafeAreaView>
-    )
+      )
+    } else {
+      return (//this page will have one button to add the question, one button to reroll, one to just go back to 0
+        <SafeAreaView style={{ gap: 15, flex: 1, backgroundColor: "white" }}>
+          <View style={{ height: height * 0.04 }} />
+          <Text style={styles.header}>Your Generated Question</Text>
+          <Text>Question body: {aiResponseBody}</Text>
+          <Text>Answer(s): {aiResponseCorrans.join(", ")}</Text>
+          {aiResponseWrongs.length !== 0 && <Text>Wrong Answer(s): {aiResponseWrongs.join(", ")}</Text>}
+          {aiExplainText !== undefined && <Text>Explanation: {aiExplainText}</Text>}
+          <View style={styles.buttonContainer}>
+            <Button title="Regenerate" onPress={() => setRender(2)} />
+            <Button title="Continue / Edit Response" onPress={() => {
+              setRender(1);
+              setQuizstmt(aiResponseBody);
+              setMcq(aiMCQ);
+              setCorrans(aiResponseCorrans);
+              setWrongs(aiResponseWrongs);
+              setExp(aiExplainText);
+              setNoOpt(aiNoOpt - aiNoCorr + 1);
+            }
+            } />
+            <Button title="Go Back (w/o Saving)" onPress={() => setRender(0)} />
+          </View>
+        </SafeAreaView>
+      )
+    }
   }
 
 
@@ -756,49 +769,49 @@ const Create = ({ route, navigation }: CreateProps) => {
             <MaterialIcons name="search" size={24} color="gray" />
           </TouchableOpacity>
         </View>
-        {(selectionRender.length===0 && searchText !=="")? <View style={{flex:10, justifyContent:"center", alignItems:"center"}}><Text>Nothing Found</Text></View>:
-        <ScrollView style={{ flex: 10 }}>
-          {selectionRender.map((item) => <View style={{ paddingTop: 10 }}>
-            <TouchableOpacity style={{
-              backgroundColor: '#cdefff',
-              padding: 15,
-              borderRadius: 10,
-            }} onPress={() => {
-              var localid = Math.random().toString();
-              while (questions.map((ele) => ele.id).includes(localid)) {
-                localid = Math.random().toString();
-              };
-              const corrects = (item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect).map((ele) => ele.answer) : []);
-              const temp = {
-                id: localid,
-                mcq: item.questionType === "MCQ",
-                maxAttempt: 1,
-                quizstmt: item.questionBody,
-                corrans: item.questionType === "MCQ" ? corrects : item.correctOptions,
-                wrongs: item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect === false || ele.isCorrect === undefined).map((ele) => ele.answer) : [],
-                noOption: 10,
-                explainText: item.explainText
-              };
+        {(selectionRender.length === 0 && searchText !== "") ? <View style={{ flex: 10, justifyContent: "center", alignItems: "center" }}><Text>Nothing Found</Text></View> :
+          <ScrollView style={{ flex: 10 }}>
+            {selectionRender.map((item) => <View style={{ paddingTop: 10 }}>
+              <TouchableOpacity style={{
+                backgroundColor: '#cdefff',
+                padding: 15,
+                borderRadius: 10,
+              }} onPress={() => {
+                var localid = Math.random().toString();
+                while (questions.map((ele) => ele.id).includes(localid)) {
+                  localid = Math.random().toString();
+                };
+                const corrects = (item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect).map((ele) => ele.answer) : []);
+                const temp = {
+                  id: localid,
+                  mcq: item.questionType === "MCQ",
+                  maxAttempt: 1,
+                  quizstmt: item.questionBody,
+                  corrans: item.questionType === "MCQ" ? corrects : item.correctOptions,
+                  wrongs: item.questionType === "MCQ" ? item.options.filter((ele) => ele.isCorrect === false || ele.isCorrect === undefined).map((ele) => ele.answer) : [],
+                  noOption: 10,
+                  explainText: item.explainText
+                };
 
-              // Updates the list of questions in the draft quiz
-              var getquestions = Array.from(questions);
-              getquestions.push(temp);
-              setQuestions(getquestions);
+                // Updates the list of questions in the draft quiz
+                var getquestions = Array.from(questions);
+                getquestions.push(temp);
+                setQuestions(getquestions);
 
-              // Updates the MongoID list
-              var getMongoId = Array.from(oldQnsmongoIDs);
-              getMongoId.push({ localID: localid, mongoID: item._id });
-              setMongo(getMongoId);
-              setSearchText('');
-              setRender(0);
-              return;
-            }
-            }>
-              <Text>{item.questionType}: {item.questionBody}</Text>
-              <Text style={{ fontSize: 10 }}>By {item.author}</Text>
-            </TouchableOpacity>
-          </View>)}
-        </ScrollView>}
+                // Updates the MongoID list
+                var getMongoId = Array.from(oldQnsmongoIDs);
+                getMongoId.push({ localID: localid, mongoID: item._id });
+                setMongo(getMongoId);
+                setSearchText('');
+                setRender(0);
+                return;
+              }
+              }>
+                <Text>{item.questionType}: {item.questionBody}</Text>
+                <Text style={{ fontSize: 10 }}>By {item.author}</Text>
+              </TouchableOpacity>
+            </View>)}
+          </ScrollView>}
         <Button title="Go back" onPress={() => {
           setSearchText('');
           setRender(0);
