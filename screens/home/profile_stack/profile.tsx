@@ -199,6 +199,7 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
     var toDisplayTaken: Array<{ count: number, topic: string }> = quizStatsPlayed[options.indexOf(options.find(x => x.value === fetchLimit))];
     var toDisplayTakenScore: { best: { avgScore: number, topic: string }, worst: { avgScore: number, topic: string }, avg: number } | undefined = quizStatsTakenScore[options.indexOf(options.find(x => x.value === fetchLimit))];
     var toDisplayCreatedScore: number | undefined = quizStatsCreatedScore[options.indexOf(options.find(x => x.value === fetchLimit))];
+    
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView style={{ flex: 1 }}>
@@ -228,13 +229,13 @@ export const ProfileScreen = ({ navigation }: ProfileProps) => {
             <View style={{ flexDirection: "row", gap: 30 }}>
               <View style={styles.circleborder}>
                 <Text>Best Topic:</Text>
-                {toDisplayTakenScore ? <Text style={{ fontSize: 20 }}>{toDisplayTakenScore.best.topic}</Text> : <Text style={{ fontSize: 9 }}>Take some quizzes to view more statistics!</Text>}
-                {toDisplayTakenScore ? <Text>{Math.round(toDisplayTakenScore.best.avgScore * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}> </Text>}
+                {toDisplayTakenScore && toDisplayTakenScore.best ? <Text style={{ fontSize: 20 }}>{toDisplayTakenScore.best.topic}</Text> : <Text style={{ fontSize: 9 }}>Take some quizzes to view more statistics!</Text>}
+                {toDisplayTakenScore && toDisplayTakenScore.best ? <Text>{Math.round(toDisplayTakenScore.best.avgScore * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}> </Text>}
               </View>
               <View style={styles.circleborder}>
                 <Text>Worst Topic:</Text>
-                {toDisplayTakenScore ? <Text style={{ fontSize: 20 }}>{toDisplayTakenScore.worst.topic}</Text> : <Text style={{ fontSize: 9, textAlign: "center" }}>Take some quizzes to view more statistics!</Text>}
-                {toDisplayTakenScore ? <Text>{Math.round(toDisplayTakenScore.worst.avgScore * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}> </Text>}
+                {toDisplayTakenScore && toDisplayTakenScore.worst ? <Text style={{ fontSize: 20 }}>{toDisplayTakenScore.worst.topic}</Text> : <Text style={{ fontSize: 9, textAlign: "center" }}>Take some quizzes to view more statistics!</Text>}
+                {toDisplayTakenScore && toDisplayTakenScore.worst ? <Text>{Math.round(toDisplayTakenScore.worst.avgScore * 100) / 100}%</Text> : <Text style={{ fontSize: 9 }}> </Text>}
               </View>
             </View>
             <View style={{ height: 15 }} />
